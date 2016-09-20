@@ -35,6 +35,11 @@ int command_base::run() const
     return runx(STDIN_FILENO, STDOUT_FILENO);
 }
 
+int shell_logic_or(int a, int b)
+{
+    return a == 0 ? b : a;
+}
+
 
 command_native::command_native(std::string const& str, std::vector<std::string> const& args)
     : str(str)
@@ -91,9 +96,10 @@ int command_pipe::runx(int in, int out) const
         close(pipefd[1]);          /* Close unused write end */
 
         // read(pipefd[0], &buf, 1)
-        right->runx(pipefd[0], out);
+        int result = right->runx(pipefd[0], out);
 
         close(pipefd[0]);
+        _exit(result);
     }
     else
     {            /* Parent writes argv[1] to pipe */
@@ -103,7 +109,13 @@ int command_pipe::runx(int in, int out) const
 
         close(pipefd[1]);          /* Reader will see EOF */
 
-        return result;
+        int status;
+        if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
+        {
+            return shell_logic_or(WEXITSTATUS(status), result);
+        }
+
+        return 0;
     }
     return 0;
 }
