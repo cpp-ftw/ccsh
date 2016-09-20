@@ -14,7 +14,7 @@ class HAS_STATIC_MEMBER_DETECTOR_CLASS_ ## member                           \
     template<typename U>                                                    \
     static two_ints_type has_func_helper(...) { }                           \
     template<typename U>                                                    \
-    static int has_func_helper(int, decltype(U::member)* func = nullptr)    \
+    static int has_func_helper(int, decltype(U::member)* = nullptr)    \
     { return 0; }                                                           \
 public:                                                                     \
     static constexpr bool value =                                           \
@@ -32,7 +32,7 @@ class HAS_NESTED_TYPE_DETECTOR_CLASS_ ## member                             \
     template<typename U>                                                    \
     static two_ints_type has_func_helper(...) { }                           \
     template<typename U>                                                    \
-    static int has_func_helper(int, typename U::member* ty = nullptr)       \
+    static int has_func_helper(int, typename U::member* = nullptr)       \
     { return 0; }                                                           \
 public:                                                                     \
     static constexpr bool value =                                           \
