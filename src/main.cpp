@@ -6,21 +6,20 @@ int main()
 {
     std::cout << ccsh::pwd() << std::endl;
 
-//    std::cout << ccsh::command("cat", {"asd.txt"}).run() << std::endl;
+    std::cout << ccsh::shell("cat", {"/you/shall/not/path"}).run() << std::endl;
 
     std::string f = "/tmp/bs.txt";
 
-    auto c1 = ccsh::shell("ls", {"-lah"}) > f;
-    c1->run();
+    ccsh::command c1 = ccsh::shell("ls", {"-lah"}) > f;
+    c1.run();
 
-    ccsh::shell("cat", {f})->run();
+    ccsh::shell("cat", {f});
 
-    auto c2 = ccsh::shell("ls", {"-lah"}) | ccsh::shell("cowsay");
-    c2->run();
+    ccsh::shell("ls", {"-lah"}) | ccsh::shell("cowsay");
 
-    ccsh::shell("echo", {"--- ls finished. ---"})->run();
-//
-//    auto c2 = ccsh::command("cowsay");
+    ccsh::shell("echo", {"--- ls finished. ---"});
+
+    //auto c2 = ccsh::shell("cowsay");
 
 
     return 0;

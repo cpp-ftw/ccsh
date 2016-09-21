@@ -6,84 +6,84 @@
 namespace ccsh
 {
 
-inline command shell(std::string const& str, std::vector<std::string> const& args = {})
+inline command_runnable shell(std::string const& str, std::vector<std::string> const& args = {})
 {
-    return command{new command_native(str, args)};
+    return command_runnable{new command_native(str, args)};
 }
 
-inline command operator|(command a, command b)
+inline command_runnable operator|(command_runnable a, command_runnable b)
 {
-    a->no_autorun();
-    b->no_autorun();
-    return command{new command_pipe(a, b)};
+    a.no_autorun();
+    b.no_autorun();
+    return command_runnable{new command_pipe(a, b)};
 }
 
-inline command operator<(command c, fs::path const& p)
+inline command_runnable operator<(command_runnable c, fs::path const& p)
 {
-    c->no_autorun();
-    return command{new command_in_redirect(c, p)};
+    c.no_autorun();
+    return command_runnable{new command_in_redirect(c, p)};
 }
 
-inline command operator>(command c, fs::path const& p)
+inline command_runnable operator>(command_runnable c, fs::path const& p)
 {
-    c->no_autorun();
-    return command{new command_out_redirect(c, p, false)};
+    c.no_autorun();
+    return command_runnable{new command_out_redirect(c, p, false)};
 }
 
-inline command operator>>(command c, fs::path const& p)
+inline command_runnable operator>>(command_runnable c, fs::path const& p)
 {
-    c->no_autorun();
-    return command{new command_out_redirect(c, p, true)};
+    c.no_autorun();
+    return command_runnable{new command_out_redirect(c, p, true)};
 }
 
-inline command operator>=(command c, fs::path const& p)
+inline command_runnable operator>=(command_runnable c, fs::path const& p)
 {
-    c->no_autorun();
-    return command{new command_err_redirect(c, p, false)};
+    c.no_autorun();
+    return command_runnable{new command_err_redirect(c, p, false)};
 }
 
-inline command operator>>=(command c, fs::path const& p)
+inline command_runnable operator>>=(command_runnable c, fs::path const& p)
 {
-    c->no_autorun();
-    return command{new command_err_redirect(c, p, true)};
+    c.no_autorun();
+    return command_runnable{new command_err_redirect(c, p, true)};
 }
 
-inline command operator&&(command a, command b)
+inline command_runnable operator&&(command_runnable a, command_runnable b)
 {
-    a->no_autorun();
-    b->no_autorun();
-    return command{new command_and(a, b)};
+    a.no_autorun();
+    b.no_autorun();
+    return command_runnable{new command_and(a, b)};
 }
 
-inline command operator||(command a, command b)
+inline command_runnable operator||(command_runnable a, command_runnable b)
 {
-    a->no_autorun();
-    b->no_autorun();
-    return command{new command_or(a, b)};
+    a.no_autorun();
+    b.no_autorun();
+    return command_runnable{new command_or(a, b)};
 }
 
-inline command operator&&(command a, bool b)
+inline command_runnable operator&&(command_runnable a, bool b)
 {
-    a->no_autorun();
-    return command{new command_and(a, command{new command_bool(b)})};
+    a.no_autorun();
+    return command_runnable{new command_and(a, command_runnable{new command_bool(b)})};
 }
 
-inline command operator||(command a, bool b)
+inline command_runnable operator||(command_runnable a, bool b)
 {
-    a->no_autorun();
-    return command{new command_or(a, command{new command_bool(b)})};
+    a.no_autorun();
+    return command_runnable{new command_or(a, command_runnable{new command_bool(b)})};
 }
 
-inline command operator&&(bool b, command a) // provided only for consistency, useless anyways
+inline command_runnable operator&&(bool b, command_runnable a) // provided only for consistency, useless anyways
 {
-    a->no_autorun();
-    return command{new command_and(command{new command_bool(b)}, a)};
+    a.no_autorun();
+    return command_runnable{new command_and(command_runnable{new command_bool(b)}, a)};
 }
 
-inline command operator||(bool b, command a) // provided only for consistency, useless anyways
+inline command_runnable operator||(bool b, command_runnable a) // provided only for consistency, useless anyways
 {
-    a->no_autorun();
-    return command{new command_or(command{new command_bool(b)}, a)};
+    a.no_autorun();
+    return command_runnable{new command_or(command_runnable{new command_bool(b)}, a)};
 }
 
 
