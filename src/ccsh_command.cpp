@@ -1,4 +1,4 @@
-#include "ccsh.hpp"
+#include "ccsh_command.hpp"
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -11,33 +11,9 @@
 namespace ccsh
 {
 
-std::string pwd()
-{
-    char * wd = get_current_dir_name();
-    std::string result = wd;
-    free(wd);
-    return result;
-}
-
-const char * stdc_error::what() const noexcept
-{
-    return strerror(error_number);
-}
-
-void open_traits::dtor_func(int fd) noexcept
-{
-    if(fd != STDIN_FILENO && fd != STDOUT_FILENO && fd != STDERR_FILENO)
-        close(fd);
-}
-
 int command_base::run() const
 {
     return runx(STDIN_FILENO, STDOUT_FILENO);
-}
-
-int shell_logic_or(int a, int b)
-{
-    return a == 0 ? b : a;
 }
 
 
@@ -120,9 +96,11 @@ int command_pipe::runx(int in, int out) const
     return 0;
 }
 
-command_out_redirect::command_out_redirect(command c, std::string const& path)
+command_out_redirect::command_out_redirect(command c, fs::path const& p)
     : c(c)
-    , fd(open(path.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR))
+    , fd(open(p.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR))
 { }
 
+
 } // namespace ccsh
+
