@@ -12,13 +12,60 @@ namespace ccsh
 
 class command_base
 {
+    mutable bool autorun_flag = true;
+    void run_autorun();
+    friend class command;
+
 public:
     virtual int runx(int, int, int) const = 0;
     int run() const;
+    void no_autorun() const
+    {
+        autorun_flag = false;
+    }
     virtual ~command_base() { }
 };
 
-using command = std::shared_ptr<command_base>;
+class command : public std::shared_ptr<command_base>
+{
+    using base = std::shared_ptr<command_base>;
+
+public:
+
+    using base::base;
+
+    command(command const& other)
+        : base(other)
+    {
+        (*this)->no_autorun();
+    }
+    command(command&& old)
+        : base(std::move(old))
+    {
+        (*this)->no_autorun();
+    }
+
+
+    command& operator=(command const& other)
+    {
+        static_cast<base&>(*this) = static_cast<base const&>(other);
+        (*this)->no_autorun();
+        return *this;
+    }
+
+    command& operator=(command&& old)
+    {
+        static_cast<base&>(*this) = static_cast<base&&>(std::move(old));
+        (*this)->no_autorun();
+        return *this;
+    }
+
+    ~command()
+    {
+        if(*this)
+            (*this)->run_autorun();
+    }
+};
 
 class command_native : public command_base
 {
@@ -45,7 +92,7 @@ public:
     { }
 };
 
-class command_and : public command_pair
+class command_and final : public command_pair
 {
 public:
     using command_pair::command_pair;
@@ -58,7 +105,7 @@ public:
     }
 };
 
-class command_or : public command_pair
+class command_or final : public command_pair
 {
 public:
     using command_pair::command_pair;
@@ -71,7 +118,7 @@ public:
     }
 };
 
-class command_bool : public command_base
+class command_bool final : public command_base
 {
     bool b;
 public:
@@ -85,7 +132,7 @@ public:
     }
 };
 
-class command_pipe : public command_pair
+class command_pipe final : public command_pair
 {
 public:
     using command_pair::command_pair;
@@ -101,7 +148,7 @@ public:
     command_redirect(command c, fs::path const& p, int flags);
 };
 
-class command_in_redirect : public command_redirect
+class command_in_redirect final : public command_redirect
 {
 public:
     command_in_redirect(command c, fs::path const& p);
@@ -112,7 +159,7 @@ public:
     }
 };
 
-class command_out_redirect : public command_redirect
+class command_out_redirect final : public command_redirect
 {
 public:
     command_out_redirect(command c, fs::path const& p, bool append = false);
@@ -123,7 +170,7 @@ public:
     }
 };
 
-class command_err_redirect : public command_redirect
+class command_err_redirect final : public command_redirect
 {
 public:
     command_err_redirect(command c, fs::path const& p, bool append = false);

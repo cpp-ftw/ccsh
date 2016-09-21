@@ -13,61 +13,76 @@ inline command shell(std::string const& str, std::vector<std::string> const& arg
 
 inline command operator|(command a, command b)
 {
+    a->no_autorun();
+    b->no_autorun();
     return command{new command_pipe(a, b)};
 }
 
 inline command operator<(command c, fs::path const& p)
 {
+    c->no_autorun();
     return command{new command_in_redirect(c, p)};
 }
 
 inline command operator>(command c, fs::path const& p)
 {
+    c->no_autorun();
     return command{new command_out_redirect(c, p, false)};
 }
 
 inline command operator>>(command c, fs::path const& p)
 {
+    c->no_autorun();
     return command{new command_out_redirect(c, p, true)};
 }
 
 inline command operator>=(command c, fs::path const& p)
 {
+    c->no_autorun();
     return command{new command_err_redirect(c, p, false)};
 }
 
 inline command operator>>=(command c, fs::path const& p)
 {
+    c->no_autorun();
     return command{new command_err_redirect(c, p, true)};
 }
 
 inline command operator&&(command a, command b)
 {
+    a->no_autorun();
+    b->no_autorun();
     return command{new command_and(a, b)};
 }
 
 inline command operator||(command a, command b)
 {
+    a->no_autorun();
+    b->no_autorun();
     return command{new command_or(a, b)};
 }
 
 inline command operator&&(command a, bool b)
 {
+    a->no_autorun();
     return command{new command_and(a, command{new command_bool(b)})};
 }
 
 inline command operator||(command a, bool b)
 {
+    a->no_autorun();
     return command{new command_or(a, command{new command_bool(b)})};
 }
 
 inline command operator&&(bool b, command a) // provided only for consistency, useless anyways
 {
+    a->no_autorun();
     return command{new command_and(command{new command_bool(b)}, a)};
 }
 
 inline command operator||(bool b, command a) // provided only for consistency, useless anyways
 {
+    a->no_autorun();
     return command{new command_or(command{new command_bool(b)}, a)};
 }
 

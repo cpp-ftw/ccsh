@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <iostream>
+
 namespace ccsh
 {
 
@@ -16,7 +18,27 @@ static constexpr mode_t fopen_w_mode_flags = S_IRUSR | S_IWUSR | S_IRGRP | S_IWG
 
 int command_base::run() const
 {
+    no_autorun();
     return runx(STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO);
+}
+
+void command_base::run_autorun()
+{
+    if(!autorun_flag)
+        return;
+
+    try
+    {
+        run();
+    }
+    catch(std::exception& x)
+    {
+        std::cerr << x.what() << std::endl;
+    }
+    catch(...)
+    {
+        std::cerr << "An unhandled type of exceptin was thrown in command::autorun" << std::endl;
+    }
 }
 
 command_native::command_native(std::string const& str, std::vector<std::string> const& args)
