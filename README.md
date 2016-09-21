@@ -11,7 +11,7 @@
 
 - Add a normal README.md
 
-- Add a flag to command_base to run command in the dtor. 
+- ~~Add a flag to command_base to run command in the dtor.~~
 - ~~Fix output redirection permission issue.~~
 
 - ~~Improve type safety via `boost::filesystem` (later `std::filesystem`) and `operator""_p`~~
@@ -23,7 +23,7 @@
 - ~~Add operator>= for error redirection~~
 - ~~Add operator>> for output appending~~
 - ~~Add operator>>= for error appending~~
-- Add `operator||` and `operator&&`
+- ~~Add `operator||` and `operator&&`~~
 
-- Add `command operator>(command, std::vector<std::string>);` and same for <, >=, >>=
-- Add `command operator>(command, std::string);` and same for <, >=, >>=
+- Add `command operator>(command, std::vector<std::string>&);` and same for <, >=, >>=
+- Add `command operator>(command, std::string&);` and same for <, >=, >>=
