@@ -31,6 +31,16 @@ inline command operator>>(command c, fs::path const& p)
     return command{new command_out_redirect(c, p, true)};
 }
 
+inline command operator>=(command c, fs::path const& p)
+{
+    return command{new command_err_redirect(c, p, false)};
+}
+
+inline command operator>>=(command c, fs::path const& p)
+{
+    return command{new command_err_redirect(c, p, true)};
+}
+
 
 namespace literals
 {

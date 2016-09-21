@@ -16,7 +16,7 @@ static constexpr mode_t fopen_w_mode_flags = S_IRUSR | S_IWUSR | S_IRGRP | S_IWG
 
 int command_base::run() const
 {
-    return runx(STDIN_FILENO, STDOUT_FILENO);
+    return runx(STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO);
 }
 
 command_native::command_native(std::string const& str, std::vector<std::string> const& args)
@@ -33,18 +33,21 @@ command_native::command_native(std::string const& str, std::vector<std::string> 
 }
 
 
-int command_native::runx(int in, int out) const
+int command_native::runx(int in, int out, int err) const
 {
     pid_t pid = vfork();
     stdc_thrower(pid);
 
     if(pid == 0)
     {
+        if(in != STDIN_FILENO)
+            dup2(in, STDIN_FILENO);
+
         if(out != STDOUT_FILENO)
             dup2(out, STDOUT_FILENO);
 
-        if(in != STDIN_FILENO)
-            dup2(in, STDIN_FILENO);
+        if(err != STDERR_FILENO)
+            dup2(err, STDERR_FILENO);
 
         execvp(argv[0], (char*const*)argv.data());
     }
@@ -60,7 +63,7 @@ int command_native::runx(int in, int out) const
 }
 
 
-int command_pipe::runx(int in, int out) const
+int command_pipe::runx(int in, int out, int err) const
 {
     int pipefd[2];
 
@@ -74,7 +77,7 @@ int command_pipe::runx(int in, int out) const
         close(pipefd[1]);          /* Close unused write end */
 
         // read(pipefd[0], &buf, 1)
-        int result = right->runx(pipefd[0], out);
+        int result = right->runx(pipefd[0], out, err);
 
         close(pipefd[0]);
         _exit(result);
@@ -83,7 +86,7 @@ int command_pipe::runx(int in, int out) const
     {            /* Parent writes argv[1] to pipe */
         close(pipefd[0]);          /* Close unused read end */
 
-        int result = left->runx(in, pipefd[1]);
+        int result = left->runx(in, pipefd[1], err);
 
         close(pipefd[1]);          /* Reader will see EOF */
 
@@ -110,6 +113,13 @@ command_in_redirect::command_in_redirect(command c, fs::path const& p)
 { }
 
 command_out_redirect::command_out_redirect(command c, fs::path const& p, bool append)
+    : command_redirect(c, p,
+                       append ?
+                        (O_WRONLY | O_CREAT | O_APPEND) :
+                        (O_WRONLY | O_CREAT | O_TRUNC))
+{ }
+
+command_err_redirect::command_err_redirect(command c, fs::path const& p, bool append)
     : command_redirect(c, p,
                        append ?
                         (O_WRONLY | O_CREAT | O_APPEND) :

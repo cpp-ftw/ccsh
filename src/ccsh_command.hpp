@@ -13,7 +13,7 @@ namespace ccsh
 class command_base
 {
 public:
-    virtual int runx(int, int) const = 0;
+    virtual int runx(int, int, int) const = 0;
     int run() const;
     virtual ~command_base() { }
 };
@@ -29,7 +29,7 @@ class command_native : public command_base
 public:
 
     command_native(std::string const& str, std::vector<std::string> const& args = {});
-    int runx(int in, int out) const override;
+    int runx(int in, int out, int err) const override;
 };
 
 
@@ -45,7 +45,7 @@ public:
         , right(right)
     { }
 
-    int runx(int in, int out) const override;
+    int runx(int in, int out, int err) const override;
 };
 
 class command_redirect : public command_base
@@ -62,9 +62,9 @@ class command_in_redirect : public command_redirect
 public:
     command_in_redirect(command c, fs::path const& p);
 
-    int runx(int, int out) const override
+    int runx(int, int out, int err) const override
     {
-        return c->runx(fd.get(), out);
+        return c->runx(fd.get(), out, err);
     }
 };
 
@@ -73,9 +73,20 @@ class command_out_redirect : public command_redirect
 public:
     command_out_redirect(command c, fs::path const& p, bool append = false);
 
-    int runx(int in, int) const override
+    int runx(int in, int, int err) const override
     {
-        return c->runx(in, fd.get());
+        return c->runx(in, fd.get(), err);
+    }
+};
+
+class command_err_redirect : public command_redirect
+{
+public:
+    command_err_redirect(command c, fs::path const& p, bool append = false);
+
+    int runx(int in, int out, int) const override
+    {
+        return c->runx(in, out, fd.get());
     }
 };
 
