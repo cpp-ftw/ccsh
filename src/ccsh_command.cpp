@@ -123,25 +123,25 @@ int command_pipe::runx(int in, int out, int err) const
     return 0;
 }
 
-command_redirect::command_redirect(command_runnable c, fs::path const& p, int flags)
+command_redirect::command_redirect(command_runnable const& c, fs::path const& p, int flags)
     : c(c)
     , fd(open(p.c_str(),
               flags,
               fopen_w_mode_flags))
 { }
 
-command_in_redirect::command_in_redirect(command_runnable c, fs::path const& p)
+command_in_redirect::command_in_redirect(command_runnable const& c, fs::path const& p)
     : command_redirect(c, p, O_RDONLY)
 { }
 
-command_out_redirect::command_out_redirect(command_runnable c, fs::path const& p, bool append)
+command_out_redirect::command_out_redirect(command_runnable const& c, fs::path const& p, bool append)
     : command_redirect(c, p,
                        append ?
                         (O_WRONLY | O_CREAT | O_APPEND) :
                         (O_WRONLY | O_CREAT | O_TRUNC))
 { }
 
-command_err_redirect::command_err_redirect(command_runnable c, fs::path const& p, bool append)
+command_err_redirect::command_err_redirect(command_runnable const& c, fs::path const& p, bool append)
     : command_redirect(c, p,
                        append ?
                         (O_WRONLY | O_CREAT | O_APPEND) :

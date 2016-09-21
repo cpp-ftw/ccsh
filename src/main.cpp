@@ -19,6 +19,7 @@ int main()
 
     ccsh::shell("echo", {"--- ls finished. ---"});
 
+    // Not compiling, as intended...
     //auto c2 = ccsh::shell("cowsay");
 
 

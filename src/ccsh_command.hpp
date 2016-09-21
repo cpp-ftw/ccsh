@@ -29,10 +29,10 @@ public:
 class command_runnable : protected std::shared_ptr<command_base>
 {
     using base = std::shared_ptr<command_base>;
-
-public:
-
-    using base::base;
+    
+    friend class command;
+    friend class command_pair;
+    friend class command_redirect;
 
     command_runnable(command_runnable const& other)
         : base(other)
@@ -59,6 +59,12 @@ public:
         (*this)->no_autorun();
         return *this;
     }
+
+public:
+   
+    command_runnable(command_base * other)
+        : base(other)
+    { }
     
     int run() const
     {
@@ -86,7 +92,7 @@ class command
 {
     command_runnable cmd;
 public:
-    command(command_runnable cmd)
+    command(command_runnable const& cmd)
         : cmd{cmd}
     {
         cmd.no_autorun();
@@ -117,7 +123,7 @@ protected:
     command_runnable right;
 
 public:
-    command_pair(command_runnable left, command_runnable right)
+    command_pair(command_runnable const& left, command_runnable const& right)
         : left (left)
         , right(right)
     { }
@@ -176,13 +182,13 @@ protected:
     command_runnable c;
     open_wrapper fd;
 public:
-    command_redirect(command_runnable c, fs::path const& p, int flags);
+    command_redirect(command_runnable const& c, fs::path const& p, int flags);
 };
 
 class command_in_redirect final : public command_redirect
 {
 public:
-    command_in_redirect(command_runnable c, fs::path const& p);
+    command_in_redirect(command_runnable const& c, fs::path const& p);
 
     int runx(int, int out, int err) const override
     {
@@ -193,7 +199,7 @@ public:
 class command_out_redirect final : public command_redirect
 {
 public:
-    command_out_redirect(command_runnable c, fs::path const& p, bool append = false);
+    command_out_redirect(command_runnable const& c, fs::path const& p, bool append = false);
 
     int runx(int in, int, int err) const override
     {
@@ -204,7 +210,7 @@ public:
 class command_err_redirect final : public command_redirect
 {
 public:
-    command_err_redirect(command_runnable c, fs::path const& p, bool append = false);
+    command_err_redirect(command_runnable const& c, fs::path const& p, bool append = false);
 
     int runx(int in, int out, int) const override
     {
