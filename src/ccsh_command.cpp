@@ -11,11 +11,13 @@
 namespace ccsh
 {
 
+static constexpr int fopen_w_mode_flags = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+
+
 int command_base::run() const
 {
     return runx(STDIN_FILENO, STDOUT_FILENO);
 }
-
 
 command_native::command_native(std::string const& str, std::vector<std::string> const& args)
     : str(str)
@@ -98,7 +100,7 @@ int command_pipe::runx(int in, int out) const
 
 command_out_redirect::command_out_redirect(command c, fs::path const& p)
     : c(c)
-    , fd(open(p.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR))
+    , fd(open(p.c_str(), O_WRONLY | O_CREAT | O_TRUNC, fopen_w_mode_flags))
 { }
 
 
