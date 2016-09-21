@@ -48,13 +48,29 @@ public:
     int runx(int in, int out) const override;
 };
 
-class command_out_redirect : public command_base
+class command_redirect : public command_base
 {
+protected:
     command c;
     open_wrapper fd;
-
 public:
+    command_redirect(command c, fs::path const& p, int flags);
+};
 
+class command_in_redirect : public command_redirect
+{
+public:
+    command_in_redirect(command c, fs::path const& p);
+
+    int runx(int, int out) const override
+    {
+        return c->runx(fd.get(), out);
+    }
+};
+
+class command_out_redirect : public command_redirect
+{
+public:
     command_out_redirect(command c, fs::path const& p, bool append = false);
 
     int runx(int in, int) const override

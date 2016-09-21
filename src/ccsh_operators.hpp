@@ -16,6 +16,11 @@ inline command operator|(command a, command b)
     return command{new command_pipe(a, b)};
 }
 
+inline command operator<(command c, fs::path const& p)
+{
+    return command{new command_in_redirect(c, p)};
+}
+
 inline command operator>(command c, fs::path const& p)
 {
     return command{new command_out_redirect(c, p, false)};
