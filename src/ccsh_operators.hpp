@@ -41,6 +41,36 @@ inline command operator>>=(command c, fs::path const& p)
     return command{new command_err_redirect(c, p, true)};
 }
 
+inline command operator&&(command a, command b)
+{
+    return command{new command_and(a, b)};
+}
+
+inline command operator||(command a, command b)
+{
+    return command{new command_or(a, b)};
+}
+
+inline command operator&&(command a, bool b)
+{
+    return command{new command_and(a, command{new command_bool(b)})};
+}
+
+inline command operator||(command a, bool b)
+{
+    return command{new command_or(a, command{new command_bool(b)})};
+}
+
+inline command operator&&(bool b, command a) // provided only for consistency, useless anyways
+{
+    return command{new command_and(command{new command_bool(b)}, a)};
+}
+
+inline command operator||(bool b, command a) // provided only for consistency, useless anyways
+{
+    return command{new command_or(command{new command_bool(b)}, a)};
+}
+
 
 namespace literals
 {

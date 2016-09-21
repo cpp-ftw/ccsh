@@ -32,19 +32,63 @@ public:
     int runx(int in, int out, int err) const override;
 };
 
-
-class command_pipe : public command_base
+class command_pair : public command_base
 {
+protected:
     command left;
     command right;
 
 public:
-
-    command_pipe(command left, command right)
+    command_pair(command left, command right)
         : left (left)
         , right(right)
     { }
+};
 
+class command_and : public command_pair
+{
+public:
+    using command_pair::command_pair;
+    int runx(int in, int out, int err) const override
+    {
+        int lres = left->runx(in, out, err);
+        if(lres != 0)
+            return lres;
+        return right->runx(in, out, err);
+    }
+};
+
+class command_or : public command_pair
+{
+public:
+    using command_pair::command_pair;
+    int runx(int in, int out, int err) const override
+    {
+        int lres = left->runx(in, out, err);
+        if(lres == 0)
+            return lres;
+        return right->runx(in, out, err);
+    }
+};
+
+class command_bool : public command_base
+{
+    bool b;
+public:
+    command_bool(bool b)
+        : b(b)
+    { }
+
+    int runx(int, int, int) const override
+    {
+        return !b; // logical inversion in bash
+    }
+};
+
+class command_pipe : public command_pair
+{
+public:
+    using command_pair::command_pair;
     int runx(int in, int out, int err) const override;
 };
 
