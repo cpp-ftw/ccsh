@@ -18,7 +18,12 @@ inline command operator|(command a, command b)
 
 inline command operator>(command c, fs::path const& p)
 {
-    return command{new command_out_redirect(c, p)};
+    return command{new command_out_redirect(c, p, false)};
+}
+
+inline command operator>>(command c, fs::path const& p)
+{
+    return command{new command_out_redirect(c, p, true)};
 }
 
 

@@ -55,7 +55,7 @@ class command_out_redirect : public command_base
 
 public:
 
-    command_out_redirect(command c, fs::path const& p);
+    command_out_redirect(command c, fs::path const& p, bool append = false);
 
     int runx(int in, int) const override
     {

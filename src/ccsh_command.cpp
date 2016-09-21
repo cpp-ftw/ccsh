@@ -35,7 +35,7 @@ command_native::command_native(std::string const& str, std::vector<std::string> 
 
 int command_native::runx(int in, int out) const
 {
-    pid_t pid = fork();
+    pid_t pid = vfork();
     stdc_thrower(pid);
 
     if(pid == 0)
@@ -98,9 +98,13 @@ int command_pipe::runx(int in, int out) const
     return 0;
 }
 
-command_out_redirect::command_out_redirect(command c, fs::path const& p)
+command_out_redirect::command_out_redirect(command c, fs::path const& p, bool append)
     : c(c)
-    , fd(open(p.c_str(), O_WRONLY | O_CREAT | O_TRUNC, fopen_w_mode_flags))
+    , fd(open(p.c_str(),
+              append ?
+                (O_WRONLY | O_CREAT | O_APPEND) :
+                (O_WRONLY | O_CREAT | O_TRUNC),
+              fopen_w_mode_flags))
 { }
 
 
