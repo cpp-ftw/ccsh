@@ -72,6 +72,7 @@ int command_native::runx(int in, int out, int err) const
             dup2(err, STDERR_FILENO);
 
         execvp(argv[0], (char*const*)argv.data());
+        _exit(-1);
     }
     else
     {
