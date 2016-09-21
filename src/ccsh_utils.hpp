@@ -12,7 +12,7 @@ namespace ccsh
 {
 
 namespace fs = boost::filesystem;
-// NEVER EVER USE boost::filesystem DIRECTLY, ALWAYS USE ccsh::ffs
+// NEVER EVER USE boost::filesystem DIRECTLY, ALWAYS USE ccsh::fs
 // boost::filesystem WILL BE CHANGED TO std::filesystem WITH C++17
 
 std::string pwd();

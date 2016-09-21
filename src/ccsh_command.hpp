@@ -12,13 +12,97 @@ namespace ccsh
 
 class command_base
 {
+    mutable bool autorun_flag = true;
+    void run_autorun() noexcept;
+    friend class command_runnable;
+
 public:
     virtual int runx(int, int, int) const = 0;
     int run() const;
+    void no_autorun() const
+    {
+        autorun_flag = false;
+    }
     virtual ~command_base() { }
 };
 
-using command = std::shared_ptr<command_base>;
+class command_runnable : protected std::shared_ptr<command_base>
+{
+    using base = std::shared_ptr<command_base>;
+    
+    friend class command;
+    friend class command_pair;
+    friend class command_redirect;
+
+    command_runnable(command_runnable const& other)
+        : base(other)
+    {
+        (*this)->no_autorun();
+    }
+    command_runnable(command_runnable&& old)
+        : base(std::move(old))
+    {
+        (*this)->no_autorun();
+    }
+
+
+    command_runnable& operator=(command_runnable const& other)
+    {
+        static_cast<base&>(*this) = static_cast<base const&>(other);
+        (*this)->no_autorun();
+        return *this;
+    }
+
+    command_runnable& operator=(command_runnable&& old)
+    {
+        static_cast<base&>(*this) = static_cast<base&&>(std::move(old));
+        (*this)->no_autorun();
+        return *this;
+    }
+
+public:
+   
+    command_runnable(command_base * other)
+        : base(other)
+    { }
+    
+    int run() const
+    {
+        return (*this)->run();
+    }
+
+    void no_autorun() const
+    {
+        (*this)->no_autorun();
+    }
+
+    int runx(int in, int out, int err) const
+    {
+        return (*this)->runx(in, out, err);
+    }
+
+    ~command_runnable()
+    {
+        if(*this)
+            (*this)->run_autorun();
+    }
+};
+
+class command
+{
+    command_runnable cmd;
+public:
+    command(command_runnable const& cmd)
+        : cmd{cmd}
+    {
+        cmd.no_autorun();
+    }
+
+    int run() const
+    {
+        return cmd.run();
+    }
+};
 
 class command_native : public command_base
 {
@@ -35,43 +119,43 @@ public:
 class command_pair : public command_base
 {
 protected:
-    command left;
-    command right;
+    command_runnable left;
+    command_runnable right;
 
 public:
-    command_pair(command left, command right)
+    command_pair(command_runnable const& left, command_runnable const& right)
         : left (left)
         , right(right)
     { }
 };
 
-class command_and : public command_pair
+class command_and final : public command_pair
 {
 public:
     using command_pair::command_pair;
     int runx(int in, int out, int err) const override
     {
-        int lres = left->runx(in, out, err);
+        int lres = left.runx(in, out, err);
         if(lres != 0)
             return lres;
-        return right->runx(in, out, err);
+        return right.runx(in, out, err);
     }
 };
 
-class command_or : public command_pair
+class command_or final : public command_pair
 {
 public:
     using command_pair::command_pair;
     int runx(int in, int out, int err) const override
     {
-        int lres = left->runx(in, out, err);
+        int lres = left.runx(in, out, err);
         if(lres == 0)
             return lres;
-        return right->runx(in, out, err);
+        return right.runx(in, out, err);
     }
 };
 
-class command_bool : public command_base
+class command_bool final : public command_base
 {
     bool b;
 public:
@@ -85,7 +169,7 @@ public:
     }
 };
 
-class command_pipe : public command_pair
+class command_pipe final : public command_pair
 {
 public:
     using command_pair::command_pair;
@@ -95,42 +179,42 @@ public:
 class command_redirect : public command_base
 {
 protected:
-    command c;
+    command_runnable c;
     open_wrapper fd;
 public:
-    command_redirect(command c, fs::path const& p, int flags);
+    command_redirect(command_runnable const& c, fs::path const& p, int flags);
 };
 
-class command_in_redirect : public command_redirect
+class command_in_redirect final : public command_redirect
 {
 public:
-    command_in_redirect(command c, fs::path const& p);
+    command_in_redirect(command_runnable const& c, fs::path const& p);
 
     int runx(int, int out, int err) const override
     {
-        return c->runx(fd.get(), out, err);
+        return c.runx(fd.get(), out, err);
     }
 };
 
-class command_out_redirect : public command_redirect
+class command_out_redirect final : public command_redirect
 {
 public:
-    command_out_redirect(command c, fs::path const& p, bool append = false);
+    command_out_redirect(command_runnable const& c, fs::path const& p, bool append = false);
 
     int runx(int in, int, int err) const override
     {
-        return c->runx(in, fd.get(), err);
+        return c.runx(in, fd.get(), err);
     }
 };
 
-class command_err_redirect : public command_redirect
+class command_err_redirect final : public command_redirect
 {
 public:
-    command_err_redirect(command c, fs::path const& p, bool append = false);
+    command_err_redirect(command_runnable const& c, fs::path const& p, bool append = false);
 
     int runx(int in, int out, int) const override
     {
-        return c->runx(in, out, fd.get());
+        return c.runx(in, out, fd.get());
     }
 };
 

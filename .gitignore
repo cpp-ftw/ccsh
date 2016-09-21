@@ -3,6 +3,7 @@
 *.lo
 *.o
 *.obj
+*.o.d
 
 # Precompiled Headers
 *.gch
@@ -29,7 +30,9 @@
 *.app
 ccsh
 
-# Code::Blocks files
+# IDE files
 *.depend
 *.layout
 *.cbp
+*.mk
+*.project
