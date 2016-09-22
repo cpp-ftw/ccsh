@@ -1,5 +1,5 @@
 BINARY=ccsh
-OBJECTS=obj/ccsh.o obj/main.o
+OBJECTS=obj/ccsh_command.o obj/ccsh_utils.o obj/main.o
 HEADERS=src/CWrapper.hpp src/ccsh.hpp
 
 # compilation and linking
@@ -7,7 +7,7 @@ CXX=clang++
 CXXFLAGS=-std=c++14
 WRNFLAGS=-Wall -Wextra -Weffc++ -Werror -pedantic
 OPTFLAGS=-O0 -g -ggdb
-LDFLAGS=-g -ggdb
+LDFLAGS=-g -ggdb -lboost_system
 
 # for later use
 CXXLIBS=

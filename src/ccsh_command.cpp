@@ -31,7 +31,7 @@ void command_base::run_autorun() noexcept
     {
         run();
     }
-    catch(std::exception& x)
+    catch(const std::exception& x)
     {
         std::cerr << x.what() << std::endl;
     }
