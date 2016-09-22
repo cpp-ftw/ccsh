@@ -30,9 +30,18 @@
 *.app
 ccsh
 
+# CMake files
+
+CMakeCache.txt
+CMakeFiles/*
+Makefile
+*.cmake
+
 # IDE files
 *.depend
 *.layout
 *.cbp
 *.mk
 *.project
+*.workspace
+.codelite/*
