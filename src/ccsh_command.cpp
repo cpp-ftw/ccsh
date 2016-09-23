@@ -31,7 +31,7 @@ void command_base::run_autorun() noexcept
     {
         run();
     }
-    catch(const std::exception& x)
+    catch(std::exception const& x)
     {
         std::cerr << x.what() << std::endl;
     }
@@ -117,6 +117,129 @@ int command_pipe::runx(int in, int out, int err) const
         if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
         {
             return shell_logic_or(WEXITSTATUS(status), result);
+        }
+
+        return 0;
+    }
+    return 0;
+}
+
+int command_in_mapping::runx(int, int out, int err) const
+{
+    int pipefd[2];
+
+    stdc_thrower(pipe(pipefd));
+
+    pid_t pid = fork(); // vfork does not work...
+    stdc_thrower(pid);
+
+    if (pid == 0)
+    {    /* Child writes to pipe */
+        close(pipefd[1]);          /* Close unused write end */
+
+        // read(pipefd[0], &buf, 1)
+        int result = c.runx(pipefd[0], out, err);
+
+        close(pipefd[0]);   /* Reader will see EOF */
+        _exit(result);
+    }
+    else
+    {
+        close(pipefd[0]);          /* Close unused read end */
+
+        char buf[BUFSIZ];
+        ssize_t count;
+        while((count = func(buf, BUFSIZ)) > 0)
+            write(pipefd[1], buf, count); // error handling?!
+
+        close(pipefd[1]);
+
+        int status;
+        if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
+        {
+            return WEXITSTATUS(status);
+        }
+
+        return 0;
+    }
+    return 0;
+}
+
+int command_out_mapping::runx(int in, int, int err) const
+{
+    int pipefd[2];
+
+    stdc_thrower(pipe(pipefd));
+
+    pid_t pid = vfork();
+    stdc_thrower(pid);
+
+    if (pid == 0)
+    {    /* Child writes to pipe */
+        close(pipefd[0]);          /* Close unused read end */
+
+        // write(pipefd[1], &buf, 1)
+        int result = c.runx(in, pipefd[1], err);
+
+        close(pipefd[1]);   /* Reader will see EOF */
+        _exit(result);
+    }
+    else
+    {
+        close(pipefd[1]);          /* Close unused read end */
+
+        char buf[BUFSIZ];
+        ssize_t count;
+        while((count = read(pipefd[0], buf, BUFSIZ)) > 0)
+            func(buf, count);
+
+        close(pipefd[0]);
+
+        int status;
+        if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
+        {
+            return WEXITSTATUS(status);
+        }
+
+        return 0;
+    }
+    return 0;
+}
+
+int command_err_mapping::runx(int in, int out, int) const
+{
+    int pipefd[2];
+
+    stdc_thrower(pipe(pipefd));
+
+    pid_t pid = vfork();
+    stdc_thrower(pid);
+
+    if (pid == 0)
+    {    /* Child writes to pipe */
+        close(pipefd[0]);          /* Close unused read end */
+
+        // write(pipefd[1], &buf, 1)
+        int result = c.runx(in, out, pipefd[1]);
+
+        close(pipefd[1]);   /* Reader will see EOF */
+        _exit(result);
+    }
+    else
+    {
+        close(pipefd[1]);          /* Close unused read end */
+
+        char buf[BUFSIZ];
+        ssize_t count;
+        while((count = read(pipefd[0], buf, BUFSIZ)) > 0)
+            func(buf, count);
+
+        close(pipefd[0]);
+
+        int status;
+        if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
+        {
+            return WEXITSTATUS(status);
         }
 
         return 0;

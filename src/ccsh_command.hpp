@@ -6,9 +6,13 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <cstddef>
+#include <functional>
 
 namespace ccsh
 {
+
+using command_functor_raw = std::function<ssize_t(char*, std::size_t)>;
 
 class command_base
 {
@@ -33,6 +37,7 @@ class command_runnable : protected std::shared_ptr<command_base>
     friend class command;
     friend class command_pair;
     friend class command_redirect;
+    friend class command_mapping;
 
     command_runnable(command_runnable const& other)
         : base(other)
@@ -44,7 +49,6 @@ class command_runnable : protected std::shared_ptr<command_base>
     {
         (*this)->no_autorun();
     }
-
 
     command_runnable& operator=(command_runnable const& other)
     {
@@ -184,6 +188,41 @@ protected:
 public:
     command_redirect(command_runnable const& c, fs::path const& p, int flags);
 };
+
+
+class command_mapping : public command_base
+{
+protected:
+    command_runnable c;
+    command_functor_raw func;
+public:
+    command_mapping(command_runnable const& c, command_functor_raw const& f)
+        : c(c)
+        , func(f)
+    { }
+};
+
+class command_in_mapping final : public command_mapping
+{
+public:
+    using command_mapping::command_mapping;
+    int runx(int, int, int) const override;
+};
+
+class command_out_mapping final : public command_mapping
+{
+public:
+    using command_mapping::command_mapping;
+    int runx(int, int, int) const override;
+};
+
+class command_err_mapping final : public command_mapping
+{
+public:
+    using command_mapping::command_mapping;
+    int runx(int, int, int) const override;
+};
+
 
 class command_in_redirect final : public command_redirect
 {
