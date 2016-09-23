@@ -9,12 +9,58 @@
 #include <string.h>
 
 #include <iostream>
+#include <utility>
 
 namespace ccsh
 {
 
-static constexpr mode_t fopen_w_mode_flags = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+namespace 
+{
+    
+constexpr mode_t fopen_w_mode_flags = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
+enum fork_action
+{
+    FORK_CHILD_READ = 0,
+    FORK_CHILD_WRITE = 1
+};
+
+template<typename FUNC_CHILD, typename FUNC_PARENT>
+std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD const& func_child, FUNC_PARENT const& func_parent)
+{
+    int pipefd[2];
+
+    stdc_thrower(pipe(pipefd));
+
+    pid_t pid = fork();
+    stdc_thrower(pid);
+
+    if (pid == 0) /* Child process */
+    {
+        close(pipefd[!child_action]);
+        int result0 = func_child(pipefd[child_action]);
+        close(pipefd[child_action]);
+        _exit(result0);
+    }
+    else /* Parent process */
+    {
+        close(pipefd[child_action]);
+        int result1 = func_parent(pipefd[!child_action]);
+        close(pipefd[!child_action]);
+        
+        int status;
+        if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
+        {
+            return {WEXITSTATUS(status), result1};
+        }
+
+        return {0, result1};
+    }
+}
+
+} // namespace
+
+using namespace std::placeholders;
 
 int command_base::run() const
 {
@@ -85,166 +131,64 @@ int command_native::runx(int in, int out, int err) const
     return 0;
 }
 
-
 int command_pipe::runx(int in, int out, int err) const
 {
-    int pipefd[2];
+    auto f1 = std::bind(&command_runnable::runx, std::ref(right), _1, out, err);
+    auto f2 = std::bind(&command_runnable::runx, std::ref(left),  in,  _1, err);
 
-    stdc_thrower(pipe(pipefd));
-
-    pid_t pid = fork();
-    stdc_thrower(pid);
-
-    if (pid == 0)
-    {    /* Child reads from pipe */
-        close(pipefd[1]);          /* Close unused write end */
-
-        // read(pipefd[0], &buf, 1)
-        int result = right.runx(pipefd[0], out, err);
-
-        close(pipefd[0]);
-        _exit(result);
-    }
-    else
-    {            /* Parent writes argv[1] to pipe */
-        close(pipefd[0]);          /* Close unused read end */
-
-        int result = left.runx(in, pipefd[1], err);
-
-        close(pipefd[1]);          /* Reader will see EOF */
-
-        int status;
-        if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
-        {
-            return shell_logic_or(WEXITSTATUS(status), result);
-        }
-
-        return 0;
-    }
-    return 0;
+    auto p = fork_functor_helper(FORK_CHILD_READ, f1, f2);
+    return shell_logic_or(p.first, p.second);
 }
 
 int command_in_mapping::runx(int, int out, int err) const
 {
-    int pipefd[2];
-
-    stdc_thrower(pipe(pipefd));
-
-    pid_t pid = fork(); // vfork does not work...
-    stdc_thrower(pid);
-
-    if (pid == 0)
-    {    /* Child writes to pipe */
-        close(pipefd[1]);          /* Close unused write end */
-
-        // read(pipefd[0], &buf, 1)
-        int result = c.runx(pipefd[0], out, err);
-
-        close(pipefd[0]);   /* Reader will see EOF */
-        _exit(result);
-    }
-    else
+    auto f1 = std::bind(&command_runnable::runx, std::ref(c), _1, out, err);
+    
+    auto f2 = [this](int pipefd)
     {
-        close(pipefd[0]);          /* Close unused read end */
-
         char buf[BUFSIZ];
         ssize_t count;
         while((count = func(buf, BUFSIZ)) > 0)
-            write(pipefd[1], buf, count); // error handling?!
-
-        close(pipefd[1]);
-
-        int status;
-        if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
-        {
-            return WEXITSTATUS(status);
-        }
-
+            write(pipefd, buf, count); // error handling?!
+        
         return 0;
-    }
-    return 0;
+    };
+    
+    return fork_functor_helper(FORK_CHILD_READ, f1, f2).first;
 }
 
 int command_out_mapping::runx(int in, int, int err) const
 {
-    int pipefd[2];
-
-    stdc_thrower(pipe(pipefd));
-
-    pid_t pid = vfork();
-    stdc_thrower(pid);
-
-    if (pid == 0)
-    {    /* Child writes to pipe */
-        close(pipefd[0]);          /* Close unused read end */
-
-        // write(pipefd[1], &buf, 1)
-        int result = c.runx(in, pipefd[1], err);
-
-        close(pipefd[1]);   /* Reader will see EOF */
-        _exit(result);
-    }
-    else
+    auto f1 = std::bind(&command_runnable::runx, std::ref(c), in, _1, err);
+    
+    auto f2 = [this](int pipefd)
     {
-        close(pipefd[1]);          /* Close unused read end */
-
         char buf[BUFSIZ];
         ssize_t count;
-        while((count = read(pipefd[0], buf, BUFSIZ)) > 0)
+        while((count = read(pipefd, buf, BUFSIZ)) > 0)
             func(buf, count);
 
-        close(pipefd[0]);
-
-        int status;
-        if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
-        {
-            return WEXITSTATUS(status);
-        }
-
         return 0;
-    }
-    return 0;
+    };
+    
+    return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
 }
 
 int command_err_mapping::runx(int in, int out, int) const
 {
-    int pipefd[2];
-
-    stdc_thrower(pipe(pipefd));
-
-    pid_t pid = vfork();
-    stdc_thrower(pid);
-
-    if (pid == 0)
-    {    /* Child writes to pipe */
-        close(pipefd[0]);          /* Close unused read end */
-
-        // write(pipefd[1], &buf, 1)
-        int result = c.runx(in, out, pipefd[1]);
-
-        close(pipefd[1]);   /* Reader will see EOF */
-        _exit(result);
-    }
-    else
+    auto f1 = std::bind(&command_runnable::runx, std::ref(c), in, out, _1);
+    
+    auto f2 = [this](int pipefd)
     {
-        close(pipefd[1]);          /* Close unused read end */
-
         char buf[BUFSIZ];
         ssize_t count;
-        while((count = read(pipefd[0], buf, BUFSIZ)) > 0)
+        while((count = read(pipefd, buf, BUFSIZ)) > 0)
             func(buf, count);
 
-        close(pipefd[0]);
-
-        int status;
-        if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
-        {
-            return WEXITSTATUS(status);
-        }
-
         return 0;
-    }
-    return 0;
+    };
+    
+    return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
 }
 
 command_redirect::command_redirect(command_runnable const& c, fs::path const& p, int flags)
