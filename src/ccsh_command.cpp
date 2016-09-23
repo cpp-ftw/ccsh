@@ -149,6 +149,7 @@ int command_pipe::runx(int in, int out, int err) const
 
 int command_in_mapping::runx(int, int out, int err) const
 {
+    if(init_func) init_func();
     auto f1 = std::bind(&command_runnable::runx, std::ref(c), _1, out, err);
 
     auto f2 = [this](int pipefd)
@@ -166,6 +167,7 @@ int command_in_mapping::runx(int, int out, int err) const
 
 int command_out_mapping::runx(int in, int, int err) const
 {
+    if(init_func) init_func();
     auto f1 = std::bind(&command_runnable::runx, std::ref(c), in, _1, err);
 
     auto f2 = [this](int pipefd)
@@ -183,6 +185,7 @@ int command_out_mapping::runx(int in, int, int err) const
 
 int command_err_mapping::runx(int in, int out, int) const
 {
+    if(init_func) init_func();
     auto f1 = std::bind(&command_runnable::runx, std::ref(c), in, out, _1);
 
     auto f2 = [this](int pipefd)

@@ -12,7 +12,8 @@
 namespace ccsh
 {
 
-using command_functor_raw = std::function<ssize_t(char*, std::size_t)>;
+using command_functor_raw  = std::function<ssize_t(char*, std::size_t)>;
+using command_functor_init = std::function<void(void)>;
 
 class command_base
 {
@@ -184,11 +185,14 @@ class command_mapping : public command_base
 {
 protected:
     command_runnable c;
-    command_functor_raw func;
+    command_functor_raw  func;
+    command_functor_init init_func;
+    
 public:
-    command_mapping(command_runnable const& c, command_functor_raw const& f)
+    command_mapping(command_runnable const& c, command_functor_raw const& f, command_functor_init const& init_func = nullptr)
         : c(c)
         , func(f)
+        , init_func(init_func)
     { }
 };
 

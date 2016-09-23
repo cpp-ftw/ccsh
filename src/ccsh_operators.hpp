@@ -57,65 +57,11 @@ inline command_runnable operator>>=(command_runnable const& c, fs::path const& p
 
 /* ******************* string redirection operators ******************* */
 
-inline command_runnable operator<(command_runnable const& c, std::string& str)
-{   // should be moved to a .cpp because of memcpy
-    c.no_autorun();
-    auto func = [&str](char* buf, std::size_t s) -> ssize_t
-    {
-        std::size_t len = str.length();
-        len = len < s ? len : s;
-        std::memcpy(buf, str.data(), len);
-        if(len)
-            str.erase(0, len);
-        return len;
-    };
-    return {new command_in_mapping(c, func)};
-}
-
-inline command_runnable operator>>(command_runnable const& c, std::string& str)
-{
-    c.no_autorun();
-    auto func = [&str](char* buf, std::size_t s) -> ssize_t
-    {
-        str += std::string(buf, s);
-        return s;
-    };
-    return {new command_out_mapping(c, func)};
-}
-
-inline command_runnable operator>(command_runnable const& c, std::string& str)
-{   // operator>> should be used here, but command_runnable has a private move ctor...
-    str.clear(); // string should be cleaned only at "run" time!
-    c.no_autorun();
-    auto func = [&str](char* buf, std::size_t s) -> ssize_t
-    {
-        str += std::string(buf, s);
-        return s;
-    };
-    return {new command_out_mapping(c, func)};
-}
-
-inline command_runnable operator>>=(command_runnable const& c, std::string& str)
-{
-    c.no_autorun();
-    auto func = [&str](char* buf, std::size_t s) -> ssize_t
-    {
-        str += std::string(buf, s);
-        return s;
-    };
-    return {new command_err_mapping(c, func)};
-}
-
-inline command_runnable operator>=(command_runnable const& c, std::string& str)
-{   // operator>> should be used here, but command_runnable has a private move ctor...
-    str.clear(); // string should be cleaned only at "run" time!
-    c.no_autorun();
-    auto func = [&str](char* buf, std::size_t s) -> ssize_t
-    {
-        str += std::string(buf, s);
-        return s;
-    };
-    return {new command_err_mapping(c, func)};}
+command_runnable operator<  (command_runnable const& c, std::string& str);
+command_runnable operator>> (command_runnable const& c, std::string& str);
+command_runnable operator>  (command_runnable const& c, std::string& str);
+command_runnable operator>>=(command_runnable const& c, std::string& str);
+command_runnable operator>= (command_runnable const& c, std::string& str);
 
 /* ******************* string redirection operators ******************* */
 
