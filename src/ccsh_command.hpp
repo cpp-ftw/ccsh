@@ -33,7 +33,7 @@ public:
 class command_runnable : protected std::shared_ptr<command_base>
 {
     using base = std::shared_ptr<command_base>;
-    
+
     friend class command;
     friend class command_pair;
     friend class command_redirect;
@@ -65,11 +65,11 @@ class command_runnable : protected std::shared_ptr<command_base>
     }
 
 public:
-   
+
     command_runnable(command_base * other)
         : base(other)
     { }
-    
+
     int run() const
     {
         return (*this)->run();
@@ -169,7 +169,7 @@ public:
 
     int runx(int, int, int) const override
     {
-        return !b; // logical inversion in bash
+        return !b; // logical inversion of shell logic
     }
 };
 
@@ -179,16 +179,6 @@ public:
     using command_pair::command_pair;
     int runx(int in, int out, int err) const override;
 };
-
-class command_redirect : public command_base
-{
-protected:
-    command_runnable c;
-    open_wrapper fd;
-public:
-    command_redirect(command_runnable const& c, fs::path const& p, int flags);
-};
-
 
 class command_mapping : public command_base
 {
@@ -224,6 +214,17 @@ public:
 };
 
 
+class command_redirect : public command_base
+{
+protected:
+    command_runnable c;
+    fs::path p;
+    int flags;
+    open_wrapper get_fd() const;
+public:
+    command_redirect(command_runnable const& c, fs::path const& p, int flags);
+};
+
 class command_in_redirect final : public command_redirect
 {
 public:
@@ -231,7 +232,7 @@ public:
 
     int runx(int, int out, int err) const override
     {
-        return c.runx(fd.get(), out, err);
+        return c.runx(get_fd().get(), out, err); // get_fd().get() is required for RAII
     }
 };
 
@@ -242,7 +243,7 @@ public:
 
     int runx(int in, int, int err) const override
     {
-        return c.runx(in, fd.get(), err);
+        return c.runx(in, get_fd().get(), err);
     }
 };
 
@@ -253,7 +254,7 @@ public:
 
     int runx(int in, int out, int) const override
     {
-        return c.runx(in, out, fd.get());
+        return c.runx(in, out, get_fd().get());
     }
 };
 

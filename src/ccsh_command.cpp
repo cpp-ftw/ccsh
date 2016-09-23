@@ -14,10 +14,17 @@
 namespace ccsh
 {
 
-namespace 
+namespace
 {
-    
-constexpr mode_t fopen_w_mode_flags = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+
+constexpr mode_t fopen_w_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+
+constexpr int fopen_w_flags(bool append)
+{
+    return append ?
+        (O_WRONLY | O_CREAT | O_APPEND) :
+        (O_WRONLY | O_CREAT | O_TRUNC);
+}
 
 enum fork_action
 {
@@ -47,7 +54,7 @@ std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD con
         close(pipefd[child_action]);
         int result1 = func_parent(pipefd[!child_action]);
         close(pipefd[!child_action]);
-        
+
         int status;
         if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
         {
@@ -143,24 +150,24 @@ int command_pipe::runx(int in, int out, int err) const
 int command_in_mapping::runx(int, int out, int err) const
 {
     auto f1 = std::bind(&command_runnable::runx, std::ref(c), _1, out, err);
-    
+
     auto f2 = [this](int pipefd)
     {
         char buf[BUFSIZ];
         ssize_t count;
         while((count = func(buf, BUFSIZ)) > 0)
             write(pipefd, buf, count); // error handling?!
-        
+
         return 0;
     };
-    
+
     return fork_functor_helper(FORK_CHILD_READ, f1, f2).first;
 }
 
 int command_out_mapping::runx(int in, int, int err) const
 {
     auto f1 = std::bind(&command_runnable::runx, std::ref(c), in, _1, err);
-    
+
     auto f2 = [this](int pipefd)
     {
         char buf[BUFSIZ];
@@ -170,14 +177,14 @@ int command_out_mapping::runx(int in, int, int err) const
 
         return 0;
     };
-    
+
     return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
 }
 
 int command_err_mapping::runx(int in, int out, int) const
 {
     auto f1 = std::bind(&command_runnable::runx, std::ref(c), in, out, _1);
-    
+
     auto f2 = [this](int pipefd)
     {
         char buf[BUFSIZ];
@@ -187,33 +194,31 @@ int command_err_mapping::runx(int in, int out, int) const
 
         return 0;
     };
-    
+
     return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
 }
 
 command_redirect::command_redirect(command_runnable const& c, fs::path const& p, int flags)
     : c(c)
-    , fd(open(p.c_str(),
-              flags,
-              fopen_w_mode_flags))
+    , p(p)
+    , flags(flags)
 { }
+
+open_wrapper command_redirect::get_fd() const
+{
+    return open_wrapper{open(p.c_str(), flags, fopen_w_mode)};
+}
 
 command_in_redirect::command_in_redirect(command_runnable const& c, fs::path const& p)
     : command_redirect(c, p, O_RDONLY)
 { }
 
 command_out_redirect::command_out_redirect(command_runnable const& c, fs::path const& p, bool append)
-    : command_redirect(c, p,
-                       append ?
-                        (O_WRONLY | O_CREAT | O_APPEND) :
-                        (O_WRONLY | O_CREAT | O_TRUNC))
+    : command_redirect(c, p, fopen_w_flags(append))
 { }
 
 command_err_redirect::command_err_redirect(command_runnable const& c, fs::path const& p, bool append)
-    : command_redirect(c, p,
-                       append ?
-                        (O_WRONLY | O_CREAT | O_APPEND) :
-                        (O_WRONLY | O_CREAT | O_TRUNC))
+    : command_redirect(c, p, fopen_w_flags(append))
 { }
 
 
