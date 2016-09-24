@@ -188,7 +188,7 @@ protected:
     command_runnable c;
     command_functor_raw  func;
     command_functor_init init_func;
-    
+
 public:
     command_mapping(command_runnable const& c, command_functor_raw const& f, command_functor_init const& init_func = nullptr)
         : c(c)

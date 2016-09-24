@@ -21,6 +21,9 @@ class stdc_error : public std::exception
 {
     int error_number = errno;
 public:
+    stdc_error() : error_number(errno) { }
+    stdc_error(int no) : error_number(no) { }
+    int no() const { return error_number; }
     virtual const char * what() const noexcept override;
 };
 
