@@ -35,8 +35,10 @@ enum fork_action
 template<typename FUNC_CHILD, typename FUNC_PARENT>
 std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD const& func_child, FUNC_PARENT const& func_parent)
 {
-    int pipefd[2];
+    int fail_pipe[2];
+    stdc_thrower(pipe(fail_pipe));
 
+    int pipefd[2];
     stdc_thrower(pipe(pipefd));
 
     pid_t pid = fork();
@@ -44,14 +46,45 @@ std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD con
 
     if (pid == 0) /* Child process */
     {
+        int fail_code;
         close(pipefd[!child_action]);
-        int result0 = func_child(pipefd[child_action]);
-        close(pipefd[child_action]);
-        _exit(result0);
+        close(fail_pipe[0]);
+
+        if(fcntl(fail_pipe[1], F_SETFD, FD_CLOEXEC) < 0)
+        {
+            fail_code = errno;
+            goto fail;
+        }
+
+        try
+        {
+            int result0 = func_child(pipefd[child_action]);
+            _exit(result0);
+        }
+        catch(stdc_error const& x)
+        {
+            fail_code = x.no();
+        }
+
+fail:
+        write(fail_pipe[1], &fail_code, sizeof(int));
+        _exit(-1);
     }
     else /* Parent process */
     {
+        close(fail_pipe[1]);
+        open_wrapper temp1(fail_pipe[0]);
+
         close(pipefd[child_action]);
+        open_wrapper temp2(pipefd[!child_action]);
+
+        int fail_code;
+        ssize_t result = read(fail_pipe[0], &fail_code, sizeof(int));
+        stdc_thrower(result);
+
+        if(result > 0)
+            throw stdc_error(fail_code);
+
         int result1 = func_parent(pipefd[!child_action]);
         close(pipefd[!child_action]);
 
@@ -90,7 +123,7 @@ void command_base::run_autorun() noexcept
     }
     catch(...)
     {
-        std::cerr << "An unhandled type of exceptin was thrown in command::autorun" << std::endl;
+        std::cerr << "An unhandled type of exception was thrown in command::autorun" << std::endl;
     }
 }
 
@@ -110,25 +143,49 @@ command_native::command_native(std::string const& str, std::vector<std::string> 
 
 int command_native::runx(int in, int out, int err) const
 {
+    int fail_pipe[2];
+    stdc_thrower(pipe(fail_pipe));
+
     pid_t pid = vfork();
     stdc_thrower(pid);
 
     if(pid == 0)
     {
+        close(fail_pipe[0]);
+
         if(in != STDIN_FILENO)
-            dup2(in, STDIN_FILENO);
+            if(dup2(in, STDIN_FILENO) < 0)
+                goto fail;
 
         if(out != STDOUT_FILENO)
-            dup2(out, STDOUT_FILENO);
+            if(dup2(out, STDOUT_FILENO) < 0)
+                goto fail;
 
         if(err != STDERR_FILENO)
-            dup2(err, STDERR_FILENO);
+            if(dup2(err, STDERR_FILENO) < 0)
+                goto fail;
+
+        if(fcntl(fail_pipe[1], F_SETFD, FD_CLOEXEC) < 0)
+            goto fail;
 
         execvp(argv[0], (char*const*)argv.data());
+fail:
+        int fail_code = errno;
+        write(fail_pipe[1], &fail_code, sizeof(int));
         _exit(-1);
     }
     else
     {
+        close(fail_pipe[1]);
+        open_wrapper temp(fail_pipe[0]);
+
+        int fail_code;
+        ssize_t result = read(fail_pipe[0], &fail_code, sizeof(int));
+        stdc_thrower(result);
+
+        if(result > 0)
+            throw stdc_error(fail_code);
+
         int status;
         if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
         {
@@ -140,10 +197,10 @@ int command_native::runx(int in, int out, int err) const
 
 int command_pipe::runx(int in, int out, int err) const
 {
-    auto f1 = std::bind(&command_runnable::runx, std::ref(right), _1, out, err);
-    auto f2 = std::bind(&command_runnable::runx, std::ref(left),  in,  _1, err);
+    auto f1 = std::bind(&command_runnable::runx, std::ref(left),  in,  _1, err);
+    auto f2 = std::bind(&command_runnable::runx, std::ref(right), _1, out, err);
 
-    auto p = fork_functor_helper(FORK_CHILD_READ, f1, f2);
+    auto p = fork_functor_helper(FORK_CHILD_WRITE, f1, f2);
     return shell_logic_or(p.first, p.second);
 }
 
