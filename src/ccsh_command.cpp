@@ -59,6 +59,7 @@ std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD con
         try
         {
             int result0 = func_child(pipefd[child_action]);
+            close(fail_pipe[1]);
             _exit(result0);
         }
         catch(stdc_error const& x)
@@ -68,6 +69,7 @@ std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD con
 
 fail:
         write(fail_pipe[1], &fail_code, sizeof(int));
+        close(fail_pipe[1]);
         _exit(-1);
     }
     else /* Parent process */
@@ -219,7 +221,7 @@ int command_in_mapping::runx(int, int out, int err) const
         return 0;
     };
 
-    return fork_functor_helper(FORK_CHILD_READ, f1, f2).first;
+    return fork_functor_helper(FORK_CHILD_WRITE, f2, f1).first;
 }
 
 int command_out_mapping::runx(int in, int, int err) const
