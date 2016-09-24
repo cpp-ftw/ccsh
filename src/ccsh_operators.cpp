@@ -101,6 +101,32 @@ command_runnable operator>=(command_runnable const& c, std::string& str)
 
 /* ******************* vector redirection operators ******************* */
 
+command_runnable operator<(command_runnable const& c, std::vector<std::string>& vec)
+{
+    c.no_autorun();
+    auto func = [&vec](char* buf, std::size_t s) -> ssize_t
+    {
+        if(s == 0 || vec.empty())
+            return 0;
+        std::string& str = vec[0];
+        std::size_t len = str.length();
+        if(len < s)
+        {
+            std::memcpy(buf, str.data(), len);
+            buf[len] = '\n';
+            vec.erase(vec.begin()); // shit
+            return len + 1;
+        }
+        else
+        {
+            std::memcpy(buf, str.data(), s);
+            str.erase(0, s);
+            return s;
+        }
+    };
+    return {new command_in_mapping(c, func)};
+}
+
 command_runnable operator>(command_runnable const& c, std::vector<std::string>& vec)
 {
     c.no_autorun();
@@ -149,6 +175,12 @@ command_runnable operator>=(command_runnable const& c, command_functor_line func
 /* ******************* line functor redirection operators ******************* */
 
 /* ******************* raw functor redirection operators ******************* */
+
+command_runnable operator<(command_runnable const& c, command_functor_raw func)
+{
+    c.no_autorun();
+    return {new command_in_mapping(c,  std::move(func))};
+}
 
 command_runnable operator>(command_runnable const& c, command_functor_raw func)
 {

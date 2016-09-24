@@ -68,7 +68,7 @@ command_runnable operator>= (command_runnable const& c, std::string& str);
 
 /* ******************* vector redirection operators ******************* */
 
-//command_runnable operator<  (command_runnable const& c, std::vector<std::string>& str);
+command_runnable operator<  (command_runnable const& c, std::vector<std::string>& str);
 command_runnable operator>> (command_runnable const& c, std::vector<std::string>& str);
 command_runnable operator>  (command_runnable const& c, std::vector<std::string>& str);
 command_runnable operator>>=(command_runnable const& c, std::vector<std::string>& str);
@@ -87,7 +87,7 @@ command_runnable operator>= (command_runnable const& c, command_functor_line fun
 
 /* ******************* raw functor redirection operators ******************* */
 
-//command_runnable operator<  (command_runnable const& c, command_functor_raw func);
+command_runnable operator<  (command_runnable const& c, command_functor_raw func);
 command_runnable operator>  (command_runnable const& c, command_functor_raw func);
 command_runnable operator>= (command_runnable const& c, command_functor_raw func);
 
