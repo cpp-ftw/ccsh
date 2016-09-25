@@ -11,14 +11,20 @@
 
 - Add a normal README.md
 
+- Add `command operator<(command, command_line_functor);`
+- Add command to fd conversion, for using commands as files, see https://www.gnu.org/software/coreutils/manual/coreutils.html#tee-invocation
+- Add `command operator<(command, int fd); and same for <, >>, >=, >>=`
+
+- Add wrappers for coreutils, switch syntax `ccsh::ls().l().a().h()` and `ccsh::gcc("file.c").c().o("file.o")` seems to be the best.
+
+### DONE
+
 - ~~Add a flag to command_base to run command in the dtor.~~
 - ~~Fix output redirection permission issue.~~
 
 - ~~Improve type safety via `boost::filesystem` (later `std::filesystem`) and `operator""_p`~~
 - ~~Invent a fancy syntax for command switches. Giving them as strings (e.g. `ccsh::ls("-lah")`) lacks static checking and type safety.~~
 - ~~The same goes for argument *pairs* like `cssh::gcc("...", "-o", "file.o")`~~
-
-`ccsh::ls().l().a().h()` and `ccsh::gcc("file.c").c().o("file.o")` seems to be the best.
 
 - ~~Add operator< for input redirection~~
 - ~~Add operator>= for error redirection~~
@@ -30,4 +36,4 @@
 - ~~Add `command operator>(command, std::string&);` and same for <, >>, >=, >>=~~
 - ~~Add `command operator>(command, command_raw_functor);` and same for <, >=~~
 - ~~Add `command operator>(command, command_line_functor);` and same for >=~~
-- Add `command operator<(command, command_line_functor);`
+
