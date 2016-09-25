@@ -44,25 +44,25 @@ class command_runnable : protected std::shared_ptr<command_base>
     command_runnable(command_runnable const& other)
         : base(other)
     {
-        (*this)->no_autorun();
+        no_autorun();
     }
     command_runnable(command_runnable&& old)
         : base(std::move(old))
     {
-        (*this)->no_autorun();
+        no_autorun();
     }
 
     command_runnable& operator=(command_runnable const& other)
     {
         static_cast<base&>(*this) = static_cast<base const&>(other);
-        (*this)->no_autorun();
+        no_autorun();
         return *this;
     }
 
     command_runnable& operator=(command_runnable&& old)
     {
         static_cast<base&>(*this) = static_cast<base&&>(std::move(old));
-        (*this)->no_autorun();
+        no_autorun();
         return *this;
     }
 
@@ -79,7 +79,8 @@ public:
 
     void no_autorun() const
     {
-        (*this)->no_autorun();
+        if(*this)
+            (*this)->no_autorun();
     }
 
     int runx(int in, int out, int err) const
