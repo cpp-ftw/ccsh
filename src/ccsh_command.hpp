@@ -16,11 +16,24 @@ using command_functor_raw  = std::function<ssize_t(char*, std::size_t)>;
 using command_functor_init = std::function<void(void)>;
 using command_functor_line = std::function<void(std::string const&)>;
 
+class command_builder_base
+{
+protected:
+    virtual std::vector<std::string>& get_args() = 0;
+    virtual std::vector<std::string> const& get_args() const = 0;
+};
+
+template<typename>
+class command_holder;
+
 class command_base
 {
     mutable bool autorun_flag = true;
     void run_autorun() noexcept;
+
     friend class command_runnable;
+    template<typename>
+    friend class command_holder;
 
 public:
     virtual int runx(int, int, int) const = 0;
@@ -32,6 +45,39 @@ public:
     virtual ~command_base() { }
 };
 
+class command_native : public command_base
+{
+protected:
+
+    std::string str;
+    std::vector<std::string> args;
+
+    template<typename>
+    friend class command_holder;
+
+    virtual std::vector<const char*> get_argv() const
+    {
+        std::vector<const char*> argv;
+        argv.reserve(args.size() + 2);
+
+        argv.push_back(this->str.c_str());
+        for(const auto& s : this->args)
+            argv.push_back(s.c_str());
+
+        argv.push_back(nullptr);
+        return argv;
+    }
+
+public:
+
+    command_native(std::string const& str, std::vector<std::string> const& args = {})
+        : str(str)
+        , args(args)
+    { }
+
+    int runx(int in, int out, int err) const override final;
+};
+
 class command_runnable : protected std::shared_ptr<command_base>
 {
     using base = std::shared_ptr<command_base>;
@@ -40,6 +86,10 @@ class command_runnable : protected std::shared_ptr<command_base>
     friend class command_pair;
     friend class command_redirect;
     friend class command_mapping;
+
+    command_runnable(base b) :
+        base(std::move(b))
+    { }
 
     command_runnable(command_runnable const& other)
         : base(other)
@@ -95,6 +145,89 @@ public:
     }
 };
 
+template<typename TRAITS>
+class command_holder : protected std::shared_ptr<command_native>, public TRAITS
+{
+    using base = std::shared_ptr<command_native>;
+
+    friend class command;
+    template<typename>
+    friend class command_builder;
+    friend class command_pair;
+    friend class command_redirect;
+    friend class command_mapping;
+
+    command_holder(command_holder const& other)
+        : base(other)
+    {
+        no_autorun();
+    }
+    command_holder(command_holder&& old)
+        : base(std::move(old))
+    {
+        no_autorun();
+    }
+
+    command_holder& operator=(command_holder const& other)
+    {
+        static_cast<base&>(*this) = static_cast<base const&>(other);
+        no_autorun();
+        return *this;
+    }
+
+    command_holder& operator=(command_holder&& old)
+    {
+        static_cast<base&>(*this) = static_cast<base&&>(std::move(old));
+        no_autorun();
+        return *this;
+    }
+
+protected:
+
+    virtual std::vector<std::string>& get_args() override final
+    {
+        return static_cast<command_native*>(get())->args;
+    }
+
+    virtual std::vector<std::string> const& get_args() const override final
+    {
+        return static_cast<command_native*>(get())->args;
+    }
+
+
+public:
+
+    command_holder(command_base * other)
+        : base(other)
+    { }
+
+    command_holder(std::string const& name, std::vector<std::string> const& args)
+        : base(new command_native(name, args))
+    { }
+
+    int run() const
+    {
+        return (*this)->run();
+    }
+
+    void no_autorun() const
+    {
+        if(*this)
+            (*this)->no_autorun();
+    }
+
+    int runx(int in, int out, int err) const
+    {
+        return (*this)->runx(in, out, err);
+    }
+
+    ~command_holder()
+    {
+        if(*this)
+            (*this)->run_autorun();
+    }
+};
+
 class command
 {
     command_runnable cmd;
@@ -105,23 +238,37 @@ public:
         cmd.no_autorun();
     }
 
+    template<typename T>
+    command(command_holder<T> const& other)
+        : cmd(std::dynamic_pointer_cast<command_base>(other))
+    { }
+
     int run() const
     {
         return cmd.run();
     }
 };
 
-class command_native : public command_base
+template<typename T>
+class command_builder : public command_holder<T>
 {
-    std::string str;
-    std::vector<std::string> args;
-    std::vector<const char*> argv;
-
+    using base = command_holder<T>;
 public:
+    command_builder(command_holder<T> const& cmd)
+        : base{cmd}
+    {
+    }
 
-    command_native(std::string const& str, std::vector<std::string> const& args = {});
-    int runx(int in, int out, int err) const override;
 };
+
+/*template<typename T, typename... ARGS>
+class command_builder<command_holder<T>(*)(ARGS...)>
+    : public command_builder<T>
+{
+    using base = command_builder<T>;
+public:
+    using base::base;
+};*/
 
 class command_pair : public command_base
 {

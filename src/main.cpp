@@ -1,6 +1,33 @@
 #include <iostream>
 #include "ccsh.hpp"
 
+// Not for real use, for syntax demonstration only.
+
+class gcc_builder : public ccsh::command_builder_base
+{
+public:
+
+    ccsh::command_holder<gcc_builder>& o(ccsh::fs::path const& p)
+    {
+        get_args().push_back(p.string());
+        return static_cast<ccsh::command_holder<gcc_builder>&>(*this);
+    }
+};
+
+ccsh::command_holder<gcc_builder> gcc(std::vector<std::string> const& args)
+{
+    return { "gcc", args };
+}
+
+void test1()
+{
+    ccsh::command c1 = gcc({}).o("");
+    auto c2 = c1;
+    ccsh::command_builder<gcc_builder> x = gcc({}).o("");
+
+    x.o("asd.o");
+}
+
 using namespace ccsh::literals;
 
 int main()

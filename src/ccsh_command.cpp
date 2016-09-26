@@ -129,24 +129,13 @@ void command_base::run_autorun() noexcept
     }
 }
 
-command_native::command_native(std::string const& str, std::vector<std::string> const& args)
-    : str(str)
-    , args(args)
-{
-    argv.reserve(args.size() + 2);
-
-    argv.push_back(this->str.c_str());
-    for(const auto& s : this->args)
-        argv.push_back(s.c_str());
-
-    argv.push_back(nullptr);
-}
-
 
 int command_native::runx(int in, int out, int err) const
 {
     int fail_pipe[2];
     stdc_thrower(pipe(fail_pipe));
+
+    auto argv = get_argv();
 
     pid_t pid = vfork();
     stdc_thrower(pid);
