@@ -47,8 +47,8 @@ std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD con
     if (pid == 0) /* Child process */
     {
         int fail_code;
-        close(pipefd[!child_action]);
-        close(fail_pipe[0]);
+        close_fd(pipefd[!child_action]);
+        close_fd(fail_pipe[0]);
 
         if(fcntl(fail_pipe[1], F_SETFD, FD_CLOEXEC) < 0)
         {
@@ -59,7 +59,7 @@ std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD con
         try
         {
             int result0 = func_child(pipefd[child_action]);
-            close(fail_pipe[1]);
+            close_fd(fail_pipe[1]);
             _exit(result0);
         }
         catch(stdc_error const& x)
@@ -69,15 +69,15 @@ std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD con
 
 fail:
         write(fail_pipe[1], &fail_code, sizeof(int));
-        close(fail_pipe[1]);
+        close_fd(fail_pipe[1]);
         _exit(-1);
     }
     else /* Parent process */
     {
-        close(fail_pipe[1]);
+        close_fd(fail_pipe[1]);
         open_wrapper temp1(fail_pipe[0]);
 
-        close(pipefd[child_action]);
+        close_fd(pipefd[child_action]);
         open_wrapper temp2(pipefd[!child_action]);
 
         int fail_code;
@@ -88,7 +88,7 @@ fail:
             throw stdc_error(fail_code);
 
         int result1 = func_parent(pipefd[!child_action]);
-        close(pipefd[!child_action]);
+        close_fd(pipefd[!child_action]);
 
         int status;
         if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
@@ -142,7 +142,7 @@ int command_native::runx(int in, int out, int err) const
 
     if(pid == 0)
     {
-        close(fail_pipe[0]);
+        close_fd(fail_pipe[0]);
 
         if(in != STDIN_FILENO)
             if(dup2(in, STDIN_FILENO) < 0)
@@ -167,7 +167,7 @@ fail:
     }
     else
     {
-        close(fail_pipe[1]);
+        close_fd(fail_pipe[1]);
         open_wrapper temp(fail_pipe[0]);
 
         int fail_code;
@@ -205,7 +205,7 @@ int command_in_mapping::runx(int, int out, int err) const
         char buf[BUFSIZ];
         ssize_t count;
         while((count = func(buf, BUFSIZ)) > 0)
-            write(pipefd, buf, count); // error handling?!
+            stdc_thrower(write(pipefd, buf, count));
 
         return 0;
     };
@@ -225,6 +225,8 @@ int command_out_mapping::runx(int in, int, int err) const
         while((count = read(pipefd, buf, BUFSIZ)) > 0)
             func(buf, count);
 
+        stdc_thrower(count);
+
         return 0;
     };
 
@@ -242,6 +244,8 @@ int command_err_mapping::runx(int in, int out, int) const
         ssize_t count;
         while((count = read(pipefd, buf, BUFSIZ)) > 0)
             func(buf, count);
+
+        stdc_thrower(count);
 
         return 0;
     };

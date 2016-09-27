@@ -19,7 +19,13 @@ const char * stdc_error::what() const noexcept
 void open_traits::dtor_func(int fd) noexcept
 {
     if(fd != STDIN_FILENO && fd != STDOUT_FILENO && fd != STDERR_FILENO)
-        close(fd);
+        close_fd(fd);
+}
+
+void close_fd(int fd) noexcept
+{
+    while(close(fd) == -1 && errno == EINTR)
+        ;
 }
 
 } // namespace ccsh

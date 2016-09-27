@@ -47,6 +47,7 @@ inline int shell_logic_or(int a, int b)
     return a == 0 ? b : a;
 }
 
+void close_fd(int fd) noexcept;
 
 } // namespace ccsh
 

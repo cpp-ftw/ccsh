@@ -10,7 +10,7 @@ namespace
 
 ssize_t mapping_appender(std::string& str, char* buf, std::size_t s)
 {
-    str += std::string(buf, s);
+    str.append(buf, s);
     return s;
 }
 
@@ -25,27 +25,30 @@ public:
     { }
 
     ssize_t operator()(char* buf, std::size_t s)
-    {   // possible to increase efficiency with tricky std::move or std::swap
+    {
         char * newline;
-        size_t s_cpy = s;
-        while (s > 0 && (newline = (char*)memchr(buf, '\n', s)))
+        size_t si = s;
+        while (si > 0 && (newline = (char*)memchr(buf, '\n', si)))
         {
             size_t diff = newline-buf;
-            temp += std::string(buf, diff);
-            func(temp);
+            temp.append(buf, diff);
+            // if you want efficient processing, func should take std::string&& argument
+            func(std::move(temp));
             temp.clear();
             buf += diff + 1;
-            s -= diff + 1;
+            si -= diff + 1;
         }
-        temp += std::string(buf, s);
-        return s_cpy;
+        temp.append(buf, si);
+        return s;
     }
 };
 
 template<typename FUNC>
 line_splitter<FUNC> line_splitter_make(FUNC&& func)
-{   // handy when you have a lambda
-    return line_splitter<FUNC>(std::move(func));
+{   // Comes handy when you have a lambda.
+    // If you see an error here: *call this function only with rvalues*!
+    // Cannot be done better without type_traits because of "forwarding reference".
+    return line_splitter<FUNC>(std::forward<FUNC>(func));
 }
 
 } // namespace
@@ -130,28 +133,28 @@ command_runnable operator<(command_runnable const& c, std::vector<std::string>& 
 command_runnable operator>(command_runnable const& c, std::vector<std::string>& vec)
 {
     c.no_autorun();
-    auto pusher = [&vec](std::string const& str) { vec.push_back(str); };
+    auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
     return {new command_out_mapping(c,  line_splitter_make(std::move(pusher)),
                                         std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
 }
 command_runnable operator>>(command_runnable const& c, std::vector<std::string>& vec)
 {
     c.no_autorun();
-    auto pusher = [&vec](std::string const& str) { vec.push_back(str); };
+    auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
     return {new command_out_mapping(c,  line_splitter_make(std::move(pusher)))};
 }
 
 command_runnable operator>=(command_runnable const& c, std::vector<std::string>& vec)
 {
     c.no_autorun();
-    auto pusher = [&vec](std::string const& str) { vec.push_back(str); };
+    auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
     return {new command_err_mapping(c,  line_splitter_make(std::move(pusher)),
                                         std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
 }
 command_runnable operator>>=(command_runnable const& c, std::vector<std::string>& vec)
 {
     c.no_autorun();
-    auto pusher = [&vec](std::string const& str) { vec.push_back(str); };
+    auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
     return {new command_err_mapping(c,  line_splitter_make(std::move(pusher)))};
 }
 
