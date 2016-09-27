@@ -58,9 +58,8 @@ namespace ccsh
 
 /* ******************* string redirection operators ******************* */
 
-command_runnable operator<(command_runnable const& c, std::string& str)
+command_runnable operator<(command const& c, std::string& str)
 {
-    c.no_autorun();
     auto func = [&str](char* buf, std::size_t s) -> ssize_t
     {
         std::size_t len = str.length();
@@ -73,28 +72,24 @@ command_runnable operator<(command_runnable const& c, std::string& str)
     return {new command_in_mapping(c, func)};
 }
 
-command_runnable operator>>(command_runnable const& c, std::string& str)
+command_runnable operator>>(command const& c, std::string& str)
 {
-    c.no_autorun();
     return {new command_out_mapping(c, std::bind(mapping_appender, std::ref(str), _1, _2))};
 }
 
-command_runnable operator>(command_runnable const& c, std::string& str)
+command_runnable operator>(command const& c, std::string& str)
 {
-    c.no_autorun();
     return {new command_out_mapping(c,  std::bind(mapping_appender, std::ref(str), _1, _2),
                                         std::bind(&std::string::clear, std::ref(str)))};
 }
 
-command_runnable operator>>=(command_runnable const& c, std::string& str)
+command_runnable operator>>=(command const& c, std::string& str)
 {
-    c.no_autorun();
     return {new command_err_mapping(c, std::bind(mapping_appender, std::ref(str), _1, _2))};
 }
 
-command_runnable operator>=(command_runnable const& c, std::string& str)
+command_runnable operator>=(command const& c, std::string& str)
 {
-    c.no_autorun();
     return {new command_err_mapping(c,  std::bind(mapping_appender, std::ref(str), _1, _2),
                                         std::bind(&std::string::clear, std::ref(str)))};
 }
@@ -104,9 +99,8 @@ command_runnable operator>=(command_runnable const& c, std::string& str)
 
 /* ******************* vector redirection operators ******************* */
 
-command_runnable operator<(command_runnable const& c, std::vector<std::string>& vec)
+command_runnable operator<(command const& c, std::vector<std::string>& vec)
 {
-    c.no_autorun();
     auto func = [&vec](char* buf, std::size_t s) -> ssize_t
     {
         if(s == 0 || vec.empty())
@@ -130,30 +124,26 @@ command_runnable operator<(command_runnable const& c, std::vector<std::string>& 
     return {new command_in_mapping(c, func)};
 }
 
-command_runnable operator>(command_runnable const& c, std::vector<std::string>& vec)
+command_runnable operator>(command const& c, std::vector<std::string>& vec)
 {
-    c.no_autorun();
     auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
     return {new command_out_mapping(c,  line_splitter_make(std::move(pusher)),
                                         std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
 }
-command_runnable operator>>(command_runnable const& c, std::vector<std::string>& vec)
+command_runnable operator>>(command const& c, std::vector<std::string>& vec)
 {
-    c.no_autorun();
     auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
     return {new command_out_mapping(c,  line_splitter_make(std::move(pusher)))};
 }
 
-command_runnable operator>=(command_runnable const& c, std::vector<std::string>& vec)
+command_runnable operator>=(command const& c, std::vector<std::string>& vec)
 {
-    c.no_autorun();
     auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
     return {new command_err_mapping(c,  line_splitter_make(std::move(pusher)),
                                         std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
 }
-command_runnable operator>>=(command_runnable const& c, std::vector<std::string>& vec)
+command_runnable operator>>=(command const& c, std::vector<std::string>& vec)
 {
-    c.no_autorun();
     auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
     return {new command_err_mapping(c,  line_splitter_make(std::move(pusher)))};
 }
@@ -163,15 +153,13 @@ command_runnable operator>>=(command_runnable const& c, std::vector<std::string>
 
 /* ******************* line functor redirection operators ******************* */
 
-command_runnable operator>(command_runnable const& c, command_functor_line func)
+command_runnable operator>(command const& c, command_functor_line func)
 {
-    c.no_autorun();
     return {new command_out_mapping(c,  line_splitter_make(std::move(func)))};
 }
 
-command_runnable operator>=(command_runnable const& c, command_functor_line func)
+command_runnable operator>=(command const& c, command_functor_line func)
 {
-    c.no_autorun();
     return {new command_err_mapping(c,  line_splitter_make(std::move(func)))};
 }
 
@@ -179,21 +167,18 @@ command_runnable operator>=(command_runnable const& c, command_functor_line func
 
 /* ******************* raw functor redirection operators ******************* */
 
-command_runnable operator<(command_runnable const& c, command_functor_raw func)
+command_runnable operator<(command const& c, command_functor_raw func)
 {
-    c.no_autorun();
     return {new command_in_mapping(c,  std::move(func))};
 }
 
-command_runnable operator>(command_runnable const& c, command_functor_raw func)
+command_runnable operator>(command const& c, command_functor_raw func)
 {
-    c.no_autorun();
     return {new command_out_mapping(c,  std::move(func))};
 }
 
-command_runnable operator>=(command_runnable const& c, command_functor_raw func)
+command_runnable operator>=(command const& c, command_functor_raw func)
 {
-    c.no_autorun();
     return {new command_err_mapping(c,  std::move(func))};
 }
 

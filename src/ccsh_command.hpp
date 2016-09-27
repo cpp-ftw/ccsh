@@ -83,38 +83,15 @@ class command_runnable : protected std::shared_ptr<command_base>
     using base = std::shared_ptr<command_base>;
 
     friend class command;
-    friend class command_pair;
-    friend class command_redirect;
-    friend class command_mapping;
 
     command_runnable(base b) :
         base(std::move(b))
     { }
 
-    command_runnable(command_runnable const& other)
-        : base(other)
-    {
-        no_autorun();
-    }
-    command_runnable(command_runnable&& old)
-        : base(std::move(old))
-    {
-        no_autorun();
-    }
-
-    command_runnable& operator=(command_runnable const& other)
-    {
-        static_cast<base&>(*this) = static_cast<base const&>(other);
-        no_autorun();
-        return *this;
-    }
-
-    command_runnable& operator=(command_runnable&& old)
-    {
-        static_cast<base&>(*this) = static_cast<base&&>(std::move(old));
-        no_autorun();
-        return *this;
-    }
+    command_runnable(command_runnable const& other) = default;
+    command_runnable(command_runnable&& old) = default;
+    command_runnable& operator=(command_runnable const& other) = default;
+    command_runnable& operator=(command_runnable&& old) = default;
 
 public:
 
@@ -153,34 +130,11 @@ class command_holder : protected std::shared_ptr<command_native>, public TRAITS
     friend class command;
     template<typename>
     friend class command_builder;
-    friend class command_pair;
-    friend class command_redirect;
-    friend class command_mapping;
 
-    command_holder(command_holder const& other)
-        : base(other)
-    {
-        no_autorun();
-    }
-    command_holder(command_holder&& old)
-        : base(std::move(old))
-    {
-        no_autorun();
-    }
-
-    command_holder& operator=(command_holder const& other)
-    {
-        static_cast<base&>(*this) = static_cast<base const&>(other);
-        no_autorun();
-        return *this;
-    }
-
-    command_holder& operator=(command_holder&& old)
-    {
-        static_cast<base&>(*this) = static_cast<base&&>(std::move(old));
-        no_autorun();
-        return *this;
-    }
+    command_holder(command_holder const& other) = default;
+    command_holder(command_holder&& old) = default;
+    command_holder& operator=(command_holder const& other) = default;
+    command_holder& operator=(command_holder&& old) = default;
 
 protected:
 
@@ -193,7 +147,6 @@ protected:
     {
         return static_cast<command_native*>(get())->args;
     }
-
 
 public:
 
@@ -228,37 +181,39 @@ public:
     }
 };
 
-class command
+class command : protected command_runnable
 {
-    command_runnable cmd;
 public:
     command(command_runnable const& cmd)
-        : cmd{cmd}
+        : command_runnable{cmd}
     {
-        cmd.no_autorun();
+        command_runnable::no_autorun();
     }
 
     template<typename T>
     command(command_holder<T> const& other)
-        : cmd(std::dynamic_pointer_cast<command_base>(other))
+        : command_runnable(std::dynamic_pointer_cast<command_base>(other))
     { }
 
-    int run() const
+    using command_runnable::run;
+
+    // cannot "using" this because std::bind would stop working
+    int runx(int in, int out, int err) const
     {
-        return cmd.run();
+        return command_runnable::runx(in, out, err);
     }
 };
 
 template<typename T>
 class command_builder : public command_holder<T>
-{
+{   // must use public inheritance to get all the methods of command_holder, which are mostly switches
     using base = command_holder<T>;
 public:
     command_builder(command_holder<T> const& cmd)
         : base{cmd}
     {
+        cmd.no_autorun();
     }
-
 };
 
 /*template<typename T, typename... ARGS>
@@ -273,11 +228,11 @@ public:
 class command_pair : public command_base
 {
 protected:
-    command_runnable left;
-    command_runnable right;
+    command left;
+    command right;
 
 public:
-    command_pair(command_runnable const& left, command_runnable const& right)
+    command_pair(command const& left, command const& right)
         : left (left)
         , right(right)
     { }
@@ -333,12 +288,12 @@ public:
 class command_mapping : public command_base
 {
 protected:
-    command_runnable c;
+    command c;
     command_functor_raw  func;
     command_functor_init init_func;
 
 public:
-    command_mapping(command_runnable const& c, command_functor_raw const& f, command_functor_init const& init_func = nullptr)
+    command_mapping(command const& c, command_functor_raw const& f, command_functor_init const& init_func = nullptr)
         : c(c)
         , func(f)
         , init_func(init_func)
@@ -370,18 +325,18 @@ public:
 class command_redirect : public command_base
 {
 protected:
-    command_runnable c;
+    command c;
     fs::path p;
     int flags;
     open_wrapper get_fd() const;
 public:
-    command_redirect(command_runnable const& c, fs::path const& p, int flags);
+    command_redirect(command const& c, fs::path const& p, int flags);
 };
 
 class command_in_redirect final : public command_redirect
 {
 public:
-    command_in_redirect(command_runnable const& c, fs::path const& p);
+    command_in_redirect(command const& c, fs::path const& p);
 
     int runx(int, int out, int err) const override
     {
@@ -392,7 +347,7 @@ public:
 class command_out_redirect final : public command_redirect
 {
 public:
-    command_out_redirect(command_runnable const& c, fs::path const& p, bool append = false);
+    command_out_redirect(command const& c, fs::path const& p, bool append = false);
 
     int runx(int in, int, int err) const override
     {
@@ -403,7 +358,7 @@ public:
 class command_err_redirect final : public command_redirect
 {
 public:
-    command_err_redirect(command_runnable const& c, fs::path const& p, bool append = false);
+    command_err_redirect(command const& c, fs::path const& p, bool append = false);
 
     int runx(int in, int out, int) const override
     {

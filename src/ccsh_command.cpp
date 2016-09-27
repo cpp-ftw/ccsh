@@ -188,8 +188,8 @@ fail:
 
 int command_pipe::runx(int in, int out, int err) const
 {
-    auto f1 = std::bind(&command_runnable::runx, std::ref(left),  in,  _1, err);
-    auto f2 = std::bind(&command_runnable::runx, std::ref(right), _1, out, err);
+    auto f1 = std::bind(&command::runx, std::ref(left),  in,  _1, err);
+    auto f2 = std::bind(&command::runx, std::ref(right), _1, out, err);
 
     auto p = fork_functor_helper(FORK_CHILD_WRITE, f1, f2);
     return shell_logic_or(p.first, p.second);
@@ -198,7 +198,7 @@ int command_pipe::runx(int in, int out, int err) const
 int command_in_mapping::runx(int, int out, int err) const
 {
     if(init_func) init_func();
-    auto f1 = std::bind(&command_runnable::runx, std::ref(c), _1, out, err);
+    auto f1 = std::bind(&command::runx, std::ref(c), _1, out, err);
 
     auto f2 = [this](int pipefd)
     {
@@ -216,7 +216,7 @@ int command_in_mapping::runx(int, int out, int err) const
 int command_out_mapping::runx(int in, int, int err) const
 {
     if(init_func) init_func();
-    auto f1 = std::bind(&command_runnable::runx, std::ref(c), in, _1, err);
+    auto f1 = std::bind(&command::runx, std::ref(c), in, _1, err);
 
     auto f2 = [this](int pipefd)
     {
@@ -236,7 +236,7 @@ int command_out_mapping::runx(int in, int, int err) const
 int command_err_mapping::runx(int in, int out, int) const
 {
     if(init_func) init_func();
-    auto f1 = std::bind(&command_runnable::runx, std::ref(c), in, out, _1);
+    auto f1 = std::bind(&command::runx, std::ref(c), in, out, _1);
 
     auto f2 = [this](int pipefd)
     {
@@ -253,7 +253,7 @@ int command_err_mapping::runx(int in, int out, int) const
     return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
 }
 
-command_redirect::command_redirect(command_runnable const& c, fs::path const& p, int flags)
+command_redirect::command_redirect(command const& c, fs::path const& p, int flags)
     : c(c)
     , p(p)
     , flags(flags)
@@ -264,15 +264,15 @@ open_wrapper command_redirect::get_fd() const
     return open_wrapper{open(p.c_str(), flags, fopen_w_mode)};
 }
 
-command_in_redirect::command_in_redirect(command_runnable const& c, fs::path const& p)
+command_in_redirect::command_in_redirect(command const& c, fs::path const& p)
     : command_redirect(c, p, O_RDONLY)
 { }
 
-command_out_redirect::command_out_redirect(command_runnable const& c, fs::path const& p, bool append)
+command_out_redirect::command_out_redirect(command const& c, fs::path const& p, bool append)
     : command_redirect(c, p, fopen_w_flags(append))
 { }
 
-command_err_redirect::command_err_redirect(command_runnable const& c, fs::path const& p, bool append)
+command_err_redirect::command_err_redirect(command const& c, fs::path const& p, bool append)
     : command_redirect(c, p, fopen_w_flags(append))
 { }
 

@@ -11,43 +11,36 @@ inline command_runnable shell(std::string const& str, std::vector<std::string> c
     return {new command_native(str, args)};
 }
 
-inline command_runnable operator|(command_runnable const& a, command_runnable const& b)
+inline command_runnable operator|(command const& a, command const& b)
 {
-    a.no_autorun();
-    b.no_autorun();
     return {new command_pipe(a, b)};
 }
 
 
 /* ******************* file redirection operators ******************* */
 
-inline command_runnable operator<(command_runnable const& c, fs::path const& p)
+inline command_runnable operator<(command const& c, fs::path const& p)
 {
-    c.no_autorun();
     return {new command_in_redirect(c, p)};
 }
 
-inline command_runnable operator>(command_runnable const& c, fs::path const& p)
+inline command_runnable operator>(command const& c, fs::path const& p)
 {
-    c.no_autorun();
     return {new command_out_redirect(c, p, false)};
 }
 
-inline command_runnable operator>>(command_runnable const& c, fs::path const& p)
+inline command_runnable operator>>(command const& c, fs::path const& p)
 {
-    c.no_autorun();
     return {new command_out_redirect(c, p, true)};
 }
 
-inline command_runnable operator>=(command_runnable const& c, fs::path const& p)
+inline command_runnable operator>=(command const& c, fs::path const& p)
 {
-    c.no_autorun();
     return {new command_err_redirect(c, p, false)};
 }
 
-inline command_runnable operator>>=(command_runnable const& c, fs::path const& p)
+inline command_runnable operator>>=(command const& c, fs::path const& p)
 {
-    c.no_autorun();
     return {new command_err_redirect(c, p, true)};
 }
 
@@ -57,39 +50,39 @@ inline command_runnable operator>>=(command_runnable const& c, fs::path const& p
 
 /* ******************* string redirection operators ******************* */
 
-command_runnable operator<  (command_runnable const& c, std::string& str);
-command_runnable operator>> (command_runnable const& c, std::string& str);
-command_runnable operator>  (command_runnable const& c, std::string& str);
-command_runnable operator>>=(command_runnable const& c, std::string& str);
-command_runnable operator>= (command_runnable const& c, std::string& str);
+command_runnable operator<  (command const& c, std::string& str);
+command_runnable operator>> (command const& c, std::string& str);
+command_runnable operator>  (command const& c, std::string& str);
+command_runnable operator>>=(command const& c, std::string& str);
+command_runnable operator>= (command const& c, std::string& str);
 
 /* ******************* string redirection operators ******************* */
 
 
 /* ******************* vector redirection operators ******************* */
 
-command_runnable operator<  (command_runnable const& c, std::vector<std::string>& str);
-command_runnable operator>> (command_runnable const& c, std::vector<std::string>& str);
-command_runnable operator>  (command_runnable const& c, std::vector<std::string>& str);
-command_runnable operator>>=(command_runnable const& c, std::vector<std::string>& str);
-command_runnable operator>= (command_runnable const& c, std::vector<std::string>& str);
+command_runnable operator<  (command const& c, std::vector<std::string>& str);
+command_runnable operator>> (command const& c, std::vector<std::string>& str);
+command_runnable operator>  (command const& c, std::vector<std::string>& str);
+command_runnable operator>>=(command const& c, std::vector<std::string>& str);
+command_runnable operator>= (command const& c, std::vector<std::string>& str);
 
 /* ******************* vector redirection operators ******************* */
 
 /* ******************* line functor redirection operators ******************* */
 
-//command_runnable operator<  (command_runnable const& c, command_functor_line func);
-command_runnable operator>  (command_runnable const& c, command_functor_line func);
-command_runnable operator>= (command_runnable const& c, command_functor_line func);
+//command_runnable operator<  (command const& c, command_functor_line func);
+command_runnable operator>  (command const& c, command_functor_line func);
+command_runnable operator>= (command const& c, command_functor_line func);
 
 /* ******************* line functor redirection operators ******************* */
 
 
 /* ******************* raw functor redirection operators ******************* */
 
-command_runnable operator<  (command_runnable const& c, command_functor_raw func);
-command_runnable operator>  (command_runnable const& c, command_functor_raw func);
-command_runnable operator>= (command_runnable const& c, command_functor_raw func);
+command_runnable operator<  (command const& c, command_functor_raw func);
+command_runnable operator>  (command const& c, command_functor_raw func);
+command_runnable operator>= (command const& c, command_functor_raw func);
 
 /* ******************* raw functor redirection operators ******************* */
 
@@ -97,41 +90,33 @@ command_runnable operator>= (command_runnable const& c, command_functor_raw func
 
 /* ******************* logical operators ******************* */
 
-inline command_runnable operator&&(command_runnable const& a, command_runnable const& b)
+inline command_runnable operator&&(command const& a, command const& b)
 {
-    a.no_autorun();
-    b.no_autorun();
     return {new command_and(a, b)};
 }
 
-inline command_runnable operator||(command_runnable const& a, command_runnable const& b)
+inline command_runnable operator||(command const& a, command const& b)
 {
-    a.no_autorun();
-    b.no_autorun();
     return {new command_or(a, b)};
 }
 
-inline command_runnable operator&&(command_runnable const& a, bool b)
+inline command_runnable operator&&(command const& a, bool b)
 {
-    a.no_autorun();
     return {new command_and(a, command_runnable{new command_bool(b)})};
 }
 
-inline command_runnable operator||(command_runnable const& a, bool b)
+inline command_runnable operator||(command const& a, bool b)
 {
-    a.no_autorun();
     return {new command_or(a, command_runnable{new command_bool(b)})};
 }
 
-inline command_runnable operator&&(bool b, command_runnable const& a) // provided only for consistency, useless anyways
+inline command_runnable operator&&(bool b, command const& a) // provided only for consistency, useless anyways
 {
-    a.no_autorun();
     return {new command_and(command_runnable{new command_bool(b)}, a)};
 }
 
-inline command_runnable operator||(bool b, command_runnable const& a) // provided only for consistency, useless anyways
+inline command_runnable operator||(bool b, command const& a) // provided only for consistency, useless anyways
 {
-    a.no_autorun();
     return {new command_or(command_runnable{new command_bool(b)}, a)};
 }
 
