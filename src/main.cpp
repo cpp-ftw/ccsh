@@ -1,4 +1,5 @@
 #include <iostream>
+#define CCSH_NON_STANDARD_DOLLAR
 #include "ccsh.hpp"
 
 // Not for real use, for syntax demonstration only.

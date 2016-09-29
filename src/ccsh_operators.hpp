@@ -148,7 +148,7 @@ inline std::string dollar(command_runnable const& c)
     return x;
 }
 
-#ifdef __GNUC__
+#ifdef CCSH_NON_STANDARD_DOLLAR
 inline env_var $(std::string const& name)
 {
     return dollar(name);
