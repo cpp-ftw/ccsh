@@ -28,4 +28,16 @@ void close_fd(int fd) noexcept
         ;
 }
 
+env_var::operator std::string() const
+{
+    const char* result = getenv(name.c_str());
+    return result == nullptr ? "" : result;
+}
+
+env_var& env_var::operator=(std::string const& str)
+{
+    stdc_thrower(setenv(name.c_str(), str.c_str(), true));
+    return *this;
+}
+
 } // namespace ccsh

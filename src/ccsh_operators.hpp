@@ -2,6 +2,7 @@
 #define CCSH_OPERATORS_HPP_INCLUDED
 
 #include "ccsh_command.hpp"
+#include <iostream>
 
 namespace ccsh
 {
@@ -133,6 +134,37 @@ namespace literals
 
 } // namespace literals
 
+
+inline env_var dollar(std::string const& name)
+{
+    return env_var(name);
+}
+
+inline std::string dollar(command_runnable const& c)
+{
+    std::string x;
+    std::string err;
+    shell_thrower((c > x >= err).run(), err);
+    return x;
+}
+
+#ifdef __GNUC__
+inline env_var $(std::string const& name)
+{
+    return dollar(name);
+}
+
+inline std::string $(command_runnable const& c)
+{
+    return dollar(c);
+}
+#endif
+
+inline std::ostream& operator<<(std::ostream& os, env_var const& var)
+{
+    os << std::string(var);
+    return os;
+}
 
 } // namespace ccsh
 

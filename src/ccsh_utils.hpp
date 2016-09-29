@@ -1,7 +1,7 @@
 #ifndef CCSH_UTILS_HPP_INCLUDED
 #define CCSH_UTILS_HPP_INCLUDED
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 #include <boost/filesystem.hpp>
@@ -33,6 +33,17 @@ inline void stdc_thrower(int result)
         throw stdc_error();
 }
 
+class shell_error : public std::runtime_error
+{
+    using std::runtime_error::runtime_error;
+};
+
+inline void shell_thrower(int result, std::string const& str)
+{
+    if(result != 0)
+        throw shell_error(str);
+}
+
 struct open_traits
 {
     static constexpr int invalid_value = -1;
@@ -48,6 +59,22 @@ inline int shell_logic_or(int a, int b)
 }
 
 void close_fd(int fd) noexcept;
+
+class env_var
+{
+    std::string name;
+public:
+    env_var(std::string name)
+        : name(std::move(name))
+    { }
+    env_var(env_var&&) = default;
+    env_var(env_var const&) = delete;
+    env_var& operator=(env_var&&) = default;
+    env_var& operator=(env_var const&) = delete;
+
+    operator std::string() const; // getenv
+    env_var& operator=(std::string const&); // setenv
+};
 
 } // namespace ccsh
 

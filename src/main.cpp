@@ -28,10 +28,22 @@ void test1()
     x.o("asd.o");
 }
 
+void test2()
+{
+    using namespace ccsh;
+    std::string user = $("USER");
+    std::cout << user << " " << user.length() << std::endl;
+    $("BAFFER") = "some text";
+    std::cout << $("BAFFER") << std::endl;
+
+    shell("echo", {$(shell("ls"))});
+}
+
 using namespace ccsh::literals;
 
 int main()
 {
+    test2();
     ccsh::shell("la");
     std::cout << ccsh::pwd() << std::endl;
     ccsh::shell("la") | ccsh::shell("cowsay"); // no cow should appear
