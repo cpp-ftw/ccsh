@@ -52,9 +52,6 @@ protected:
     std::string str;
     std::vector<std::string> args;
 
-    template<typename>
-    friend class command_holder;
-
     virtual std::vector<const char*> get_argv() const
     {
         std::vector<const char*> argv;
@@ -83,10 +80,6 @@ class command_runnable : protected std::shared_ptr<command_base>
     using base = std::shared_ptr<command_base>;
 
     friend class command;
-
-    command_runnable(base b) :
-        base(std::move(b))
-    { }
 
     command_runnable(command_runnable const& other) = default;
     command_runnable(command_runnable&& old) = default;
@@ -123,10 +116,8 @@ public:
 };
 
 template<typename TRAITS>
-class command_holder : protected std::shared_ptr<command_native>, public TRAITS
+class command_holder : public command_native, public TRAITS
 {
-    using base = std::shared_ptr<command_native>;
-
     friend class command;
     template<typename>
     friend class command_builder;
@@ -140,44 +131,23 @@ protected:
 
     virtual std::vector<std::string>& get_args() override final
     {
-        return static_cast<command_native*>(get())->args;
+        return args;
     }
 
     virtual std::vector<std::string> const& get_args() const override final
     {
-        return static_cast<command_native*>(get())->args;
+        return args;
     }
 
 public:
 
-    command_holder(command_base * other)
-        : base(other)
-    { }
-
     command_holder(std::string const& name, std::vector<std::string> const& args)
-        : base(new command_native(name, args))
+        : command_native(name, args)
     { }
-
-    int run() const
-    {
-        return (*this)->run();
-    }
-
-    void no_autorun() const
-    {
-        if(*this)
-            (*this)->no_autorun();
-    }
-
-    int runx(int in, int out, int err) const
-    {
-        return (*this)->runx(in, out, err);
-    }
 
     ~command_holder()
     {
-        if(*this)
-            (*this)->run_autorun();
+        run_autorun();
     }
 };
 
@@ -187,13 +157,17 @@ public:
     command(command_runnable const& cmd)
         : command_runnable{cmd}
     {
+        cmd.no_autorun();
         command_runnable::no_autorun();
     }
 
     template<typename T>
-    command(command_holder<T> const& other)
-        : command_runnable(std::dynamic_pointer_cast<command_base>(other))
-    { }
+    command(command_holder<T> const& cmd)
+        : command_runnable{new command_holder<T>(cmd)}
+    {
+        cmd.no_autorun();
+        command_runnable::no_autorun();
+    }
 
     using command_runnable::run;
 
@@ -212,18 +186,10 @@ public:
     command_builder(command_holder<T> const& cmd)
         : base{cmd}
     {
+        base::no_autorun();
         cmd.no_autorun();
     }
 };
-
-/*template<typename T, typename... ARGS>
-class command_builder<command_holder<T>(*)(ARGS...)>
-    : public command_builder<T>
-{
-    using base = command_builder<T>;
-public:
-    using base::base;
-};*/
 
 class command_pair : public command_base
 {
