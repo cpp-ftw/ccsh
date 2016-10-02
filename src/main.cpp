@@ -4,27 +4,28 @@
 
 // Not for real use, for syntax demonstration only.
 
-class gcc_builder : public ccsh::command_builder_base
+class gcc_t : public ccsh::command_native, public ccsh::command_builder_base
 {
 public:
 
-    ccsh::command_holder<gcc_builder>& o(ccsh::fs::path const& p)
+    gcc_t(std::vector<std::string> const& args)
+        : command_native("gcc", args)
+    { }
+
+    ccsh::command_holder<gcc_t>& o(ccsh::fs::path const& p)
     {
-        get_args().push_back(p.string());
-        return static_cast<ccsh::command_holder<gcc_builder>&>(*this);
+        args.push_back(p.string());
+        return static_cast<ccsh::command_holder<gcc_t>&>(*this);
     }
 };
 
-ccsh::command_holder<gcc_builder> gcc(std::vector<std::string> const& args)
-{
-    return { "gcc", args };
-}
+using gcc = ccsh::command_holder<gcc_t>;
 
 void test1()
 {
     ccsh::command c1 = gcc({}).o("");
     auto c2 = c1;
-    ccsh::command_builder<gcc_builder> x = gcc({}).o("");
+    ccsh::command_builder<gcc> x = gcc({}).o("");
 
     x.o("asd.o");
 }

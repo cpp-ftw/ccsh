@@ -18,9 +18,10 @@ using command_functor_line = std::function<void(std::string const&)>;
 
 class command_builder_base
 {
-protected:
-    virtual std::vector<std::string>& get_args() = 0;
-    virtual std::vector<std::string> const& get_args() const = 0;
+    template<typename>
+    friend class command_holder;
+    struct ccsh_abstract_guard_t { };
+    virtual void ccsh_abstract_guard(ccsh_abstract_guard_t) const = 0;
 };
 
 template<typename>
@@ -116,7 +117,7 @@ public:
 };
 
 template<typename TRAITS>
-class command_holder : public command_native, public TRAITS
+class command_holder : public TRAITS
 {
     friend class command;
     template<typename>
@@ -127,27 +128,15 @@ class command_holder : public command_native, public TRAITS
     command_holder& operator=(command_holder const& other) = default;
     command_holder& operator=(command_holder&& old) = default;
 
-protected:
-
-    virtual std::vector<std::string>& get_args() override final
-    {
-        return args;
-    }
-
-    virtual std::vector<std::string> const& get_args() const override final
-    {
-        return args;
-    }
+    void ccsh_abstract_guard(command_builder_base::ccsh_abstract_guard_t) const override { }
 
 public:
 
-    command_holder(std::string const& name, std::vector<std::string> const& args)
-        : command_native(name, args)
-    { }
+    using TRAITS::TRAITS;
 
     ~command_holder()
     {
-        run_autorun();
+        TRAITS::run_autorun();
     }
 };
 
@@ -189,6 +178,14 @@ public:
         base::no_autorun();
         cmd.no_autorun();
     }
+};
+
+template<typename T>
+class command_builder<command_holder<T>> : public command_builder<T>
+{
+    using base = command_builder<T>;
+public:
+    using base::base;
 };
 
 class command_pair : public command_base
