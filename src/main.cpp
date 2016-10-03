@@ -2,32 +2,16 @@
 #define CCSH_NON_STANDARD_DOLLAR
 #include "ccsh.hpp"
 
-// Not for real use, for syntax demonstration only.
-
-class gcc_t : public ccsh::command_native, public ccsh::command_builder_base
-{
-public:
-
-    gcc_t(std::vector<std::string> const& args)
-        : command_native("gcc", args)
-    { }
-
-    ccsh::command_holder<gcc_t>& o(ccsh::fs::path const& p)
-    {
-        args.push_back(p.string());
-        return static_cast<ccsh::command_holder<gcc_t>&>(*this);
-    }
-};
-
-using gcc = ccsh::command_holder<gcc_t>;
+#include "core.hpp"
 
 void test1()
 {
-    ccsh::command c1 = gcc({}).o("");
+    using namespace ccsh::core;
+    ccsh::command c1 = cat().e();
     auto c2 = c1;
-    ccsh::command_builder<gcc> x = gcc({}).o("");
+    ccsh::command_builder<cat> x = cat().n();
 
-    x.o("asd.o");
+    x.T();
 }
 
 void test2()
@@ -39,6 +23,12 @@ void test2()
     std::cout << $("BAFFER") << std::endl;
 
     shell("echo", {$(shell("ls"))});
+}
+
+void test3()
+{
+    using namespace ccsh::core;
+    cat();
 }
 
 using namespace ccsh::literals;

@@ -132,6 +132,8 @@ class command_holder : public TRAITS
 
 public:
 
+    command_holder() = default;
+
     using TRAITS::TRAITS;
 
     ~command_holder()
