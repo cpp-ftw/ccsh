@@ -3,6 +3,7 @@
 
 #include "../ccsh_command.hpp"
 #include "../ccsh_wrappers.hpp"
+#include "../ccsh_regex.hpp"
 
 namespace ccsh {
 namespace core {
@@ -53,11 +54,20 @@ public:
     CCSH_WRAPPER_ARG1(nl_t, b, "-b", numbering_style, flag_to_str)
     CCSH_WRAPPER_ARG1_FWD(nl_t, body_numbering, b, numbering_style)
 
+    CCSH_WRAPPER_ARG1(nl_t, b, "-b", regex<regex_type::basic>, /* empty */)
+    CCSH_WRAPPER_ARG1_FWD(nl_t, body_numbering, b, regex<regex_type::basic>)
+
     CCSH_WRAPPER_ARG1(nl_t, h, "-h", numbering_style, flag_to_str)
     CCSH_WRAPPER_ARG1_FWD(nl_t, header_numbering, h, numbering_style)
 
+    CCSH_WRAPPER_ARG1(nl_t, h, "-h", regex<regex_type::basic>, /* empty */)
+    CCSH_WRAPPER_ARG1_FWD(nl_t, header_numbering, h, regex<regex_type::basic>)
+
     CCSH_WRAPPER_ARG1(nl_t, f, "-f", numbering_style, flag_to_str)
     CCSH_WRAPPER_ARG1_FWD(nl_t, footer_numbering, f, numbering_style)
+
+    CCSH_WRAPPER_ARG1(nl_t, f, "-f", regex<regex_type::basic>, /* empty */)
+    CCSH_WRAPPER_ARG1_FWD(nl_t, footer_numbering, f, regex<regex_type::basic>)
 
     CCSH_WRAPPER_ARG1(nl_t, n, "-n", numbering_format, flag_to_str)
     CCSH_WRAPPER_ARG1_FWD(nl_t, number_format, n, numbering_format)
