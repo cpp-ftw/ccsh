@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <cstddef>
 
 #include <boost/filesystem.hpp>
 
@@ -75,6 +76,14 @@ public:
     operator std::string() const; // getenv
     env_var& operator=(std::string const&); // setenv
 };
+
+template<typename ENUM, std::size_t N>
+const char* enum_to_string(ENUM val, const char* const (&mapping)[N])
+{
+    if(val < 0 || val >= N)
+        return "";
+    return mapping[val];
+}
 
 } // namespace ccsh
 
