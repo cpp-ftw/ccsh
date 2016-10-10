@@ -16,8 +16,6 @@ namespace fs = boost::filesystem;
 // NEVER EVER USE boost::filesystem DIRECTLY, ALWAYS USE ccsh::fs
 // boost::filesystem WILL BE CHANGED TO std::filesystem WITH C++17
 
-std::string pwd();
-
 class stdc_error : public std::exception
 {
     int error_number = errno;
