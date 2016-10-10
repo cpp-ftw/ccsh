@@ -1,7 +1,33 @@
 #include "ccsh_utils.hpp"
 
+#include <sys/types.h>
+#include <pwd.h>
+
+#include <memory>
+
 namespace ccsh
 {
+
+fs::path get_home()
+{
+    struct passwd pwd;
+    struct passwd *result;
+
+    long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+    if (bufsize == -1)
+        bufsize = 16384;
+
+    std::unique_ptr<char[]> buf{new char[bufsize]};
+
+    if(getpwuid_r(getuid(), &pwd, buf.get(), bufsize, &result) != 0 ||
+        result == nullptr ||
+        result->pw_dir == nullptr)
+    {
+        throw stdc_error();
+    }
+
+    return fs::path{result->pw_dir};
+}
 
 const char * stdc_error::what() const noexcept
 {

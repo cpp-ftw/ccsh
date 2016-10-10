@@ -1,6 +1,7 @@
 #ifndef CCSH_UTILS_HPP_INCLUDED
 #define CCSH_UTILS_HPP_INCLUDED
 
+#include <exception>
 #include <stdexcept>
 #include <string>
 #include <cstddef>
@@ -15,6 +16,8 @@ namespace ccsh
 namespace fs = boost::filesystem;
 // NEVER EVER USE boost::filesystem DIRECTLY, ALWAYS USE ccsh::fs
 // boost::filesystem WILL BE CHANGED TO std::filesystem WITH C++17
+
+fs::path get_home();
 
 class stdc_error : public std::exception
 {

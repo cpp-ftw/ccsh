@@ -4,6 +4,15 @@
 #include "ccsh_command.hpp"
 #include <iostream>
 
+namespace boost { namespace filesystem {
+
+    inline path operator~(path other)
+    {
+        return ccsh::get_home() / other;
+    }
+
+}}
+
 namespace ccsh
 {
 

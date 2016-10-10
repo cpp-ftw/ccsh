@@ -4,6 +4,8 @@
 
 #include "core.hpp"
 
+using namespace ccsh::literals;
+
 void test1()
 {
     using namespace ccsh::core;
@@ -31,16 +33,18 @@ void test3()
     cat();
 }
 
-using namespace ccsh::literals;
+void test4()
+{
+    ccsh::core::cat(~"Documents/ccsh/src/main.cpp"_p);
+}
 
 int main()
 {
+    std::cout << ccsh::get_home().string() << std::endl;
     test2();
+    test4();
     ccsh::shell("la");
-    std::cout << ccsh::pwd() << std::endl;
     ccsh::shell("la") | ccsh::shell("cowsay"); // no cow should appear
-
-    //std::cout << ccsh::shell("cat", {"/you/shall/not/path"}).run() << std::endl;
 
     ccsh::fs::path f = "/tmp/bs.txt"_p;
 
