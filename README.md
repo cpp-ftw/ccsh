@@ -2,20 +2,23 @@
 
 #### Rough plan
 
-1. Create a library that implements shell-like syntax and functionality, e.g.
-`ccsh::shell("ls", {"-lah", "--color=auto"}) | ccsh::shell("grep", "rwx")`
-2. Add ccsh::shell wrappers for coreutils (e.g. `ccsh::ls()` for `ccsh::shell("ls")`)
-3. Pipe this into a C++ interpreter, e.g. cling (https://root.cern.ch/cling), which makes a complete C++ shell.
+1. ~~Create a library that implements shell-like syntax and functionality, e.g.
+`ccsh::shell("ls", {"-lah", "--color=auto"}) | ccsh::shell("grep", "rwx")`~~
+2. Add ccsh::shell wrappers for coreutils (e.g. `ccsh::ls()` for `ccsh::shell("ls")`) // partly done
+3. ~~Pipe this into a C++ interpreter, e.g. cling (https://root.cern.ch/cling), which makes a complete C++ shell.~~
 
 ### TODO
 
 - Add a normal README.md
 
+- Add wildcard selection
+- Fix shell prompt and make it customizable
+- Catch signals in cling and forward them to programs
+
 - Add `command operator<(command, command_line_functor);`
 - Add command to fd conversion, for using commands as files, see https://www.gnu.org/software/coreutils/manual/coreutils.html#tee-invocation
 - Add `command operator<(command, int fd); and same for <, >>, >=, >>=`
 
-- Add wrappers for coreutils, switch syntax `ccsh::ls().l().a().h()` and `ccsh::gcc("file.c").c().o("file.o")` seems to be the best.
 
 ### DONE
 
