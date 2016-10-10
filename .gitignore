@@ -29,6 +29,8 @@
 *.out
 *.app
 ccsh
+ccsh_test
+ccsh_bin
 
 # CMake files
 
