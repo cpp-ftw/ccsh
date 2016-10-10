@@ -1,5 +1,5 @@
-#ifndef CCSH_CORE_OD_HPP_INCLUDED
-#define CCSH_CORE_OD_HPP_INCLUDED
+#ifndef CCSH_REGEX_HPP_INCLUDED
+#define CCSH_REGEX_HPP_INCLUDED
 
 #include "ccsh_utils.hpp"
 
@@ -56,4 +56,4 @@ public:
 
 }
 
-#endif // CCSH_CORE_OD_HPP_INCLUDED
+#endif // CCSH_REGEX_HPP_INCLUDED
