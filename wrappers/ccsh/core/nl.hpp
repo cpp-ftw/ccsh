@@ -1,9 +1,9 @@
 #ifndef CCSH_CORE_NL_HPP_INCLUDED
 #define CCSH_CORE_NL_HPP_INCLUDED
 
-#include "../ccsh_command.hpp"
-#include "../ccsh_wrappers.hpp"
-#include "../ccsh_regex.hpp"
+#include <ccsh/ccsh_command.hpp>
+#include <ccsh/ccsh_wrappers.hpp>
+#include <ccsh/ccsh_regex.hpp>
 
 namespace ccsh {
 namespace core {

@@ -1,8 +1,8 @@
 #ifndef CCSH_CORE_OD_HPP_INCLUDED
 #define CCSH_CORE_OD_HPP_INCLUDED
 
-#include "../ccsh_command.hpp"
-#include "../ccsh_wrappers.hpp"
+#include <ccsh/ccsh_command.hpp>
+#include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
 namespace core {

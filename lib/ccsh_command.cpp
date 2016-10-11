@@ -1,4 +1,4 @@
-#include "ccsh_command.hpp"
+#include <ccsh/ccsh_command.hpp>
 
 #include <sys/types.h>
 #include <sys/wait.h>

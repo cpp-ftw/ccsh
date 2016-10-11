@@ -1,5 +1,5 @@
-#include "src/ccsh.hpp"
-#include "src/core.hpp"
+#include <ccsh/ccsh.hpp>
+#include <ccsh/core.hpp>
 
 using namespace ccsh;
 using namespace ccsh::literals;

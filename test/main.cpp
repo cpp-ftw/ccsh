@@ -1,8 +1,8 @@
 #include <iostream>
 #define CCSH_NON_STANDARD_DOLLAR
-#include "ccsh.hpp"
+#include <ccsh/ccsh.hpp>
 
-#include "core.hpp"
+#include <ccsh/core.hpp>
 
 using namespace ccsh::literals;
 

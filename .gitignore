@@ -28,14 +28,14 @@
 *.exe
 *.out
 *.app
-ccsh
-ccsh_test
-ccsh_bin
+test/ccsh_test
+start/ccsh_start
 
 # CMake files
 
+*/CMakeCache.txt
 CMakeCache.txt
-CMakeFiles/*
+CMakeFiles
 Makefile
 *.cmake
 
