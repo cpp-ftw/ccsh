@@ -1,7 +1,19 @@
 #include <ccsh/ccsh.hpp>
 
-int main()
+using namespace ccsh;
+
+int main(int argc, const char** argv)
 {
-	// cling -std=c++14  -l ccsh_lib -l "src/clingrc.hpp" --nologo
-	ccsh::shell("cling", {"-std=c++14", "-l", "lib/libccsh_lib.so", "-l", "start/clingrc.hpp", "-Iinclude", "-Iwrappers", "--nologo"});
+    (void) argc;
+
+    fs::path p = fs::current_path() / fs::path(argv[0]);
+    p = p.parent_path();
+
+    shell("cling", {"-std=c++14", 
+                    "-L" + (p / "lib").string(),                // -Llib
+                    "-l", "ccsh_lib",                           // -l ccsh_lib
+                    "-l", (p / "start/clingrc.hpp").string(),   // -l start/clingrc.hpp
+                    "-I" + (p / "include").string(),            // -Iinclude
+                    "-I" + (p / "wrappers").string(),           // -Iwrappers
+                    "--nologo"});
 }
