@@ -4,6 +4,8 @@
 
 #include <ccsh/core.hpp>
 
+#include <ccsh/ccsh_tty.hpp>
+
 using namespace ccsh::literals;
 
 void test1()
