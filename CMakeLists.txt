@@ -8,5 +8,5 @@ include_directories(include)
 
 add_subdirectory(lib)
 
-add_subdirectory(start)
+add_subdirectory(ui)
 add_subdirectory(test)

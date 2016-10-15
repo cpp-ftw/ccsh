@@ -71,7 +71,7 @@ int main( int argc, char **argv ) {
     "-std=c++14",
     "-L" + (p / "lib").string(),                // -Llib
     "-l", "ccsh_lib",                           // -l ccsh_lib
-    "-l",  (p / "start/clingrc.hpp").string(),  // -l start/clingrc.hpp
+    "-l",  (p / "ui/clingrc.hpp").string(),     // -l ui/clingrc.hpp
     "-I" + (p / "include").string(),            // -Iinclude
     "-I" + (p / "wrappers").string(),           // -Iwrappers  
   };
