@@ -24,6 +24,16 @@
         return fwd_to(std::move(arg)); \
     }
 
+#define CCSH_WRAPPER_COMMON_CLASS(basecmd, cmdname, cmdstr) \
+    class cmdname : public basecmd<cmdname> \
+    { \
+        using base = basecmd<cmdname>; \
+        friend base; \
+        static constexpr const char* name = cmdstr; \
+    public: \
+        using base::base; \
+    };
+
 namespace ccsh {
 namespace wrappers {
 
