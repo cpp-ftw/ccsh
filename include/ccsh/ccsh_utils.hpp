@@ -19,14 +19,19 @@ namespace fs = boost::filesystem;
 
 fs::path get_home();
 
-class stdc_error : public std::exception
+class stdc_error : public std::runtime_error
 {
-    int error_number = errno;
+    int error_number;
 public:
-    stdc_error() : error_number(errno) { }
-    stdc_error(int no) : error_number(no) { }
+    stdc_error(int no = errno)
+        : runtime_error(strerror(errno))
+        , error_number(no)
+    { }
+    stdc_error(int no, std::string const& msg)
+        : std::runtime_error(msg.empty() ? strerror(no) : msg + ": " + strerror(no))
+        , error_number(no)
+    { }
     int no() const { return error_number; }
-    virtual const char * what() const noexcept override;
 };
 
 inline void stdc_thrower(int result)

@@ -175,7 +175,7 @@ fail:
         stdc_thrower(result);
 
         if(result > 0)
-            throw stdc_error(fail_code);
+            throw stdc_error(fail_code, str);
 
         int status;
         if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))

@@ -29,11 +29,6 @@ fs::path get_home()
     return fs::path{result->pw_dir};
 }
 
-const char * stdc_error::what() const noexcept
-{
-    return strerror(error_number);
-}
-
 void open_traits::dtor_func(int fd) noexcept
 {
     if(fd != STDIN_FILENO && fd != STDOUT_FILENO && fd != STDERR_FILENO)
