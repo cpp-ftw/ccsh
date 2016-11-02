@@ -7,12 +7,12 @@
 namespace ccsh {
 namespace core {
 
-template<typename DERIVED>
-class base_t : public wrappers::options_paths<DERIVED>
+template<const char* NAME>
+class base_t : public wrappers::options_paths<base_t<NAME>>
 {
-    using base = wrappers::options_paths<DERIVED>;
+    using base = wrappers::options_paths<base_t<NAME>>;
     friend base;
-    static constexpr const char* name = DERIVED::name;
+    static constexpr const char* name = NAME;
 
 public:
 
@@ -39,7 +39,6 @@ CCSH_WRAPPER_COMMON_CLASS(base_t, base64_t, "base64")
 
 using base32 = command_holder<base32_t>;
 using base64 = command_holder<base64_t>;
-
 
 }
 }

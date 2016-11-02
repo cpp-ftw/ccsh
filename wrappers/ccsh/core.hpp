@@ -17,5 +17,8 @@
 #include "core/csplit.hpp" // TODO
 
 #include "core/wc.hpp"
+#include "core/sum.hpp"
+#include "core/cksum.hpp"
+#include "core/shasum.hpp"
 
 #endif // CCSH_CORE_HPP_INCLUDED

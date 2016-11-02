@@ -25,14 +25,8 @@
     }
 
 #define CCSH_WRAPPER_COMMON_CLASS(basecmd, cmdname, cmdstr) \
-    class cmdname : public basecmd<cmdname> \
-    { \
-        using base = basecmd<cmdname>; \
-        friend base; \
-        static constexpr const char* name = cmdstr; \
-    public: \
-        using base::base; \
-    };
+    namespace hidden { constexpr const char cmdname##_name[] = cmdstr; } \
+    using cmdname = basecmd<hidden::cmdname##_name>;
 
 namespace ccsh {
 namespace wrappers {

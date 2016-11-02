@@ -8,12 +8,12 @@ namespace ccsh {
 namespace core {
 
 
-template<typename DERIVED>
-class shasum_t : public wrappers::options_paths<DERIVED>
+template<const char* NAME>
+class shasum_t : public wrappers::options_paths<shasum_t<NAME>>
 {
-    using base = wrappers::options_paths<DERIVED>;
+    using base = wrappers::options_paths<shasum_t<NAME>>;
     friend base;
-    static constexpr const char* name = DERIVED::name;
+    static constexpr const char* name = NAME;
 
 public:
 
@@ -48,8 +48,8 @@ public:
 
 };
 
-CCSH_WRAPPER_COMMON_CLASS(shasum_t, md5sum_t, "md5sum")
-CCSH_WRAPPER_COMMON_CLASS(shasum_t, sha1sum_t, "sha1sum")
+CCSH_WRAPPER_COMMON_CLASS(shasum_t, md5sum_t,    "md5sum")
+CCSH_WRAPPER_COMMON_CLASS(shasum_t, sha1sum_t,   "sha1sum")
 CCSH_WRAPPER_COMMON_CLASS(shasum_t, sha224sum_t, "sha224sum")
 CCSH_WRAPPER_COMMON_CLASS(shasum_t, sha256sum_t, "sha256sum")
 CCSH_WRAPPER_COMMON_CLASS(shasum_t, sha384sum_t, "sha384sum")
