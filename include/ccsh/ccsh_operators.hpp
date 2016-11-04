@@ -31,27 +31,27 @@ inline command_runnable operator|(command const& a, command const& b)
 
 inline command_runnable operator<(command const& c, fs::path const& p)
 {
-    return {new command_in_redirect(c, p)};
+    return {new command_redirect<stdfd::in>(c, p)};
 }
 
 inline command_runnable operator>(command const& c, fs::path const& p)
 {
-    return {new command_out_redirect(c, p, false)};
+    return {new command_redirect<stdfd::out>(c, p, false)};
 }
 
 inline command_runnable operator>>(command const& c, fs::path const& p)
 {
-    return {new command_out_redirect(c, p, true)};
+    return {new command_redirect<stdfd::out>(c, p, true)};
 }
 
 inline command_runnable operator>=(command const& c, fs::path const& p)
 {
-    return {new command_err_redirect(c, p, false)};
+    return {new command_redirect<stdfd::err>(c, p, false)};
 }
 
 inline command_runnable operator>>=(command const& c, fs::path const& p)
 {
-    return {new command_err_redirect(c, p, true)};
+    return {new command_redirect<stdfd::err>(c, p, true)};
 }
 
 /* ******************* file redirection operators ******************* */

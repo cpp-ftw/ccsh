@@ -250,7 +250,8 @@ public:
     int runx(int in, int out, int err) const override;
 };
 
-class command_mapping : public command_base
+template<stdfd DESC>
+class command_mapping final : public command_base
 {
 protected:
     command c;
@@ -263,31 +264,11 @@ public:
         , func(f)
         , init_func(init_func)
     { }
-};
-
-class command_in_mapping final : public command_mapping
-{
-public:
-    using command_mapping::command_mapping;
     int runx(int, int, int) const override;
 };
 
-class command_out_mapping final : public command_mapping
-{
-public:
-    using command_mapping::command_mapping;
-    int runx(int, int, int) const override;
-};
-
-class command_err_mapping final : public command_mapping
-{
-public:
-    using command_mapping::command_mapping;
-    int runx(int, int, int) const override;
-};
-
-
-class command_redirect : public command_base
+template<stdfd DESC>
+class command_redirect final : public command_base
 {
 protected:
     command c;
@@ -295,42 +276,9 @@ protected:
     int flags;
     open_wrapper get_fd() const;
 public:
-    command_redirect(command const& c, fs::path const& p, int flags);
+    command_redirect(command const& c, fs::path const& p, bool append = false);
+    int runx(int in, int out, int err) const override;
 };
-
-class command_in_redirect final : public command_redirect
-{
-public:
-    command_in_redirect(command const& c, fs::path const& p);
-
-    int runx(int, int out, int err) const override
-    {
-        return c.runx(get_fd().get(), out, err); // get_fd().get() is required for RAII
-    }
-};
-
-class command_out_redirect final : public command_redirect
-{
-public:
-    command_out_redirect(command const& c, fs::path const& p, bool append = false);
-
-    int runx(int in, int, int err) const override
-    {
-        return c.runx(in, get_fd().get(), err);
-    }
-};
-
-class command_err_redirect final : public command_redirect
-{
-public:
-    command_err_redirect(command const& c, fs::path const& p, bool append = false);
-
-    int runx(int in, int out, int) const override
-    {
-        return c.runx(in, out, get_fd().get());
-    }
-};
-
 
 } // namespace ccsh
 

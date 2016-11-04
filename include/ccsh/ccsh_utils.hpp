@@ -65,6 +65,14 @@ inline int shell_logic_or(int a, int b)
     return a == 0 ? b : a;
 }
 
+enum class stdfd : uint8_t
+{
+    in = 0,
+    out = 1,
+    err = 2,
+    count
+};
+
 void close_fd(int fd) noexcept;
 
 class env_var

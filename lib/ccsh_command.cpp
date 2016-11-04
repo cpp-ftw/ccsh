@@ -19,12 +19,14 @@ namespace
 
 constexpr mode_t fopen_w_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
-constexpr int fopen_w_flags(bool append)
+constexpr int fopen_flags(stdfd fd, bool append = false)
 {
-    return append ?
-        (O_WRONLY | O_CREAT | O_APPEND) :
-        (O_WRONLY | O_CREAT | O_TRUNC);
+    return fd == stdfd::in ? O_RDONLY : 
+        (append ? 
+            (O_WRONLY | O_CREAT | O_APPEND) :
+            (O_WRONLY | O_CREAT | O_TRUNC));
 }
+
 
 enum fork_action
 {
@@ -195,10 +197,17 @@ int command_pipe::runx(int in, int out, int err) const
     return shell_logic_or(p.first, p.second);
 }
 
-int command_in_mapping::runx(int, int out, int err) const
+template<stdfd DESC>
+int command_mapping<DESC>::runx(int in, int out, int err) const
 {
     if(init_func) init_func();
-    auto f1 = std::bind(&command::runx, std::ref(c), _1, out, err);
+
+    int fds[int(stdfd::count)] = {in, out, err};
+    auto f1 = [&](int mapped_fd)
+    {
+        fds[int(DESC)] = mapped_fd;
+        return c.runx(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)]);
+    };
 
     auto f2 = [this](int pipefd)
     {
@@ -213,69 +222,35 @@ int command_in_mapping::runx(int, int out, int err) const
     return fork_functor_helper(FORK_CHILD_WRITE, f2, f1).first;
 }
 
-int command_out_mapping::runx(int in, int, int err) const
-{
-    if(init_func) init_func();
-    auto f1 = std::bind(&command::runx, std::ref(c), in, _1, err);
+template class command_mapping<stdfd::in>;
+template class command_mapping<stdfd::out>;
+template class command_mapping<stdfd::err>;
 
-    auto f2 = [this](int pipefd)
-    {
-        char buf[BUFSIZ];
-        ssize_t count;
-        while((count = read(pipefd, buf, BUFSIZ)) > 0)
-            func(buf, count);
-
-        stdc_thrower(count);
-
-        return 0;
-    };
-
-    return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
-}
-
-int command_err_mapping::runx(int in, int out, int) const
-{
-    if(init_func) init_func();
-    auto f1 = std::bind(&command::runx, std::ref(c), in, out, _1);
-
-    auto f2 = [this](int pipefd)
-    {
-        char buf[BUFSIZ];
-        ssize_t count;
-        while((count = read(pipefd, buf, BUFSIZ)) > 0)
-            func(buf, count);
-
-        stdc_thrower(count);
-
-        return 0;
-    };
-
-    return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
-}
-
-command_redirect::command_redirect(command const& c, fs::path const& p, int flags)
+template<stdfd DESC>
+command_redirect<DESC>::command_redirect(command const& c, fs::path const& p, bool append)
     : c(c)
     , p(p)
-    , flags(flags)
+    , flags(fopen_flags(DESC, append))
 { }
 
-open_wrapper command_redirect::get_fd() const
+template<stdfd DESC>
+open_wrapper command_redirect<DESC>::get_fd() const
 {
     return open_wrapper{open(p.c_str(), flags, fopen_w_mode)};
 }
 
-command_in_redirect::command_in_redirect(command const& c, fs::path const& p)
-    : command_redirect(c, p, O_RDONLY)
-{ }
+template<stdfd DESC>
+int command_redirect<DESC>::runx(int in, int out, int err) const
+{
+    open_wrapper fd = get_fd(); // get_fd().get() is required for RAII
+    int fds[int(stdfd::count)] = {in, out, err};
+    fds[int(DESC)] = fd.get();
+    return c.runx(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)]);
+}
 
-command_out_redirect::command_out_redirect(command const& c, fs::path const& p, bool append)
-    : command_redirect(c, p, fopen_w_flags(append))
-{ }
-
-command_err_redirect::command_err_redirect(command const& c, fs::path const& p, bool append)
-    : command_redirect(c, p, fopen_w_flags(append))
-{ }
-
+template class command_redirect<stdfd::in>;
+template class command_redirect<stdfd::out>;
+template class command_redirect<stdfd::err>;
 
 } // namespace ccsh
 

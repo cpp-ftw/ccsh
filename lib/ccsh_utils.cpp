@@ -41,6 +41,10 @@ void close_fd(int fd) noexcept
         ;
 }
 
+static_assert(int(stdfd::in)  == STDIN_FILENO,  "Error in stdfd enum.");
+static_assert(int(stdfd::out) == STDOUT_FILENO, "Error in stdfd enum.");
+static_assert(int(stdfd::err) == STDERR_FILENO, "Error in stdfd enum.");
+
 env_var::operator std::string() const
 {
     const char* result = getenv(name.c_str());
