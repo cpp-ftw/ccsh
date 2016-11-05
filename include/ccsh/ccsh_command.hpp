@@ -255,8 +255,7 @@ public:
     int runx(int in, int out, int err) const override;
 };
 
-template<stdfd DESC>
-class command_mapping final : public command_base
+class command_mapping : public command_base
 {
 protected:
     command c;
@@ -269,6 +268,26 @@ public:
         , func(f)
         , init_func(init_func)
     { }
+};
+
+class command_in_mapping final : public command_mapping
+{
+public:
+    using command_mapping::command_mapping;
+    int runx(int, int, int) const override;
+};
+
+class command_out_mapping final : public command_mapping
+{
+public:
+    using command_mapping::command_mapping;
+    int runx(int, int, int) const override;
+};
+
+class command_err_mapping final : public command_mapping
+{
+public:
+    using command_mapping::command_mapping;
     int runx(int, int, int) const override;
 };
 

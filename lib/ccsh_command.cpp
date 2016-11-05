@@ -18,7 +18,6 @@ namespace
 {
 
 constexpr mode_t fopen_w_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-
 constexpr int fopen_flags(stdfd fd, bool append = false)
 {
     return fd == stdfd::in ? O_RDONLY : 
@@ -197,17 +196,10 @@ int command_pipe::runx(int in, int out, int err) const
     return shell_logic_or(p.first, p.second);
 }
 
-template<stdfd DESC>
-int command_mapping<DESC>::runx(int in, int out, int err) const
+int command_in_mapping::runx(int, int out, int err) const
 {
     if(init_func) init_func();
-
-    int fds[int(stdfd::count)] = {in, out, err};
-    auto f1 = [&](int mapped_fd)
-    {
-        fds[int(DESC)] = mapped_fd;
-        return c.runx(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)]);
-    };
+    auto f1 = std::bind(&command::runx, std::ref(c), _1, out, err);
 
     auto f2 = [this](int pipefd)
     {
@@ -222,9 +214,45 @@ int command_mapping<DESC>::runx(int in, int out, int err) const
     return fork_functor_helper(FORK_CHILD_WRITE, f2, f1).first;
 }
 
-template class command_mapping<stdfd::in>;
-template class command_mapping<stdfd::out>;
-template class command_mapping<stdfd::err>;
+int command_out_mapping::runx(int in, int, int err) const
+{
+    if(init_func) init_func();
+    auto f1 = std::bind(&command::runx, std::ref(c), in, _1, err);
+
+    auto f2 = [this](int pipefd)
+    {
+        char buf[BUFSIZ];
+        ssize_t count;
+        while((count = read(pipefd, buf, BUFSIZ)) > 0)
+            func(buf, count);
+
+        stdc_thrower(count);
+
+        return 0;
+    };
+
+    return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
+}
+
+int command_err_mapping::runx(int in, int out, int) const
+{
+    if(init_func) init_func();
+    auto f1 = std::bind(&command::runx, std::ref(c), in, out, _1);
+
+    auto f2 = [this](int pipefd)
+    {
+        char buf[BUFSIZ];
+        ssize_t count;
+        while((count = read(pipefd, buf, BUFSIZ)) > 0)
+            func(buf, count);
+
+        stdc_thrower(count);
+
+        return 0;
+    };
+
+    return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
+}
 
 template<stdfd DESC>
 command_redirect<DESC>::command_redirect(command const& c, fs::path const& p, bool append)
