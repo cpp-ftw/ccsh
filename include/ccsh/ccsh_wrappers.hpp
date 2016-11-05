@@ -65,6 +65,18 @@ public:
         : command_native(DERIVED::name)
         , paths({p})
     { }
+
+    command_holder<DERIVED>& version()
+    {
+        args.push_back("--version");
+        return static_cast<command_holder<DERIVED>&>(*this);
+    }
+
+    command_holder<DERIVED>& help()
+    {
+        args.push_back("--help");
+        return static_cast<command_holder<DERIVED>&>(*this);
+    }
 };
 
 }
