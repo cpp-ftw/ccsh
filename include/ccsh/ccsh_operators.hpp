@@ -26,6 +26,19 @@ inline command_runnable operator|(command const& a, command const& b)
     return {new command_pipe(a, b)};
 }
 
+template<typename COMMAND>
+command_holder<COMMAND>&& operator/(fs::path const& p, command_holder<COMMAND>&& c)
+{
+    c.append_dir(p);
+    return std::move(c);
+}
+
+template<typename COMMAND>
+command_holder<COMMAND>& operator/(fs::path const& p, command_holder<COMMAND>& c)
+{
+    c.append_dir(p);
+    return c;
+}
 
 /* ******************* file redirection operators ******************* */
 

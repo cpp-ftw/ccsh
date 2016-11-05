@@ -73,6 +73,11 @@ public:
         , args(args)
     { }
 
+    void append_dir(fs::path const& p)
+    {
+        str = (p / fs::path(str)).string();
+    }
+
     int runx(int in, int out, int err) const override final;
 };
 
