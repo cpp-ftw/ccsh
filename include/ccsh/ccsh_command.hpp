@@ -304,6 +304,17 @@ public:
     int runx(int in, int out, int err) const override;
 };
 
+template<stdfd DESC>
+class command_fd final : public command_base
+{
+protected:
+    command c;
+    open_wrapper ow;
+public:
+    command_fd(command const& c, int fd);
+    int runx(int in, int out, int err) const override;
+};
+
 } // namespace ccsh
 
 

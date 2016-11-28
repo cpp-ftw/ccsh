@@ -280,5 +280,25 @@ template class command_redirect<stdfd::in>;
 template class command_redirect<stdfd::out>;
 template class command_redirect<stdfd::err>;
 
+
+
+template<stdfd DESC>
+command_fd<DESC>::command_fd(command const& c, int fd)
+    : c(c)
+    , ow(fd)
+{ }
+
+template<stdfd DESC>
+int command_fd<DESC>::runx(int in, int out, int err) const
+{
+    int fds[int(stdfd::count)] = {in, out, err};
+    fds[int(DESC)] = ow.get();
+    return c.runx(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)]);
+}
+
+template class command_fd<stdfd::in>;
+template class command_fd<stdfd::out>;
+template class command_fd<stdfd::err>;
+
 } // namespace ccsh
 
