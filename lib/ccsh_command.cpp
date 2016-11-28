@@ -1,4 +1,5 @@
 #include <ccsh/ccsh_command.hpp>
+#include "ccsh_internals.hpp"
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -299,6 +300,48 @@ int command_fd<DESC>::runx(int in, int out, int err) const
 template class command_fd<stdfd::in>;
 template class command_fd<stdfd::out>;
 template class command_fd<stdfd::err>;
+
+
+command_source::command_source(fs::path const& p)
+    : p(p)
+{ }
+
+int command_source::runx(int in, int out, int err) const
+{
+    auto f1 = [=](int fd) -> int
+    {
+        std::string cmdstr = "source \"" + p.string() + "\" && (/bin/sh -c \"printenv -0\") >&" + std::to_string(fd);
+        command_native cmd("/bin/sh", {"-c", cmdstr});
+        return cmd.runx(in, out, err);
+    };
+
+    auto env_putter = [](std::string const& str)
+    {
+        auto eq_sign = str.find('=');
+        if(eq_sign == std::string::npos) // should never happen
+            throw stdc_error(errno, "Bad format from printenv");
+
+        std::string env_name = str.substr(0, eq_sign);
+        std::string env_value = str.substr(++eq_sign);
+
+        stdc_thrower(setenv(env_name.c_str(), env_value.c_str(), true));
+    };
+
+    auto f2 = [=](int fd) -> int
+    {
+        auto ls = line_splitter_make(env_putter, '\0');
+
+        char buf[BUFSIZ];
+        ssize_t count;
+        while((count = read(fd, buf, BUFSIZ)) > 0)
+            ls(buf, count);
+
+        return 0;
+    };
+
+    return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
+}
+
 
 } // namespace ccsh
 

@@ -8,6 +8,38 @@
 
 using namespace ccsh::literals;
 
+void test0()
+{
+    std::cout << ccsh::get_home().string() << std::endl;
+    ccsh::shell("la");
+    ccsh::shell("la") | ccsh::shell("cowsay"); // no cow should appear
+
+    ccsh::fs::path f = "/tmp/bs.txt"_p;
+
+    ccsh::command c1 = ccsh::shell("ls", {"-lh"}) > f;
+    c1.run();
+
+    ccsh::shell("cat", {f.string()});
+
+    ccsh::shell("ls", {"-lh"}) | ccsh::shell("cowsay") | ccsh::shell("lolcat");
+
+    std::string str;
+    ccsh::shell("echo", {"--- ls finished. ---"}) > str;
+    std::cout << str.size() << std::endl;
+    std::cout << str << std::endl;
+
+    ccsh::shell("lolcat") < str;
+
+    std::vector<std::string> vec;
+    ccsh::shell("ls", {"-1"}) > vec;
+
+    for(auto const& s : vec)
+        std::cout << s << std::endl;
+
+    // Not compiling, as intended...
+    //auto c2 = ccsh::shell("cowsay");
+}
+
 void test1()
 {
     using namespace ccsh::core;
@@ -40,39 +72,21 @@ void test4()
     ccsh::core::cat(~"Documents/ccsh/src/main.cpp"_p);
 }
 
+void test5()
+{
+    ccsh::source("./vars");
+    std::cout << ccsh::$("EXAMPLE_ENV_VAR1") << std::endl;
+    std::cout << ccsh::$("EXAMPLE_ENV_VAR2") << std::endl;
+}
+
 int main()
 {
-    std::cout << ccsh::get_home().string() << std::endl;
+    test0();
+    test1();
     test2();
+    test3();
     test4();
-    ccsh::shell("la");
-    ccsh::shell("la") | ccsh::shell("cowsay"); // no cow should appear
-
-    ccsh::fs::path f = "/tmp/bs.txt"_p;
-
-    ccsh::command c1 = ccsh::shell("ls", {"-lh"}) > f;
-    c1.run();
-
-    ccsh::shell("cat", {f.string()});
-
-    ccsh::shell("ls", {"-lh"}) | ccsh::shell("cowsay") | ccsh::shell("lolcat");
-
-    std::string str;
-    ccsh::shell("echo", {"--- ls finished. ---"}) > str;
-    std::cout << str.size() << std::endl;
-    std::cout << str << std::endl;
-
-    ccsh::shell("lolcat") < str;
-
-    std::vector<std::string> vec;
-    ccsh::shell("ls", {"-1"}) > vec;
-
-    for(auto const& s : vec)
-        std::cout << s << std::endl;
-
-    // Not compiling, as intended...
-    //auto c2 = ccsh::shell("cowsay");
-
+    test5();
 
     return 0;
 }

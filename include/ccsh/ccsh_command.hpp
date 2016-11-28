@@ -294,7 +294,6 @@ public:
 template<stdfd DESC>
 class command_redirect final : public command_base
 {
-protected:
     command c;
     fs::path p;
     int flags;
@@ -307,11 +306,18 @@ public:
 template<stdfd DESC>
 class command_fd final : public command_base
 {
-protected:
     command c;
     open_wrapper ow;
 public:
     command_fd(command const& c, int fd);
+    int runx(int in, int out, int err) const override;
+};
+
+class command_source final : public command_base
+{
+    fs::path p;
+public:
+    command_source(fs::path const& p);
     int runx(int in, int out, int err) const override;
 };
 
