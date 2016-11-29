@@ -21,8 +21,8 @@ namespace
 constexpr mode_t fopen_w_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 constexpr int fopen_flags(stdfd fd, bool append = false)
 {
-    return fd == stdfd::in ? O_RDONLY : 
-        (append ? 
+    return fd == stdfd::in ? O_RDONLY :
+        (append ?
             (O_WRONLY | O_CREAT | O_APPEND) :
             (O_WRONLY | O_CREAT | O_TRUNC));
 }
@@ -177,7 +177,7 @@ fail:
         stdc_thrower(result);
 
         if(result > 0)
-            throw stdc_error(fail_code, str);
+            throw stdc_error(fail_code, p.string());
 
         int status;
         if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))

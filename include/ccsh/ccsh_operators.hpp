@@ -16,9 +16,9 @@ namespace boost { namespace filesystem {
 namespace ccsh
 {
 
-inline command_runnable shell(std::string const& str, std::vector<std::string> const& args = {})
+inline command_runnable shell(fs::path const& p, std::vector<std::string> const& args = {})
 {
-    return {new command_native(str, args)};
+    return {new command_native(p, args)};
 }
 
 inline command_runnable source(fs::path const& p)

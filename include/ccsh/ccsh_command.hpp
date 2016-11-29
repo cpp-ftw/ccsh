@@ -50,7 +50,7 @@ class command_native : public command_base
 {
 protected:
 
-    std::string str;
+    fs::path p;
     std::vector<std::string> args;
 
     virtual std::vector<const char*> get_argv() const
@@ -58,7 +58,7 @@ protected:
         std::vector<const char*> argv;
         argv.reserve(args.size() + 2);
 
-        argv.push_back(this->str.c_str());
+        argv.push_back(p.string().c_str());
         for(const auto& s : this->args)
             argv.push_back(s.c_str());
 
@@ -68,14 +68,14 @@ protected:
 
 public:
 
-    command_native(std::string const& str, std::vector<std::string> const& args = {})
-        : str(str)
+    command_native(fs::path const& p, std::vector<std::string> const& args = {})
+        : p(p)
         , args(args)
     { }
 
-    void append_dir(fs::path const& p)
+    void append_dir(fs::path const& dir)
     {
-        str = (p / fs::path(str)).string();
+        p = dir / p;
     }
 
     int runx(int in, int out, int err) const override final;
