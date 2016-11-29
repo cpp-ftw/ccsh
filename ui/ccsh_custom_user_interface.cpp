@@ -54,14 +54,14 @@ namespace {
   ///
   class UITabCompletion : public textinput::TabCompletion {
     const cling::Interpreter& m_ParentInterpreter;
-  
+
   public:
     UITabCompletion(const cling::Interpreter& Parent) :
                     m_ParentInterpreter(Parent) {}
     ~UITabCompletion() {}
 
     bool Complete(textinput::Text& Line /*in+out*/,
-                  size_t& Cursor /*in+out*/,
+                  std::size_t& Cursor /*in+out*/,
                   textinput::EditorRange& R /*out*/,
                   std::vector<std::string>& Completions /*out*/) override {
       m_ParentInterpreter.codeComplete(Line.GetText(), Cursor, Completions);
@@ -86,7 +86,9 @@ void custom_user_interface::run_interactively() {
   // TextInput owns the TabCompletion.
   TI.SetCompletion(new UITabCompletion(getMetaProcessor()->getInterpreter()));
 
-  TI.SetPrompt("[ccsh]$ ");
+  const char * prompt_dollar = ccsh::is_user_possibly_elevated() ? "# " : "$ ";
+
+  TI.SetPrompt((std::string("[ccsh]") + prompt_dollar).c_str());
   std::string line;
   while (true) {
     try {
@@ -107,7 +109,7 @@ void custom_user_interface::run_interactively() {
       if (getMetaProcessor()->getInterpreter().isRawInputEnabled())
         Prompt.append("! ");
       else
-        Prompt.append("$ ");
+        Prompt.append(prompt_dollar);
 
       if (indent > 0)
         // Continuation requested.

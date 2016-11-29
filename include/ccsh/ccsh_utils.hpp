@@ -51,6 +51,8 @@ inline void shell_thrower(int result, std::string const& str)
         throw shell_error(str);
 }
 
+bool is_user_possibly_elevated();
+
 struct open_traits
 {
     static constexpr int invalid_value = -1;

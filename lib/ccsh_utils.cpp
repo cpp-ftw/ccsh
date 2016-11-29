@@ -1,6 +1,7 @@
 #include <ccsh/ccsh_utils.hpp>
 
 #include <sys/types.h>
+#include <unistd.h>
 #include <pwd.h>
 
 #include <memory>
@@ -27,6 +28,14 @@ fs::path get_home()
     }
 
     return fs::path{result->pw_dir};
+}
+
+bool is_user_possibly_elevated()
+{
+    uid_t uid=getuid();
+    uid_t euid=geteuid();
+
+    return uid <= 0 || uid != euid;
 }
 
 void open_traits::dtor_func(int fd) noexcept
