@@ -21,9 +21,9 @@ inline command_runnable shell(fs::path const& p, std::vector<std::string> const&
     return {new command_native(p, args)};
 }
 
-inline command_runnable source(fs::path const& p)
+inline command_runnable source(fs::path const& p, std::vector<std::string> const& args = {})
 {
-    return {new command_source(p)};
+    return {new command_source(p, args)};
 }
 
 inline command_runnable operator|(command const& a, command const& b)

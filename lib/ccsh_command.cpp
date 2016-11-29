@@ -302,15 +302,34 @@ template class command_fd<stdfd::out>;
 template class command_fd<stdfd::err>;
 
 
-command_source::command_source(fs::path const& p)
-    : p(p)
-{ }
+
+namespace
+{
+    void replace(std::string& str, std::string const& from, std::string const& to)
+    {
+        std::size_t start_pos;
+        while((start_pos = str.find(from)), start_pos != std::string::npos)
+            str.replace(start_pos, from.length(), to);
+    }
+
+    std::string sh_escape(std::string const& str)
+    {
+        std::string temp = str;
+        replace(temp, "'", "'\\''");
+        return " '" + temp + "' ";
+    }
+}
 
 int command_source::runx(int in, int out, int err) const
 {
     auto f1 = [=](int fd) -> int
     {
-        std::string cmdstr = "source \"" + p.string() + "\" && (/bin/sh -c \"printenv -0\") >&" + std::to_string(fd);
+        std::string cmdstr = "source " + sh_escape(p.string());
+        for(std::string const& str : args)
+            cmdstr += sh_escape(str);
+
+        cmdstr += " && (/bin/sh -c \"printenv -0\") >&" + std::to_string(fd);
+
         command_native cmd("/bin/sh", {"-c", cmdstr});
         return cmd.runx(in, out, err);
     };
