@@ -22,6 +22,7 @@ namespace fs = boost::filesystem;
 #include <fstream>
 #include <vector>
 #include <string>
+#include <csignal>
 
 #if defined(WIN32) && defined(_MSC_VER)
 #include <crtdbg.h>
@@ -43,6 +44,11 @@ std::vector<const char*> add_args(int argc, const char * const * argv, std::vect
   return args;
 }
 
+void sigint_handler(int sig)
+{
+    std::cout << "^C" << std::endl;
+}
+
 int main( int argc, char **argv ) {
 
 #if defined(_WIN32) && defined(_MSC_VER)
@@ -61,6 +67,8 @@ int main( int argc, char **argv ) {
   }
 #endif
 
+  signal(SIGINT, &sigint_handler);
+
   // TODO: find a better way to specify path
   const char* llvmdir = "/opt/cling";
 
@@ -73,7 +81,7 @@ int main( int argc, char **argv ) {
     "-l", "ccsh_lib",                           // -l ccsh_lib
     "-l",  (p / "ui/clingrc.hpp").string(),     // -l ui/clingrc.hpp
     "-I" + (p / "include").string(),            // -Iinclude
-    "-I" + (p / "wrappers").string(),           // -Iwrappers  
+    "-I" + (p / "wrappers").string(),           // -Iwrappers
   };
 
   auto args = add_args(argc, argv, params);
