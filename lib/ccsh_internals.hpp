@@ -27,12 +27,12 @@ public:
     ssize_t operator()(char* buf, std::size_t s)
     {
         char * newline;
-        size_t si = s;
+        std::size_t si = s;
         while (si > 0 && (newline = (char*)memchr(buf, delim, si)))
         {
-            size_t diff = newline-buf;
+            std::size_t diff = newline-buf;
             temp.append(buf, diff);
-            // if you want efficient processing, func should take std::string&& argument
+            // if you want efficient processing, func can take std::string&& argument
             func(std::move(temp));
             temp.clear();
             buf += diff + 1;

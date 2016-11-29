@@ -18,6 +18,7 @@ namespace ccsh
 namespace
 {
 
+
 constexpr mode_t fopen_w_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 constexpr int fopen_flags(stdfd fd, bool append = false)
 {
@@ -263,15 +264,9 @@ command_redirect<DESC>::command_redirect(command const& c, fs::path const& p, bo
 { }
 
 template<stdfd DESC>
-open_wrapper command_redirect<DESC>::get_fd() const
-{
-    return open_wrapper{open(p.c_str(), flags, fopen_w_mode)};
-}
-
-template<stdfd DESC>
 int command_redirect<DESC>::runx(int in, int out, int err) const
 {
-    open_wrapper fd = get_fd(); // get_fd().get() is required for RAII
+    open_wrapper fd{open(p.c_str(), flags, fopen_w_mode)};
     int fds[int(stdfd::count)] = {in, out, err};
     fds[int(DESC)] = fd.get();
     return c.runx(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)]);
@@ -308,7 +303,7 @@ namespace
     void replace(std::string& str, std::string const& from, std::string const& to)
     {
         std::size_t start_pos;
-        while((start_pos = str.find(from)), start_pos != std::string::npos)
+        while((start_pos = str.find(from)) != std::string::npos)
             str.replace(start_pos, from.length(), to);
     }
 

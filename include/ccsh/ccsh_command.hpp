@@ -297,7 +297,6 @@ class command_redirect final : public command_base
     command c;
     fs::path p;
     int flags;
-    open_wrapper get_fd() const;
 public:
     command_redirect(command const& c, fs::path const& p, bool append = false);
     int runx(int in, int out, int err) const override;

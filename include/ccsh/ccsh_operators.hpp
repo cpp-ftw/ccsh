@@ -153,12 +153,10 @@ inline command_runnable operator||(bool b, command const& a) // provided only fo
 
 namespace literals
 {
-
     inline fs::path operator""_p(const char* str, std::size_t)
     {
         return fs::path{str};
     }
-
 } // namespace literals
 
 
