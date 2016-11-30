@@ -64,7 +64,7 @@ void test2()
 void test3()
 {
     using namespace ccsh::core;
-    cat();
+    ls().l().color(ls::auto_);
 }
 
 void test4()
@@ -84,6 +84,7 @@ int main()
     test0();
     test1();
     test2();
+    test3();
     test4();
     test5();
 

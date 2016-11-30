@@ -21,4 +21,6 @@
 #include "core/cksum.hpp"
 #include "core/shasum.hpp"
 
+#include "core/ls.hpp"
+
 #endif // CCSH_CORE_HPP_INCLUDED
