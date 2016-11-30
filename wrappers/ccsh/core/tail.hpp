@@ -9,9 +9,9 @@
 
 namespace ccsh {
 namespace core {
-class
 
- tail_t : public wrappers::options_paths<tail_t>
+
+class tail_t : public wrappers::options_paths<tail_t>
 {
     using base = wrappers::options_paths<tail_t>;
     friend base;

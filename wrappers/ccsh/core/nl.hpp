@@ -12,6 +12,7 @@ class nl_t : public wrappers::options_paths<nl_t>
 {
     using base = wrappers::options_paths<nl_t>;
     static constexpr const char* name = "nl";
+    friend base;
 
 public:
 
@@ -19,7 +20,7 @@ public:
     {
         a,  all_lines,
         t,  non_empty_lines,
-        nn, no_lines,
+        n_, no_lines,
         // pbre?
     };
 

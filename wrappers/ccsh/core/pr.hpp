@@ -11,6 +11,7 @@ class pr_t : public wrappers::options_paths<pr_t>
 {
     using base = wrappers::options_paths<pr_t>;
     static constexpr const char* name = "pr";
+    friend base;
 
 public:
 

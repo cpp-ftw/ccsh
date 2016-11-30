@@ -11,6 +11,7 @@ class tac_t : public wrappers::options_paths<tac_t>
 {
     using base = wrappers::options_paths<tac_t>;
     static constexpr const char* name = "tac";
+    friend base;    
 
 public:
 
