@@ -65,6 +65,8 @@ void test3()
 {
     using namespace ccsh::core;
     ls().l().color(ls::auto_);
+
+    ls("CMake*").l();
 }
 
 void test4()

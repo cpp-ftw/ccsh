@@ -13,7 +13,13 @@
 namespace ccsh
 {
 
-namespace fs = boost::filesystem;
+namespace fs
+{
+    using namespace boost::filesystem;
+
+    std::vector<path> expand(path const& p);
+    std::vector<path> expand(std::vector<path> const& paths);
+}
 // NEVER EVER USE boost::filesystem DIRECTLY, ALWAYS USE ccsh::fs
 // boost::filesystem WILL BE CHANGED TO std::filesystem WITH C++17
 
@@ -92,6 +98,7 @@ public:
     operator std::string() const; // getenv
     env_var& operator=(std::string const&); // setenv
 };
+
 
 template<typename ENUM, std::size_t N>
 const char* enum_to_string(ENUM val, const char* const (&mapping)[N])

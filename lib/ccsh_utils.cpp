@@ -3,11 +3,49 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <glob.h>
 
 #include <memory>
 
 namespace ccsh
 {
+
+namespace fs
+{
+
+namespace
+{
+
+void expand_helper(path const& p, std::vector<path>& result)
+{
+    glob_t globbuf;
+    glob(p.string().c_str(), GLOB_NOCHECK | GLOB_TILDE_CHECK, NULL, &globbuf);
+
+    for(std::size_t i = 0; i < globbuf.gl_pathc; ++i)
+        result.push_back(globbuf.gl_pathv[i]);
+
+    globfree(&globbuf);
+}
+
+}
+
+std::vector<path> expand(path const& p)
+{
+    std::vector<path> result;
+    expand_helper(p, result);
+    return result;
+}
+
+std::vector<path> expand(std::vector<path> const& paths)
+{
+    std::vector<path> result;
+    for(path const& p : paths)
+        expand_helper(p, result);
+    return result;
+}
+
+
+}
 
 fs::path get_home()
 {
