@@ -4,10 +4,18 @@ project (ccsh)
 
 find_package(Boost COMPONENTS filesystem system REQUIRED)
 
+option(WITH_CLING "Compile cling front-end (interactive shell) as well, requires cling at /opt/cling." ON)
+option(WITH_TEST  "Compile test code as well, not required for release." ON)
+
 include_directories(include)
 
 add_subdirectory(lib)
 add_subdirectory(wrappers)
 
-add_subdirectory(ui)
-add_subdirectory(test)
+if(WITH_TEST)
+    add_subdirectory(test)
+endif()
+
+if(WITH_CLING)
+    add_subdirectory(ui)
+endif()
