@@ -32,19 +32,19 @@ public:
 
 private:
 
-    static constexpr const char* numbering_style_mapping[] =
-        { "a", "a", "t", "t", "n", "n" };
-    static constexpr const char* numbering_format_mapping[] =
-        { "ln", "ln", "rn", "rn", "rz", "rz" };
+    static constexpr std::array<const char*, 6> numbering_style_mapping()
+        { return { "a", "a", "t", "t", "n", "n" }; };
+    static constexpr std::array<const char*, 6> numbering_format_mapping()
+        { return { "ln", "ln", "rn", "rn", "rz", "rz" }; };
 
     static const char* flag_to_str(numbering_style flag)
     {
-        return enum_to_string(flag, numbering_style_mapping);
+        return enum_to_string(flag, numbering_style_mapping());
     }
 
     static const char* flag_to_str(numbering_format flag)
     {
-        return enum_to_string(flag, numbering_format_mapping);
+        return enum_to_string(flag, numbering_format_mapping());
     }
 
 public:

@@ -7,10 +7,15 @@
 namespace ccsh {
 namespace core {
 
+namespace hidden {
 
-class ls_t : public wrappers::options_paths<ls_t>
+// must be template to keep header-only structure
+// this way the static variables can be defined in a header
+
+template<typename DUMMY = void>
+class ls_t : public wrappers::options_paths<ls_t<DUMMY>>
 {
-    using base = wrappers::options_paths<ls_t>;
+    using base = wrappers::options_paths<ls_t<DUMMY>>;
     friend base;
     static constexpr const char* name = "ls";
 
@@ -185,6 +190,9 @@ public:
 
     using base::base;
 
+// sorry
+#define args (base::args)
+
     // 1. Which fields are listed
 
     CCSH_WRAPPER_ARG0(ls_t, a, "-a")
@@ -358,7 +366,23 @@ public:
         args.push_back(std::string("--quoting-style=") + enum_to_string(style, quoting_styles_mapping));
         return static_cast<command_holder<ls_t>&>(*this);
     }
+#undef args
 };
+
+template<typename T> constexpr const char * ls_t<T>::format_styles_mapping[];
+template<typename T> constexpr const char * ls_t<T>::time_styles_mapping[];
+template<typename T> constexpr const char * ls_t<T>::time_type_mapping[];
+template<typename T> constexpr const char * ls_t<T>::sort_type_mapping[];
+template<typename T> constexpr const char * ls_t<T>::quoting_styles_mapping[];
+template<typename T> constexpr const char * ls_t<T>::indicator_styles_mapping[];
+template<typename T> constexpr const char * ls_t<T>::color_type_mapping[];
+
+template<typename T> constexpr typename ls_t<T>::none_t ls_t<T>::none;
+template<typename T> constexpr typename ls_t<T>::locale_t ls_t<T>::locale;
+
+}
+
+using ls_t = hidden::ls_t<>;
 
 using ls = command_holder<ls_t>;
 

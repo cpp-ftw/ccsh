@@ -108,6 +108,14 @@ const char* enum_to_string(ENUM val, const char* const (&mapping)[N])
     return mapping[val];
 }
 
+template<typename ENUM, std::size_t N>
+const char* enum_to_string(ENUM val, std::array<const char*, N> const& mapping)
+{
+    if(val < 0 || val >= N)
+        return "";
+    return mapping[val];
+}
+
 } // namespace ccsh
 
 #endif // CCSH_UTILS_HPP_INCLUDED

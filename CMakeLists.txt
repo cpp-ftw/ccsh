@@ -10,7 +10,6 @@ option(WITH_TEST  "Compile test code as well, not required for release." ON)
 include_directories(include)
 
 add_subdirectory(lib)
-add_subdirectory(wrappers)
 
 if(WITH_TEST)
     add_subdirectory(test)

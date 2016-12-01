@@ -25,11 +25,8 @@ public:
     };
 
 private:
-    static constexpr const char * follow_type_mapping[] =
-    {
-        "descriptor",
-        "name",
-    };
+    static constexpr std::array<const char*, 2> follow_type_mapping()
+    { return { "descriptor", "name", }; };
 
 public:
 
@@ -39,7 +36,7 @@ public:
     CCSH_WRAPPER_ARG0(tail_t, follow, "--follow")
     command_holder<tail_t>& follow(follow_type type)
     {
-        args.push_back(std::string("--follow=") + enum_to_string(type, follow_type_mapping));
+        args.push_back(std::string("--follow=") + enum_to_string(type, follow_type_mapping()));
         return static_cast<command_holder<tail_t>&>(*this);
     }
 
