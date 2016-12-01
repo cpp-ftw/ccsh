@@ -78,7 +78,9 @@ int main( int argc, char **argv ) {
   std::vector<std::string> params = {
     "-std=c++14",
     "-L" + (p / "lib").string(),                // -Llib
+    "-L" + (p / "wrappers").string(),           // -Lwrappers
     "-l", "ccsh_lib",                           // -l ccsh_lib
+    "-l", "ccsh_wrappers",                      // -l ccsh_wrappers
     "-l",  (p / "ui/clingrc.hpp").string(),     // -l ui/clingrc.hpp
     "-I" + (p / "include").string(),            // -Iinclude
     "-I" + (p / "wrappers").string(),           // -Iwrappers

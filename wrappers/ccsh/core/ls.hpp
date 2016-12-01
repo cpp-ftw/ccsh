@@ -163,20 +163,23 @@ private:
         "none"
     };
 
-public:
-
-    static constexpr struct
+    struct none_t
     {
         constexpr operator color_type() const { return color_type(2); }
         constexpr operator indicator_styles() const { return indicator_styles(3); }
         constexpr operator sort_type() const { return sort_type(4); }
-    } none{};
+    };
 
-    static constexpr struct
+    struct locale_t
     {
         constexpr operator time_styles() const { return time_styles(5); }
         constexpr operator quoting_styles() const { return quoting_styles(8); }
-    } locale{};
+    };
+
+public:
+
+    static constexpr none_t none{};
+    static constexpr locale_t locale{};
 
 public:
 
