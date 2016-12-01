@@ -18,13 +18,33 @@ class tail_t : public wrappers::options_paths<tail_t>
     static constexpr const char* name = "tail";
 
 public:
+    enum follow_type
+    {
+        descriptor,
+        name_,
+    };
+
+private:
+    static constexpr const char * follow_type_mapping[] =
+    {
+        "descriptor",
+        "name",
+    };
+
+public:
 
     using base::base;
 
-    // TODO: --follow
+    CCSH_WRAPPER_ARG0(tail_t, f, "-f")
+    CCSH_WRAPPER_ARG0(tail_t, follow, "--follow")
+    command_holder<tail_t>& follow(follow_type type)
+    {
+        args.push_back(std::string("--follow=") + enum_to_string(type, follow_type_mapping));
+        return static_cast<command_holder<tail_t>&>(*this);
+    }
 
     CCSH_WRAPPER_ARG0(tail_t, F, "-F")
-    
+
     CCSH_WRAPPER_ARG1(tail_t, max_unchanged_stats, "--max-unchanged-stats", unsigned, std::to_string)
 
     CCSH_WRAPPER_ARG1(tail_t, pid, "--pid", int, std::to_string)
