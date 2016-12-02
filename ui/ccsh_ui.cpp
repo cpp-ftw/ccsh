@@ -15,9 +15,6 @@
 #include "clang/Basic/LangOptions.h"
 #include "clang/Frontend/CompilerInstance.h"
 
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -27,6 +24,8 @@ namespace fs = boost::filesystem;
 #if defined(WIN32) && defined(_MSC_VER)
 #include <crtdbg.h>
 #endif
+
+#include <ccsh/ccsh_utils.hpp>
 
 std::vector<const char*> add_args(int argc, const char * const * argv, std::vector<std::string> const& params)
 {
@@ -72,16 +71,20 @@ int main( int argc, char **argv ) {
   // TODO: find a better way to specify path
   const char* llvmdir = "/opt/cling";
 
-  fs::path p = fs::current_path() / fs::path(argv[0]);
+  ccsh::fs::path p = ccsh::fs::current_path() / ccsh::fs::path(argv[0]);
   p = p.parent_path();
+
+  ccsh::fs::path clingrc_path = p / "ui/clingrc.hpp";
+  if(!ccsh::fs::exists(clingrc_path))
+    clingrc_path = ccsh::get_home() / ".clingrc.hpp";
+  if(!ccsh::fs::exists(clingrc_path))
+    clingrc_path = "/etc/ccsh/clingrc.hpp";
 
   std::vector<std::string> params = {
     "-std=c++14",
     "-L" + (p / "lib").string(),                // -Llib
-    "-L" + (p / "wrappers").string(),           // -Lwrappers
     "-l", "ccsh_lib",                           // -l ccsh_lib
-    "-l", "ccsh_wrappers",                      // -l ccsh_wrappers
-    "-l",  (p / "ui/clingrc.hpp").string(),     // -l ui/clingrc.hpp
+    "-l",  clingrc_path.string(),               // -l ui/clingrc.hpp
     "-I" + (p / "include").string(),            // -Iinclude
     "-I" + (p / "wrappers").string(),           // -Iwrappers
   };
