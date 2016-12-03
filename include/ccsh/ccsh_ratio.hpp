@@ -12,13 +12,13 @@ class quantity
 {
     int64_t q;
 public:
-    constexpr explicit quantity(int64_t q) 
+    constexpr explicit quantity(int64_t q)
         : q(q)
     { }
 
-    constexpr int64_t get() const 
+    constexpr int64_t get() const
     {
-        return 0;
+        return q;
     }
 
     constexpr quantity operator-() const
@@ -67,6 +67,9 @@ CCSH_DEFINE_RATIO_RATIO(gibi, G, 1073741824)
 CCSH_DEFINE_RATIO_RATIO(tebi, T, 1099511627776)
 CCSH_DEFINE_RATIO_RATIO(pebi, P, 1125899906842624)
 CCSH_DEFINE_RATIO_RATIO(exbi, E, 1152921504606846976)
+
+#undef CCSH_DEFINE_RATIO_PREFIX
+#undef CCSH_DEFINE_RATIO_RATIO
 
 template<typename RATIO>
 std::string quantity_to_string(quantity<RATIO> q)
