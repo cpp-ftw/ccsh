@@ -32,14 +32,14 @@ namespace ccsh {
 namespace wrappers {
 
 template<typename DERIVED>
-class options_paths : public command_native, public command_builder_base
+class options_paths : public internal::command_native, public internal::command_builder_base
 {
 protected:
     std::vector<fs::path> paths;
 
     virtual std::vector<const char*> get_argv() const override final
     {
-        std::vector<const char*> argv = command_native::get_argv();
+        std::vector<const char*> argv = internal::command_native::get_argv();
         argv.reserve(argv.size() + paths.size());
         argv.pop_back();
         for(const auto& p : paths)

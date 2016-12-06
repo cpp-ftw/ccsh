@@ -292,7 +292,7 @@ public:
 
     command_holder<ls_t>& format(format_styles style)
     {
-        args.push_back(std::string("--format=") + enum_to_string(style, format_styles_mapping));
+        args.push_back(std::string("--format=") + internal::enum_to_string(style, format_styles_mapping));
         return static_cast<command_holder<ls_t>&>(*this);
     }
 
@@ -303,7 +303,7 @@ public:
 
     command_holder<ls_t>& color(color_type style)
     {
-        args.push_back(std::string("--color=") + enum_to_string(style, color_type_mapping));
+        args.push_back(std::string("--color=") + internal::enum_to_string(style, color_type_mapping));
         return static_cast<command_holder<ls_t>&>(*this);
     }
 
@@ -314,7 +314,7 @@ public:
 
     command_holder<ls_t>& indicator_style(indicator_styles style)
     {
-        args.push_back(std::string("--indicator-style=") + enum_to_string(style, indicator_styles_mapping));
+        args.push_back(std::string("--indicator-style=") + internal::enum_to_string(style, indicator_styles_mapping));
         return static_cast<command_holder<ls_t>&>(*this);
     }
 

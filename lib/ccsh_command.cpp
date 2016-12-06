@@ -14,16 +14,19 @@
 
 namespace ccsh
 {
+namespace internal
+{
 
 namespace
 {
 
 
 constexpr mode_t fopen_w_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+
 constexpr int fopen_flags(stdfd fd, bool append = false)
 {
     return fd == stdfd::in ? O_RDONLY :
-        (append ?
+           (append ?
             (O_WRONLY | O_CREAT | O_APPEND) :
             (O_WRONLY | O_CREAT | O_TRUNC));
 }
@@ -36,7 +39,8 @@ enum fork_action
 };
 
 template<typename FUNC_CHILD, typename FUNC_PARENT>
-std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD const& func_child, FUNC_PARENT const& func_parent)
+std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD const& func_child,
+                                        FUNC_PARENT const& func_parent)
 {
     int fail_pipe[2];
     stdc_thrower(pipe(fail_pipe));
@@ -47,7 +51,7 @@ std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD con
     pid_t pid = fork();
     stdc_thrower(pid);
 
-    if (pid == 0) /* Child process */
+    if(pid == 0) // Child process
     {
         int fail_code;
         close_fd(pipefd[!child_action]);
@@ -75,7 +79,7 @@ fail:
         close_fd(fail_pipe[1]);
         _exit(-1);
     }
-    else /* Parent process */
+    else // Parent process
     {
         close_fd(fail_pipe[1]);
         open_wrapper temp1(fail_pipe[0]);
@@ -162,7 +166,7 @@ int command_native::runx(int in, int out, int err) const
         if(fcntl(fail_pipe[1], F_SETFD, FD_CLOEXEC) < 0)
             goto fail;
 
-        execvp(argv[0], (char*const*)argv.data());
+        execvp(argv[0], (char* const*)argv.data());
 fail:
         int fail_code = errno;
         write(fail_pipe[1], &fail_code, sizeof(int));
@@ -191,7 +195,7 @@ fail:
 
 int command_pipe::runx(int in, int out, int err) const
 {
-    auto f1 = std::bind(&command::runx, std::ref(left),  in,  _1, err);
+    auto f1 = std::bind(&command::runx, std::ref(left), in, _1, err);
     auto f2 = std::bind(&command::runx, std::ref(right), _1, out, err);
 
     auto p = fork_functor_helper(FORK_CHILD_WRITE, f1, f2);
@@ -261,7 +265,7 @@ command_redirect<DESC>::command_redirect(command const& c, fs::path const& p, bo
     : c(c)
     , p(p)
     , flags(fopen_flags(DESC, append))
-{ }
+{}
 
 template<stdfd DESC>
 int command_redirect<DESC>::runx(int in, int out, int err) const
@@ -272,17 +276,21 @@ int command_redirect<DESC>::runx(int in, int out, int err) const
     return c.runx(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)]);
 }
 
-template class command_redirect<stdfd::in>;
-template class command_redirect<stdfd::out>;
-template class command_redirect<stdfd::err>;
+template
+class command_redirect<stdfd::in>;
 
+template
+class command_redirect<stdfd::out>;
+
+template
+class command_redirect<stdfd::err>;
 
 
 template<stdfd DESC>
 command_fd<DESC>::command_fd(command const& c, int fd)
     : c(c)
     , ow(fd)
-{ }
+{}
 
 template<stdfd DESC>
 int command_fd<DESC>::runx(int in, int out, int err) const
@@ -292,27 +300,31 @@ int command_fd<DESC>::runx(int in, int out, int err) const
     return c.runx(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)]);
 }
 
-template class command_fd<stdfd::in>;
-template class command_fd<stdfd::out>;
-template class command_fd<stdfd::err>;
+template
+class command_fd<stdfd::in>;
 
+template
+class command_fd<stdfd::out>;
+
+template
+class command_fd<stdfd::err>;
 
 
 namespace
 {
-    void replace(std::string& str, std::string const& from, std::string const& to)
-    {
-        std::size_t start_pos;
-        while((start_pos = str.find(from)) != std::string::npos)
-            str.replace(start_pos, from.length(), to);
-    }
+void replace(std::string& str, std::string const& from, std::string const& to)
+{
+    std::size_t start_pos;
+    while((start_pos = str.find(from)) != std::string::npos)
+        str.replace(start_pos, from.length(), to);
+}
 
-    std::string sh_escape(std::string const& str)
-    {
-        std::string temp = str;
-        replace(temp, "'", "'\\''");
-        return " '" + temp + "' ";
-    }
+std::string sh_escape(std::string const& str)
+{
+    std::string temp = str;
+    replace(temp, "'", "'\\''");
+    return " '" + temp + "' ";
+}
 }
 
 int command_source::runx(int in, int out, int err) const
@@ -356,6 +368,6 @@ int command_source::runx(int in, int out, int err) const
     return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
 }
 
-
+} // namespace internal
 } // namespace ccsh
 

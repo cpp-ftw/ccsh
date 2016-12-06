@@ -11,6 +11,8 @@
 
 namespace ccsh
 {
+namespace internal
+{
 
 using command_functor_raw  = std::function<ssize_t(char*, std::size_t)>;
 using command_functor_init = std::function<void(void)>;
@@ -19,8 +21,12 @@ using command_functor_line = std::function<void(std::string const&)>;
 class command_builder_base
 {
     template<typename>
-    friend class command_holder;
-    struct ccsh_abstract_guard_t { };
+    friend
+    class command_holder;
+
+    struct ccsh_abstract_guard_t
+    {
+    };
     virtual void ccsh_abstract_guard(ccsh_abstract_guard_t) const = 0;
 };
 
@@ -33,17 +39,22 @@ class command_base
     void run_autorun() noexcept;
 
     friend class command_runnable;
+
     template<typename>
-    friend class command_holder;
+    friend
+    class command_holder;
 
 public:
     virtual int runx(int, int, int) const = 0;
     int run() const;
+
     void no_autorun() const
     {
         autorun_flag = false;
     }
-    virtual ~command_base() { }
+
+    virtual ~command_base()
+    {}
 };
 
 class command_native : public command_base
@@ -71,7 +82,7 @@ public:
     command_native(fs::path const& p, std::vector<std::string> const& args = {})
         : p(p)
         , args(args)
-    { }
+    {}
 
     void append_dir(fs::path const& dir)
     {
@@ -94,9 +105,9 @@ class command_runnable : protected std::shared_ptr<command_base>
 
 public:
 
-    command_runnable(command_base * other)
+    command_runnable(command_base* other)
         : base(other)
-    { }
+    {}
 
     int run() const
     {
@@ -125,15 +136,18 @@ template<typename TRAITS>
 class command_holder : public TRAITS
 {
     friend class command;
+
     template<typename>
-    friend class command_builder;
+    friend
+    class command_builder;
 
     command_holder(command_holder const& other) = default;
     command_holder(command_holder&& old) = default;
     command_holder& operator=(command_holder const& other) = default;
     command_holder& operator=(command_holder&& old) = default;
 
-    void ccsh_abstract_guard(command_builder_base::ccsh_abstract_guard_t) const override { }
+    void ccsh_abstract_guard(command_builder_base::ccsh_abstract_guard_t) const override
+    {}
 
 public:
 
@@ -203,15 +217,16 @@ protected:
 
 public:
     command_pair(command const& left, command const& right)
-        : left (left)
+        : left(left)
         , right(right)
-    { }
+    {}
 };
 
 class command_and final : public command_pair
 {
 public:
     using command_pair::command_pair;
+
     int runx(int in, int out, int err) const override
     {
         int lres = left.runx(in, out, err);
@@ -225,6 +240,7 @@ class command_or final : public command_pair
 {
 public:
     using command_pair::command_pair;
+
     int runx(int in, int out, int err) const override
     {
         int lres = left.runx(in, out, err);
@@ -240,7 +256,7 @@ class command_bool final : public command_base
 public:
     command_bool(bool b)
         : b(b)
-    { }
+    {}
 
     int runx(int, int, int) const override
     {
@@ -259,7 +275,7 @@ class command_mapping : public command_base
 {
 protected:
     command c;
-    command_functor_raw  func;
+    command_functor_raw func;
     command_functor_init init_func;
 
 public:
@@ -267,7 +283,7 @@ public:
         : c(c)
         , func(f)
         , init_func(init_func)
-    { }
+    {}
 };
 
 class command_in_mapping final : public command_mapping
@@ -320,9 +336,17 @@ public:
     command_source(fs::path const& p, std::vector<std::string> const& args = {})
         : p(p)
         , args(args)
-    { }
+    {}
+
     int runx(int in, int out, int err) const override;
 };
+
+} // namespace internal
+
+using internal::command;
+using internal::command_builder;
+using internal::command_holder;  // easier for wrappers
+
 
 } // namespace ccsh
 

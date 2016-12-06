@@ -39,12 +39,12 @@ private:
 
     static const char* flag_to_str(numbering_style flag)
     {
-        return enum_to_string(flag, numbering_style_mapping());
+        return internal::enum_to_string(flag, numbering_style_mapping());
     }
 
     static const char* flag_to_str(numbering_format flag)
     {
-        return enum_to_string(flag, numbering_format_mapping());
+        return internal::enum_to_string(flag, numbering_format_mapping());
     }
 
 public:

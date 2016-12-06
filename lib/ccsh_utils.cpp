@@ -1,4 +1,5 @@
 #include <ccsh/ccsh_utils.hpp>
+#include "ccsh_internals.hpp"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -76,22 +77,6 @@ bool is_user_possibly_elevated()
     return uid <= 0 || uid != euid;
 }
 
-void open_traits::dtor_func(int fd) noexcept
-{
-    if(fd != STDIN_FILENO && fd != STDOUT_FILENO && fd != STDERR_FILENO)
-        close_fd(fd);
-}
-
-void close_fd(int fd) noexcept
-{
-    while(close(fd) == -1 && errno == EINTR)
-        ;
-}
-
-static_assert(int(stdfd::in)  == STDIN_FILENO,  "Error in stdfd enum.");
-static_assert(int(stdfd::out) == STDOUT_FILENO, "Error in stdfd enum.");
-static_assert(int(stdfd::err) == STDERR_FILENO, "Error in stdfd enum.");
-
 env_var::operator std::string() const
 {
     const char* result = getenv(name.c_str());
@@ -102,6 +87,21 @@ env_var& env_var::operator=(std::string const& str)
 {
     stdc_thrower(setenv(name.c_str(), str.c_str(), true));
     return *this;
+}
+
+namespace internal
+{
+
+void open_traits::dtor_func(int fd) noexcept
+{
+    if(fd != STDIN_FILENO && fd != STDOUT_FILENO && fd != STDERR_FILENO)
+        close_fd(fd);
+}
+
+static_assert(int(stdfd::in)  == STDIN_FILENO,  "Error in stdfd enum.");
+static_assert(int(stdfd::out) == STDOUT_FILENO, "Error in stdfd enum.");
+static_assert(int(stdfd::err) == STDERR_FILENO, "Error in stdfd enum.");
+
 }
 
 } // namespace ccsh

@@ -24,6 +24,7 @@ namespace fs
 // boost::filesystem WILL BE CHANGED TO std::filesystem WITH C++17
 
 fs::path get_home();
+bool is_user_possibly_elevated();
 
 class stdc_error : public std::runtime_error
 {
@@ -40,48 +41,12 @@ public:
     int no() const { return error_number; }
 };
 
-inline void stdc_thrower(int result)
-{
-    if(result == -1)
-        throw stdc_error();
-}
 
 class shell_error : public std::runtime_error
 {
     using std::runtime_error::runtime_error;
 };
 
-inline void shell_thrower(int result, std::string const& str)
-{
-    if(result != 0)
-        throw shell_error(str);
-}
-
-bool is_user_possibly_elevated();
-
-struct open_traits
-{
-    static constexpr int invalid_value = -1;
-    using exception = stdc_error;
-    static void dtor_func(int fd) noexcept;
-};
-
-using open_wrapper = CW::CWrapper<int, open_traits>;
-
-inline int shell_logic_or(int a, int b)
-{
-    return a == 0 ? b : a;
-}
-
-enum class stdfd : uint8_t
-{
-    in = 0,
-    out = 1,
-    err = 2,
-    count
-};
-
-void close_fd(int fd) noexcept;
 
 class env_var
 {
@@ -99,9 +64,30 @@ public:
     env_var& operator=(std::string const&); // setenv
 };
 
+namespace internal
+{
+
+struct open_traits
+{
+    static constexpr int invalid_value = -1;
+    using exception = stdc_error;
+
+    static void dtor_func(int fd) noexcept;
+};
+
+using open_wrapper = CW::CWrapper<int, open_traits>;
+
+enum class stdfd : uint8_t
+{
+    in = 0,
+    out = 1,
+    err = 2,
+    count
+};
+
 
 template<typename ENUM, std::size_t N>
-const char* enum_to_string(ENUM val, const char* const (&mapping)[N])
+const char* enum_to_string(ENUM val, const char* const (& mapping)[N])
 {
     if(val < 0 || val >= N)
         return "";
@@ -115,6 +101,8 @@ const char* enum_to_string(ENUM val, std::array<const char*, N> const& mapping)
         return "";
     return mapping[val];
 }
+
+} // namespace internal
 
 } // namespace ccsh
 

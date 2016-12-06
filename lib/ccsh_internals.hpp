@@ -3,8 +3,26 @@
 
 #include <string>
 #include <cstddef>
+#include <unistd.h>
 
-namespace ccsh {
+namespace ccsh
+{
+
+inline void stdc_thrower(int result)
+{
+    if(result == -1)
+        throw stdc_error();
+}
+
+inline int shell_logic_or(int a, int b)
+{
+    return a == 0 ? b : a;
+}
+
+inline void close_fd(int fd) noexcept
+{
+    while(close(fd) == -1 && errno == EINTR);
+}
 
 inline ssize_t mapping_appender(std::string& str, char* buf, std::size_t s)
 {
@@ -20,17 +38,17 @@ class line_splitter
     char delim;
 public:
     explicit line_splitter(FUNC&& func, char delim = '\n')
-        : func(std::move(func))
-        , delim(delim)
-    { }
+            : func(std::move(func))
+              , delim(delim)
+    {}
 
     ssize_t operator()(char* buf, std::size_t s)
     {
-        char * newline;
+        char* newline;
         std::size_t si = s;
-        while (si > 0 && (newline = (char*)memchr(buf, delim, si)))
+        while(si > 0 && (newline = (char*)memchr(buf, delim, si)))
         {
-            std::size_t diff = newline-buf;
+            std::size_t diff = newline - buf;
             temp.append(buf, diff);
             // if you want efficient processing, func can take std::string&& argument
             func(std::move(temp));

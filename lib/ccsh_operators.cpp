@@ -8,6 +8,8 @@ using namespace std::placeholders;
 
 namespace ccsh
 {
+namespace internal
+{
 
 /* ******************* string redirection operators ******************* */
 
@@ -32,8 +34,8 @@ command_runnable operator>>(command const& c, std::string& str)
 
 command_runnable operator>(command const& c, std::string& str)
 {
-    return {new command_out_mapping(c,  std::bind(mapping_appender, std::ref(str), _1, _2),
-                                        std::bind(&std::string::clear, std::ref(str)))};
+    return {new command_out_mapping(c, std::bind(mapping_appender, std::ref(str), _1, _2),
+                                    std::bind(&std::string::clear, std::ref(str)))};
 }
 
 command_runnable operator>>=(command const& c, std::string& str)
@@ -43,8 +45,8 @@ command_runnable operator>>=(command const& c, std::string& str)
 
 command_runnable operator>=(command const& c, std::string& str)
 {
-    return {new command_err_mapping(c,  std::bind(mapping_appender, std::ref(str), _1, _2),
-                                        std::bind(&std::string::clear, std::ref(str)))};
+    return {new command_err_mapping(c, std::bind(mapping_appender, std::ref(str), _1, _2),
+                                    std::bind(&std::string::clear, std::ref(str)))};
 }
 
 /* ******************* string redirection operators ******************* */
@@ -79,26 +81,32 @@ command_runnable operator<(command const& c, std::vector<std::string>& vec)
 
 command_runnable operator>(command const& c, std::vector<std::string>& vec)
 {
-    auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
-    return {new command_out_mapping(c,  line_splitter_make(std::move(pusher)),
-                                        std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
+    auto pusher = [&vec](std::string&& str)
+    { vec.push_back(std::move(str)); };
+    return {new command_out_mapping(c, line_splitter_make(std::move(pusher)),
+                                    std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
 }
+
 command_runnable operator>>(command const& c, std::vector<std::string>& vec)
 {
-    auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
-    return {new command_out_mapping(c,  line_splitter_make(std::move(pusher)))};
+    auto pusher = [&vec](std::string&& str)
+    { vec.push_back(std::move(str)); };
+    return {new command_out_mapping(c, line_splitter_make(std::move(pusher)))};
 }
 
 command_runnable operator>=(command const& c, std::vector<std::string>& vec)
 {
-    auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
-    return {new command_err_mapping(c,  line_splitter_make(std::move(pusher)),
-                                        std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
+    auto pusher = [&vec](std::string&& str)
+    { vec.push_back(std::move(str)); };
+    return {new command_err_mapping(c, line_splitter_make(std::move(pusher)),
+                                    std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
 }
+
 command_runnable operator>>=(command const& c, std::vector<std::string>& vec)
 {
-    auto pusher = [&vec](std::string&& str) { vec.push_back(std::move(str)); };
-    return {new command_err_mapping(c,  line_splitter_make(std::move(pusher)))};
+    auto pusher = [&vec](std::string&& str)
+    { vec.push_back(std::move(str)); };
+    return {new command_err_mapping(c, line_splitter_make(std::move(pusher)))};
 }
 
 /* ******************* vector redirection operators ******************* */
@@ -108,12 +116,12 @@ command_runnable operator>>=(command const& c, std::vector<std::string>& vec)
 
 command_runnable operator>(command const& c, command_functor_line func)
 {
-    return {new command_out_mapping(c,  line_splitter_make(std::move(func)))};
+    return {new command_out_mapping(c, line_splitter_make(std::move(func)))};
 }
 
 command_runnable operator>=(command const& c, command_functor_line func)
 {
-    return {new command_err_mapping(c,  line_splitter_make(std::move(func)))};
+    return {new command_err_mapping(c, line_splitter_make(std::move(func)))};
 }
 
 /* ******************* line functor redirection operators ******************* */
@@ -122,20 +130,20 @@ command_runnable operator>=(command const& c, command_functor_line func)
 
 command_runnable operator<(command const& c, command_functor_raw func)
 {
-    return {new command_in_mapping(c,  std::move(func))};
+    return {new command_in_mapping(c, std::move(func))};
 }
 
 command_runnable operator>(command const& c, command_functor_raw func)
 {
-    return {new command_out_mapping(c,  std::move(func))};
+    return {new command_out_mapping(c, std::move(func))};
 }
 
 command_runnable operator>=(command const& c, command_functor_raw func)
 {
-    return {new command_err_mapping(c,  std::move(func))};
+    return {new command_err_mapping(c, std::move(func))};
 }
 
 /* ******************* raw functor redirection operators ******************* */
 
-
+} // namespace internal
 } // namespace ccsh

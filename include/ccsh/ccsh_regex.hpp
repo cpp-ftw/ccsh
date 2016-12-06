@@ -22,8 +22,8 @@ public:
         , ex(str, TYPE)
     { }
 
-    explicit regex(std::string str)
-        : source(std::move(str))
+    explicit regex(std::string const& str)
+        : source(str)
         , ex(str, TYPE)
     { }
 

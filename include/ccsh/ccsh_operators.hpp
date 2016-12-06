@@ -16,15 +16,18 @@ namespace boost { namespace filesystem {
 namespace ccsh
 {
 
-inline command_runnable shell(fs::path const& p, std::vector<std::string> const& args = {})
+inline internal::command_runnable shell(fs::path const& p, std::vector<std::string> const& args = {})
 {
-    return {new command_native(p, args)};
+    return {new internal::command_native(p, args)};
 }
 
-inline command_runnable source(fs::path const& p, std::vector<std::string> const& args = {})
+inline internal::command_runnable source(fs::path const& p, std::vector<std::string> const& args = {})
 {
-    return {new command_source(p, args)};
+    return {new internal::command_source(p, args)};
 }
+
+namespace internal
+{
 
 inline command_runnable operator|(command const& a, command const& b)
 {
@@ -78,39 +81,39 @@ inline command_runnable operator>>=(command const& c, fs::path const& p)
 
 /* ******************* string redirection operators ******************* */
 
-command_runnable operator<  (command const& c, std::string& str);
-command_runnable operator>> (command const& c, std::string& str);
-command_runnable operator>  (command const& c, std::string& str);
+command_runnable operator<(command const& c, std::string& str);
+command_runnable operator>>(command const& c, std::string& str);
+command_runnable operator>(command const& c, std::string& str);
 command_runnable operator>>=(command const& c, std::string& str);
-command_runnable operator>= (command const& c, std::string& str);
+command_runnable operator>=(command const& c, std::string& str);
 
 /* ******************* string redirection operators ******************* */
 
 
 /* ******************* vector redirection operators ******************* */
 
-command_runnable operator<  (command const& c, std::vector<std::string>& str);
-command_runnable operator>> (command const& c, std::vector<std::string>& str);
-command_runnable operator>  (command const& c, std::vector<std::string>& str);
+command_runnable operator<(command const& c, std::vector<std::string>& str);
+command_runnable operator>>(command const& c, std::vector<std::string>& str);
+command_runnable operator>(command const& c, std::vector<std::string>& str);
 command_runnable operator>>=(command const& c, std::vector<std::string>& str);
-command_runnable operator>= (command const& c, std::vector<std::string>& str);
+command_runnable operator>=(command const& c, std::vector<std::string>& str);
 
 /* ******************* vector redirection operators ******************* */
 
 /* ******************* line functor redirection operators ******************* */
 
 //command_runnable operator<  (command const& c, command_functor_line func);
-command_runnable operator>  (command const& c, command_functor_line func);
-command_runnable operator>= (command const& c, command_functor_line func);
+command_runnable operator>(command const& c, command_functor_line func);
+command_runnable operator>=(command const& c, command_functor_line func);
 
 /* ******************* line functor redirection operators ******************* */
 
 
 /* ******************* raw functor redirection operators ******************* */
 
-command_runnable operator<  (command const& c, command_functor_raw func);
-command_runnable operator>  (command const& c, command_functor_raw func);
-command_runnable operator>= (command const& c, command_functor_raw func);
+command_runnable operator<(command const& c, command_functor_raw func);
+command_runnable operator>(command const& c, command_functor_raw func);
+command_runnable operator>=(command const& c, command_functor_raw func);
 
 /* ******************* raw functor redirection operators ******************* */
 
@@ -150,6 +153,7 @@ inline command_runnable operator||(bool b, command const& a) // provided only fo
 
 /* ******************* logical operators ******************* */
 
+} // namespace internal
 
 namespace literals
 {
@@ -165,11 +169,12 @@ inline env_var dollar(std::string const& name)
     return env_var(name);
 }
 
-inline std::string dollar(command_runnable const& c)
+inline std::string dollar(command const& c)
 {
     std::string x;
     std::string err;
-    shell_thrower((c > x >= err).run(), err);
+    if((c > x >= err).run() != 0)
+        throw shell_error(err);
     return x;
 }
 
@@ -179,7 +184,7 @@ inline env_var $(std::string const& name)
     return dollar(name);
 }
 
-inline std::string $(command_runnable const& c)
+inline std::string $(command const& c)
 {
     return dollar(c);
 }
