@@ -6,4 +6,4 @@ using namespace ccsh;
 using namespace ccsh::literals;
 using namespace ccsh::core;
 
-CCSH_RUN(ccsh::ps::prompt = []{return "test prompt ";});
+// CCSH_RUN(ccsh::ps::prompt = []{return "test prompt ";});
