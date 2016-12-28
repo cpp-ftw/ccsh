@@ -11,8 +11,7 @@
 
 - Add a normal README.md
 
-- Add wildcard selection
-- Make shell prompt customizable
+- Add functions to make prompt customization easier, like bash PS1 format codes
 
 - Add `command operator<(command, command_line_functor);`
 - Add command to fd conversion, for using commands as files, see https://www.gnu.org/software/coreutils/manual/coreutils.html#tee-invocation
@@ -20,6 +19,9 @@
 
 
 ### DONE
+
+- ~~Add wildcard selection~~
+- ~~Make shell prompt customizable~~
 
 - ~~Catch signals in cling to behave like bash~~
 - ~~Change shell prompt from cling to ccsh, use # for root shell~~
