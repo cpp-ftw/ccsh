@@ -12,12 +12,11 @@
 #include "cling/Interpreter/Exception.h"
 #include "cling/Interpreter/Interpreter.h"
 #include "cling/MetaProcessor/MetaProcessor.h"
+#include "cling/Utils/Output.h"
 #include "textinput/Callbacks.h"
 #include "textinput/TextInput.h"
 #include "textinput/StreamReader.h"
 #include "textinput/TerminalDisplay.h"
-
-#include "llvm/Support/raw_ostream.h"
 
 #include "clang/Basic/LangOptions.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -27,10 +26,6 @@
 // Fragment copied from LLVM's raw_ostream.cpp
 #if defined(HAVE_UNISTD_H)
 # include <unistd.h>
-#endif
-
-#if defined(LLVM_ON_WIN32)
-#include <Shlobj.h>
 #endif
 
 #if defined(_MSC_VER)
@@ -47,7 +42,7 @@
 
 #include <memory>
 #include <iostream>
-#include <sstream>
+
 
 namespace {
   ///\brief Class that specialises the textinput TabCompletion to allow Cling
@@ -104,50 +99,47 @@ void custom_user_interface::run_interactively() {
   using namespace textinput;
   std::unique_ptr<StreamReader> R(StreamReader::Create());
   std::unique_ptr<TerminalDisplay> D(TerminalDisplay::Create());
-  TextInput TI(*R, *D, histfilePath.empty() ? nullptr : histfilePath.c_str());
+  TextInput TI(*R, *D, histfilePath.c_str());
 
   // Inform text input about the code complete consumer
   // TextInput owns the TabCompletion.
-  auto const& interp = getMetaProcessor()->getInterpreter();
-  TI.SetCompletion(new UITabCompletion(interp));
+  TI.SetCompletion(new UITabCompletion(getMetaProcessor()->getInterpreter()));
 
   TI.SetPrompt(prompt_factory().c_str());
   std::string line;
+  std::string prompt = prompt_factory();
   while (true) {
     try {
-      getMetaProcessor()->getOuts().flush();
-      TextInput::EReadResult RR = TI.ReadInput();
-      TI.TakeInput(line);
-      if (RR == TextInput::kRREOF) {
-        break;
+      {
+        cling::MetaProcessor::MaybeRedirectOutputRAII RAII(*getMetaProcessor());
+        TI.SetPrompt(prompt.c_str());
+        if (TI.ReadInput() == TextInput::kRREOF)
+          break;
+        TI.TakeInput(line);
       }
 
       cling::Interpreter::CompilationResult compRes;
-      cling::MetaProcessor::MaybeRedirectOutputRAII RAII(*getMetaProcessor());
-      int indent = getMetaProcessor()->process(line.c_str(), compRes, 0/*result*/);
+      int indent = getMetaProcessor()->process(line.c_str(), compRes);
       // Quit requested
       if (indent < 0)
         break;
 
-      std::string prompt = prompt_factory();
+      prompt = prompt_factory();
       if (indent > 0) // Continuation requested.
         prompt += '?' + std::string(indent * 3, ' ');
-
-      TI.SetPrompt(prompt.c_str());
-    }
-    catch(cling::InvalidDerefException& e) {
-      e.diagnose();
     }
     catch(cling::InterpreterException& e) {
-      std::cerr << ">>> Caught an interpreter exception!\n"
-                   << ">>> " << e.what() << '\n';
+      if (!e.diagnose()) {
+        cling::errs() << ">>> Caught an interpreter exception!\n"
+                      << ">>> " << e.what() << '\n';
+      }
     }
     catch(std::exception& e) {
-      std::cerr << ">>> Caught a std::exception!\n"
+      cling::errs() << ">>> Caught a std::exception!\n"
                    << ">>> " << e.what() << '\n';
     }
     catch(...) {
-      std::cerr << "Exception occurred. Recovering...\n";
+      cling::errs() << "Exception occurred. Recovering...\n";
     }
   }
 }
