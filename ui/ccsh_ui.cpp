@@ -20,6 +20,7 @@
 #include <vector>
 #include <string>
 #include <csignal>
+#include <sstream>
 
 #if defined(WIN32) && defined(_MSC_VER)
 #include <crtdbg.h>
@@ -48,7 +49,7 @@ void sigint_handler(int sig)
     std::cout << "^C" << std::endl;
 }
 
-int main( int argc, char **argv ) {
+int main( int argc, const char **argv ) {
 
 #if defined(_WIN32) && defined(_MSC_VER)
   // Suppress error dialogs to avoid hangs on build nodes.
@@ -84,7 +85,6 @@ int main( int argc, char **argv ) {
     "-std=c++14",
     "-L" + (p / "lib").string(),                // -Llib
     "-l", "ccsh_lib",                           // -l ccsh_lib
-    "-l",  clingrc_path.string(),               // -l ui/clingrc.hpp
     "-I" + (p / "include").string(),            // -Iinclude
     "-I" + (p / "wrappers").string(),           // -Iwrappers
   };
@@ -136,6 +136,14 @@ int main( int argc, char **argv ) {
     }
   }
   else {
+    std::ostringstream prompt_initializer;
+    prompt_initializer << "#include <functional>\n"
+                       << "namespace ccsh { namespace ps { "
+                       << "std::function<std::string()>& prompt = *((std::function<std::string()>*)"
+                       << (void*)&ui.prompt_factory << ");} }";
+
+    interp.declare(prompt_initializer.str());
+    interp.loadFile(clingrc_path.string(), false);
     ui.run_interactively();
   }
 

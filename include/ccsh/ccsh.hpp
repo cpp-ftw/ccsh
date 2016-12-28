@@ -8,6 +8,7 @@
 #include "ccsh_regex.hpp"
 #include "ccsh_command.hpp"
 #include "ccsh_operators.hpp"
+#include "ccsh_tty.hpp"
 
 
 #endif // CCSH_HPP_INCLUDED

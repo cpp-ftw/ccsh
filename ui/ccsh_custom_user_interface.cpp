@@ -10,6 +10,7 @@
 #include "ccsh_custom_user_interface.hpp"
 
 #include "cling/Interpreter/Exception.h"
+#include "cling/Interpreter/Interpreter.h"
 #include "cling/MetaProcessor/MetaProcessor.h"
 #include "textinput/Callbacks.h"
 #include "textinput/TextInput.h"
@@ -46,6 +47,7 @@
 
 #include <memory>
 #include <iostream>
+#include <sstream>
 
 namespace {
   ///\brief Class that specialises the textinput TabCompletion to allow Cling
@@ -73,6 +75,28 @@ namespace {
 
 namespace ccsh { namespace ui {
 
+custom_user_interface::custom_user_interface(cling::Interpreter& interp)
+    : base(interp)
+    , prompt_factory(std::bind(&custom_user_interface::default_prompt, this))
+{
+
+}
+
+
+std::string custom_user_interface::default_prompt()
+{
+    static const char * prompt_dollar = ccsh::is_user_possibly_elevated() ? "# " : "$ ";
+
+    std::string prompt = "[ccsh]";
+    if (getMetaProcessor()->getInterpreter().isRawInputEnabled())
+        prompt.append("! ");
+    else
+        prompt.append(prompt_dollar);
+
+    return prompt;
+}
+
+
 void custom_user_interface::run_interactively() {
 
   std::string histfilePath = (ccsh::get_home() / ".cling_history").string();
@@ -84,11 +108,10 @@ void custom_user_interface::run_interactively() {
 
   // Inform text input about the code complete consumer
   // TextInput owns the TabCompletion.
-  TI.SetCompletion(new UITabCompletion(getMetaProcessor()->getInterpreter()));
+  auto const& interp = getMetaProcessor()->getInterpreter();
+  TI.SetCompletion(new UITabCompletion(interp));
 
-  const char * prompt_dollar = ccsh::is_user_possibly_elevated() ? "# " : "$ ";
-
-  TI.SetPrompt((std::string("[ccsh]") + prompt_dollar).c_str());
+  TI.SetPrompt(prompt_factory().c_str());
   std::string line;
   while (true) {
     try {
@@ -100,23 +123,17 @@ void custom_user_interface::run_interactively() {
       }
 
       cling::Interpreter::CompilationResult compRes;
-      cling::MetaProcessor::MaybeRedirectOutputRAII RAII(getMetaProcessor());
+      cling::MetaProcessor::MaybeRedirectOutputRAII RAII(*getMetaProcessor());
       int indent = getMetaProcessor()->process(line.c_str(), compRes, 0/*result*/);
       // Quit requested
       if (indent < 0)
         break;
-      std::string Prompt = "[ccsh]";
-      if (getMetaProcessor()->getInterpreter().isRawInputEnabled())
-        Prompt.append("! ");
-      else
-        Prompt.append(prompt_dollar);
 
-      if (indent > 0)
-        // Continuation requested.
-        Prompt.append('?' + std::string(indent * 3, ' '));
+      std::string prompt = prompt_factory();
+      if (indent > 0) // Continuation requested.
+        prompt += '?' + std::string(indent * 3, ' ');
 
-      TI.SetPrompt(Prompt.c_str());
-
+      TI.SetPrompt(prompt.c_str());
     }
     catch(cling::InvalidDerefException& e) {
       e.diagnose();
