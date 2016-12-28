@@ -6,15 +6,14 @@
 
 namespace boost { namespace filesystem {
 
-    inline path operator~(path other)
-    {
-        return ccsh::get_home() / other;
-    }
+inline path operator~(path other)
+{
+    return ccsh::get_home() / other;
+}
 
 }}
 
-namespace ccsh
-{
+namespace ccsh {
 
 inline internal::command_runnable shell(fs::path const& p, std::vector<std::string> const& args = {})
 {
@@ -26,8 +25,7 @@ inline internal::command_runnable source(fs::path const& p, std::vector<std::str
     return {new internal::command_source(p, args)};
 }
 
-namespace internal
-{
+namespace internal {
 
 inline command_runnable operator|(command const& a, command const& b)
 {
@@ -155,12 +153,11 @@ inline command_runnable operator||(bool b, command const& a) // provided only fo
 
 } // namespace internal
 
-namespace literals
+namespace literals {
+inline fs::path operator ""_p(const char* str, std::size_t)
 {
-    inline fs::path operator""_p(const char* str, std::size_t)
-    {
-        return fs::path{str};
-    }
+    return fs::path{str};
+}
 } // namespace literals
 
 

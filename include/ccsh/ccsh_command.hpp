@@ -9,10 +9,8 @@
 #include <cstddef>
 #include <functional>
 
-namespace ccsh
-{
-namespace internal
-{
+namespace ccsh {
+namespace internal {
 
 using command_functor_raw  = std::function<ssize_t(char*, std::size_t)>;
 using command_functor_init = std::function<void(void)>;

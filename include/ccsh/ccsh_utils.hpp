@@ -10,15 +10,13 @@
 
 #include "CWrapper.hpp"
 
-namespace ccsh
-{
+namespace ccsh {
 
-namespace fs
-{
-    using namespace boost::filesystem;
+namespace fs {
+using namespace boost::filesystem;
 
-    std::vector<path> expand(path const& p);
-    std::vector<path> expand(std::vector<path> const& paths);
+std::vector<path> expand(path const& p);
+std::vector<path> expand(std::vector<path> const& paths);
 }
 // NEVER EVER USE boost::filesystem DIRECTLY, ALWAYS USE ccsh::fs
 // boost::filesystem WILL BE CHANGED TO std::filesystem WITH C++17
@@ -33,12 +31,15 @@ public:
     stdc_error(int no = errno)
         : runtime_error(strerror(errno))
         , error_number(no)
-    { }
+    {}
+
     stdc_error(int no, std::string const& msg)
         : std::runtime_error(msg.empty() ? strerror(no) : msg + ": " + strerror(no))
         , error_number(no)
-    { }
-    int no() const { return error_number; }
+    {}
+
+    int no() const
+    { return error_number; }
 };
 
 
@@ -54,7 +55,8 @@ class env_var
 public:
     env_var(std::string name)
         : name(std::move(name))
-    { }
+    {}
+
     env_var(env_var&&) = default;
     env_var(env_var const&) = delete;
     env_var& operator=(env_var&&) = default;
@@ -64,8 +66,7 @@ public:
     env_var& operator=(std::string const&); // setenv
 };
 
-namespace internal
-{
+namespace internal {
 
 struct open_traits
 {

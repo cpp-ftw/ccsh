@@ -12,13 +12,10 @@
 #include <iostream>
 #include <utility>
 
-namespace ccsh
-{
-namespace internal
-{
+namespace ccsh {
+namespace internal {
 
-namespace
-{
+namespace {
 
 
 constexpr mode_t fopen_w_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
@@ -310,8 +307,7 @@ template
 class command_fd<stdfd::err>;
 
 
-namespace
-{
+namespace {
 void replace(std::string& str, std::string const& from, std::string const& to)
 {
     std::size_t start_pos;

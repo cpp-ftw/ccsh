@@ -4,8 +4,7 @@
 #include <string>
 #include <ratio>
 
-namespace ccsh
-{
+namespace ccsh {
 
 template<typename RATIO>
 class quantity
@@ -14,7 +13,7 @@ class quantity
 public:
     constexpr explicit quantity(int64_t q)
         : q(q)
-    { }
+    {}
 
     constexpr int64_t get() const
     {
@@ -59,7 +58,7 @@ CCSH_DEFINE_RATIO_PREFIX(mega, MB)
 CCSH_DEFINE_RATIO_PREFIX(giga, GB)
 CCSH_DEFINE_RATIO_PREFIX(tera, TB)
 CCSH_DEFINE_RATIO_PREFIX(peta, PB)
-CCSH_DEFINE_RATIO_PREFIX(exa,  eB)
+CCSH_DEFINE_RATIO_PREFIX(exa, eB)
 
 CCSH_DEFINE_RATIO_RATIO(kibi, k, 1024)
 CCSH_DEFINE_RATIO_RATIO(mebi, M, 1048576)

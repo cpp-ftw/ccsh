@@ -54,25 +54,25 @@ public:
     options_paths()
         : command_native(DERIVED::name)
         , paths()
-    { }
+    {}
 
     options_paths(std::vector<fs::path> const& paths)
         : command_native(DERIVED::name)
         , paths(fs::expand(paths))
-    { }
+    {}
 
     options_paths(fs::path const& p)
         : command_native(DERIVED::name)
         , paths(fs::expand(p))
-    { }
+    {}
 
-    command_holder<DERIVED>& version()
+    command_holder <DERIVED>& version()
     {
         args.push_back("--version");
         return static_cast<command_holder<DERIVED>&>(*this);
     }
 
-    command_holder<DERIVED>& help()
+    command_holder <DERIVED>& help()
     {
         args.push_back("--help");
         return static_cast<command_holder<DERIVED>&>(*this);

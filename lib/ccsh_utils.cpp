@@ -8,14 +8,11 @@
 
 #include <memory>
 
-namespace ccsh
-{
+namespace ccsh {
 
-namespace fs
-{
+namespace fs {
 
-namespace
-{
+namespace {
 
 void expand_helper(path const& p, std::vector<path>& result)
 {
@@ -51,17 +48,17 @@ std::vector<path> expand(std::vector<path> const& paths)
 fs::path get_home()
 {
     struct passwd pwd;
-    struct passwd *result;
+    struct passwd* result;
 
     long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-    if (bufsize == -1)
+    if(bufsize == -1)
         bufsize = 16384;
 
     std::unique_ptr<char[]> buf{new char[bufsize]};
 
     if(getpwuid_r(getuid(), &pwd, buf.get(), bufsize, &result) != 0 ||
-        result == nullptr ||
-        result->pw_dir == nullptr)
+       result == nullptr ||
+       result->pw_dir == nullptr)
     {
         throw stdc_error();
     }
@@ -71,8 +68,8 @@ fs::path get_home()
 
 bool is_user_possibly_elevated()
 {
-    uid_t uid=getuid();
-    uid_t euid=geteuid();
+    uid_t uid = getuid();
+    uid_t euid = geteuid();
 
     return uid <= 0 || uid != euid;
 }
@@ -89,8 +86,7 @@ env_var& env_var::operator=(std::string const& str)
     return *this;
 }
 
-namespace internal
-{
+namespace internal {
 
 void open_traits::dtor_func(int fd) noexcept
 {
@@ -98,7 +94,7 @@ void open_traits::dtor_func(int fd) noexcept
         close_fd(fd);
 }
 
-static_assert(int(stdfd::in)  == STDIN_FILENO,  "Error in stdfd enum.");
+static_assert(int(stdfd::in) == STDIN_FILENO, "Error in stdfd enum.");
 static_assert(int(stdfd::out) == STDOUT_FILENO, "Error in stdfd enum.");
 static_assert(int(stdfd::err) == STDERR_FILENO, "Error in stdfd enum.");
 

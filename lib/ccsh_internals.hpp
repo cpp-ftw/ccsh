@@ -5,8 +5,7 @@
 #include <cstddef>
 #include <unistd.h>
 
-namespace ccsh
-{
+namespace ccsh {
 
 inline void stdc_thrower(int result)
 {
@@ -38,8 +37,8 @@ class line_splitter
     char delim;
 public:
     explicit line_splitter(FUNC&& func, char delim = '\n')
-            : func(std::move(func))
-              , delim(delim)
+        : func(std::move(func))
+        , delim(delim)
     {}
 
     ssize_t operator()(char* buf, std::size_t s)

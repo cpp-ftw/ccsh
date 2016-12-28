@@ -6,10 +6,8 @@
 
 using namespace std::placeholders;
 
-namespace ccsh
-{
-namespace internal
-{
+namespace ccsh {
+namespace internal {
 
 /* ******************* string redirection operators ******************* */
 

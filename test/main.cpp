@@ -1,5 +1,7 @@
 #include <iostream>
+
 #define CCSH_NON_STANDARD_DOLLAR
+
 #include <ccsh/ccsh.hpp>
 
 #include <ccsh/core.hpp>
