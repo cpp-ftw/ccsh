@@ -42,6 +42,9 @@ class command_base
     friend
     class command_holder;
 
+    static int last_exit_code;
+    friend class command;
+
 public:
     virtual int runx(int, int, int) const = 0;
     int run() const;
@@ -162,6 +165,11 @@ public:
 class command : protected command_runnable
 {
 public:
+    static int last_exit_code()
+    {
+        return command_base::last_exit_code;
+    }
+
     command(command_runnable const& cmd)
         : command_runnable{cmd}
     {

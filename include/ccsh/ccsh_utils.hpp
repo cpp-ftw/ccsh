@@ -22,6 +22,15 @@ std::vector<path> expand(std::vector<path> const& paths);
 // boost::filesystem WILL BE CHANGED TO std::filesystem WITH C++17
 
 fs::path get_home();
+fs::path get_current_path();
+fs::path get_current_directory();
+fs::path get_current_path_abbreviated();
+
+std::string get_hostname();
+std::string get_short_hostname();
+
+std::string get_shell_name();
+
 bool is_user_possibly_elevated();
 
 class stdc_error : public std::runtime_error

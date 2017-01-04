@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <unistd.h>
+#include <limits.h>
 #include <pwd.h>
 #include <glob.h>
 
@@ -65,6 +66,52 @@ fs::path get_home()
 
     return fs::path{result->pw_dir};
 }
+
+fs::path get_current_path()
+{
+    return fs::current_path();
+}
+
+fs::path get_current_directory()
+{
+    fs::path wd = get_current_path();
+    if(wd == get_home())
+        return "~";
+    return wd.filename();
+}
+
+fs::path get_current_path_abbreviated()
+{
+    fs::path wd = get_current_path();
+    fs::path home = get_home();
+    boost::system::error_code errcode;
+    auto abb_wd = fs::relative(wd, home, errcode);
+    if(errcode)
+        return wd;
+    return fs::path("~")/abb_wd;
+}
+
+std::string get_hostname()
+{
+    char buf[HOST_NAME_MAX + 1];
+    stdc_thrower(gethostname(buf, sizeof(buf)));
+    return buf;
+}
+
+std::string get_short_hostname()
+{
+    std::string hn = get_hostname();
+    auto pos = hn.find('.');
+    if(pos == std::string::npos)
+        return hn;
+    return hn.substr(0, pos);
+}
+
+std::string get_shell_name()
+{
+    return "ccsh";
+}
+
 
 bool is_user_possibly_elevated()
 {

@@ -108,10 +108,14 @@ fail:
 
 using namespace std::placeholders;
 
+int command_base::last_exit_code = 0;
+
 int command_base::run() const
 {
     no_autorun();
-    return runx(STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO);
+    int result = runx(STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO);
+    last_exit_code = result;
+    return result;
 }
 
 void command_base::run_autorun() noexcept
