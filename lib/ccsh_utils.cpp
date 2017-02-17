@@ -81,15 +81,59 @@ fs::path get_current_directory()
     return wd.filename();
 }
 
+namespace {
+
+// C++14 provide a mismatch algorithm with four iterator arguments(), but earlier
+// standard libraries didn't, so provide this needed functionality.
+inline std::pair<fs::path::iterator, fs::path::iterator> mismatch(fs::path::iterator it1, fs::path::iterator it1end,
+                                                                  fs::path::iterator it2, fs::path::iterator it2end)
+{
+    for(; it1 != it1end && it2 != it2end && *it1 == *it2;)
+    {
+        ++it1;
+        ++it2;
+    }
+    return std::make_pair(it1, it2);
+}
+
+fs::path lexically_relative(const fs::path& self, const fs::path& base)
+{
+    std::pair<fs::path::iterator, fs::path::iterator> mm
+        = mismatch(self.begin(), self.end(), base.begin(), base.end());
+    if(mm.first == self.begin() && mm.second == base.begin())
+        return fs::path();
+    if(mm.first == self.end() && mm.second == base.end())
+        return fs::path(".");
+    fs::path tmp;
+    for(; mm.second != base.end(); ++mm.second)
+        tmp /= fs::path(".");
+    for(; mm.first != self.end(); ++mm.first)
+        tmp /= *mm.first;
+    return tmp;
+}
+
+fs::path relative(const fs::path& p, const fs::path& base, std::error_code& ec)
+{
+    fs::path wc_base(fs::canonical(base, ec));
+    if(ec)
+        return fs::path();
+    fs::path wc_p(fs::canonical(p, ec));
+    if(ec)
+        return fs::path();
+    return lexically_relative(wc_p, wc_base);
+}
+
+}
+
 fs::path get_current_path_abbreviated()
 {
     fs::path wd = get_current_path();
     fs::path home = get_home();
-    boost::system::error_code errcode;
-    auto abb_wd = fs::relative(wd, home, errcode);
+    std::error_code errcode;
+    auto abb_wd = relative(wd, home, errcode);
     if(errcode)
         return wd;
-    return fs::path("~")/abb_wd;
+    return fs::path("~") / abb_wd;
 }
 
 std::string get_hostname()
@@ -111,6 +155,12 @@ std::string get_short_hostname()
 std::string get_shell_name()
 {
     return "ccsh";
+}
+
+std::string get_ttyname()
+{
+    fs::path result = ttyname(fileno(stdin));
+    return result.string();
 }
 
 

@@ -19,7 +19,7 @@ file(GLOB sources *.cpp *.hpp)
 file(GLOB headers ../include/ccsh/*.hpp)
 
 add_library(ccsh_lib SHARED ${sources} ${headers})
-target_link_libraries(ccsh_lib   PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(ccsh_lib   PUBLIC ${filesystem_lib})
 target_compile_options(ccsh_lib  PUBLIC -std=c++11 -Wall -Wextra -pedantic -O3 -g -ggdb)
 
 endif()

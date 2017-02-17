@@ -73,7 +73,7 @@ void test3()
 
 void test4()
 {
-    ccsh::core::cat(~"Documents/ccsh/src/main.cpp"_p);
+    ccsh::core::cat(__FILE__);
 }
 
 void test5()

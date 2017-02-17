@@ -43,6 +43,7 @@ class command_base
     class command_holder;
 
     static int last_exit_code;
+
     friend class command;
 
 public:
