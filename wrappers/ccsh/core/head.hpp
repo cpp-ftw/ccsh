@@ -13,7 +13,7 @@ class head_t : public wrappers::options_paths<head_t>
 {
     using base = wrappers::options_paths<head_t>;
     friend base;
-    static constexpr const char* name = "head";
+    static constexpr const char * name() { return "head"; }
 
 public:
 

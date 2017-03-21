@@ -17,7 +17,7 @@ class ls_t : public wrappers::options_paths<ls_t<DUMMY>>
 {
     using base = wrappers::options_paths<ls_t<DUMMY>>;
     friend base;
-    static constexpr const char* name = "ls";
+    static constexpr const char * name() { return "ls"; }
 
 public:
     enum format_styles

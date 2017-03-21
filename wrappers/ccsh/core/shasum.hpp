@@ -13,7 +13,7 @@ class shasum_t : public wrappers::options_paths<shasum_t<NAME>>
 {
     using base = wrappers::options_paths<shasum_t<NAME>>;
     friend base;
-    static constexpr const char* name = NAME;
+    static constexpr const char * name() { return NAME; }
 
 public:
 

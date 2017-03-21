@@ -12,7 +12,7 @@ class od_t : public wrappers::options_paths<od_t>
 {
     using base = wrappers::options_paths<od_t>;
     friend base;
-    static constexpr const char* name = "od";
+    static constexpr const char * name() { return "od"; }
 
 public:
 

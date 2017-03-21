@@ -12,7 +12,7 @@ class sum_t : public wrappers::options_paths<sum_t>
 {
     using base = wrappers::options_paths<sum_t>;
     friend base;
-    static constexpr const char* name = "sum";
+    static constexpr const char * name() { return "sum"; }
 
 public:
 

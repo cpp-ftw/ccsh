@@ -52,17 +52,17 @@ protected:
 public:
 
     options_paths()
-        : command_native(DERIVED::name)
+        : command_native(DERIVED::name())
         , paths()
     {}
 
     options_paths(std::vector<fs::path> const& paths)
-        : command_native(DERIVED::name)
+        : command_native(DERIVED::name())
         , paths(fs::expand(paths))
     {}
 
     options_paths(fs::path const& p)
-        : command_native(DERIVED::name)
+        : command_native(DERIVED::name())
         , paths(fs::expand(p))
     {}
 

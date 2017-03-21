@@ -12,7 +12,7 @@ class fold_t : public wrappers::options_paths<fold_t>
 {
     using base = wrappers::options_paths<fold_t>;
     friend base;
-    static constexpr const char* name = "fold";
+    static constexpr const char * name() { return "fold"; }
 
 public:
 

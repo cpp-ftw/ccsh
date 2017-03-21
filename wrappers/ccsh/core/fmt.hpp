@@ -12,7 +12,7 @@ class fmt_t : public wrappers::options_paths<fmt_t>
 {
     using base = wrappers::options_paths<fmt_t>;
     friend base;
-    static constexpr const char* name = "fmt";
+    static constexpr const char * name() { return "fmt"; }
 
 public:
 

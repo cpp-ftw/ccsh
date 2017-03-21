@@ -12,7 +12,7 @@ class cksum_t : public wrappers::options_paths<cksum_t>
 {
     using base = wrappers::options_paths<cksum_t>;
     friend base;
-    static constexpr const char* name = "cksum";
+    static constexpr const char * name() { return "cksum"; }
 
 public:
 

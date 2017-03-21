@@ -11,7 +11,7 @@ namespace core {
 class nl_t : public wrappers::options_paths<nl_t>
 {
     using base = wrappers::options_paths<nl_t>;
-    static constexpr const char* name = "nl";
+    static constexpr const char * name() { return "nl"; }
     friend base;
 
 public:

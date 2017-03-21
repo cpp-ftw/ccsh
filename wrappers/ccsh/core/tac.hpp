@@ -10,7 +10,7 @@ namespace core {
 class tac_t : public wrappers::options_paths<tac_t>
 {
     using base = wrappers::options_paths<tac_t>;
-    static constexpr const char* name = "tac";
+    static constexpr const char * name() { return "tac"; }
     friend base;    
 
 public:

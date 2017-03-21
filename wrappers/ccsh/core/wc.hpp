@@ -12,7 +12,7 @@ class wc_t : public wrappers::options_paths<wc_t>
 {
     using base = wrappers::options_paths<wc_t>;
     friend base;
-    static constexpr const char* name = "wc";
+    static constexpr const char * name() { return "wc"; }
 
 public:
 

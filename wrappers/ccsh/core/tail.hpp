@@ -15,7 +15,7 @@ class tail_t : public wrappers::options_paths<tail_t>
 {
     using base = wrappers::options_paths<tail_t>;
     friend base;
-    static constexpr const char* name = "tail";
+    static constexpr const char * name() { return "tail"; }
 
 public:
     enum follow_type

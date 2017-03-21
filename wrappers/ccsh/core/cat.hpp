@@ -12,7 +12,7 @@ class cat_t : public wrappers::options_paths<cat_t>
 {
     using base = wrappers::options_paths<cat_t>;
     friend base;
-    static constexpr const char* name = "cat";
+    static constexpr const char * name() { return "cat"; }
 
 public:
 
