@@ -70,7 +70,7 @@ protected:
         std::vector<const char*> argv;
         argv.reserve(args.size() + 2);
 
-        argv.push_back(p.string().c_str());
+        argv.push_back(p.c_str());
         for(const auto& s : this->args)
             argv.push_back(s.c_str());
 
