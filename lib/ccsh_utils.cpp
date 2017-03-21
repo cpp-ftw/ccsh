@@ -1,6 +1,7 @@
 #include <ccsh/ccsh_utils.hpp>
 #include "ccsh_internals.hpp"
 
+#include <cstring>
 #include <sys/types.h>
 #include <unistd.h>
 #include <limits.h>
@@ -120,6 +121,16 @@ bool is_user_possibly_elevated()
 
     return uid <= 0 || uid != euid;
 }
+
+stdc_error::stdc_error(int no)
+    : std::runtime_error(strerror(errno))
+    , error_number(no)
+{}
+
+stdc_error::stdc_error(int no, std::string const& msg)
+    : std::runtime_error(msg.empty() ? strerror(no) : msg + ": " + strerror(no))
+    , error_number(no)
+{}
 
 env_var::operator std::string() const
 {

@@ -2,6 +2,7 @@
 #define CCSH_INTERNALS_HPP_INCLUDED
 
 #include <string>
+#include <cstring>
 #include <cstddef>
 #include <unistd.h>
 
