@@ -6,7 +6,7 @@
 #include <string>
 #include <cstddef>
 
-#include <boost/filesystem.hpp>
+#include "filesystem.hpp"
 
 #include "CWrapper.hpp"
 
