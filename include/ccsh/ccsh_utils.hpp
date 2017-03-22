@@ -13,8 +13,6 @@
 namespace ccsh {
 
 namespace fs {
-using namespace boost::filesystem;
-
 std::vector<path> expand(path const& p);
 std::vector<path> expand(std::vector<path> const& paths);
 }
@@ -30,6 +28,8 @@ std::string get_hostname();
 std::string get_short_hostname();
 
 std::string get_shell_name();
+
+std::string get_ttyname();
 
 bool is_user_possibly_elevated();
 

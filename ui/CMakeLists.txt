@@ -9,5 +9,5 @@ include_directories(AFTER /opt/cling/include /opt/cling/include/cling/UserInterf
 link_directories(/opt/cling/lib)
 
 add_executable(ccsh ccsh_ui.cpp ccsh_custom_user_interface.cpp)
-target_link_libraries( ccsh PUBLIC cling clingUserInterface ccsh_lib ${Boost_LIBRARIES})
+target_link_libraries( ccsh PUBLIC cling clingUserInterface ccsh_lib ${filesystem_lib})
 target_compile_options(ccsh PUBLIC -std=c++11 -Wall -Wextra -Wno-unused-parameter -pedantic -O3 -g -ggdb -fno-rtti)

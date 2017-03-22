@@ -88,6 +88,9 @@ int main(int argc, const char** argv)
         "-l", "ccsh_lib",                           // -l ccsh_lib
         "-I" + (p / "include").string(),            // -Iinclude
         "-I" + (p / "wrappers").string(),           // -Iwrappers
+#ifdef CCSH_FILESYSTEM_BOOST
+        "-DCCSH_FILESYSTEM_BOOST",                  // -DCCSH_FILESYSTEM_BOOST
+#endif
     };
 
     auto args = add_args(argc, argv, params);
