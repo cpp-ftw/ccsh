@@ -172,6 +172,21 @@ bool is_user_possibly_elevated()
     return uid <= 0 || uid != euid;
 }
 
+const char* env_var::get(std::string const& name)
+{
+    return getenv(name.c_str());
+}
+
+void env_var::set(std::string const& name, std::string const& value, bool override)
+{
+    stdc_thrower(try_set(name, value, override));
+}
+
+int env_var::try_set(std::string const& name, std::string const& value, bool override)
+{
+    return setenv(name.c_str(), value.c_str(), override);
+}
+
 stdc_error::stdc_error(int no)
     : std::runtime_error(strerror(errno))
     , error_number(no)
@@ -184,7 +199,7 @@ stdc_error::stdc_error(int no, std::string const& msg)
 
 env_var::operator std::string() const
 {
-    const char* result = getenv(name.c_str());
+    const char* result = get(name);
     return result == nullptr ? "" : result;
 }
 

@@ -9,6 +9,7 @@
 #include "ccsh_command.hpp"
 #include "ccsh_operators.hpp"
 #include "ccsh_tty.hpp"
+#include "ccsh_builtins.hpp"
 
 
 #endif // CCSH_HPP_INCLUDED

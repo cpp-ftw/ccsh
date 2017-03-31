@@ -55,6 +55,11 @@ class env_var
 {
     std::string name;
 public:
+
+    static const char* get(std::string const& name);
+    static void set(std::string const& name, std::string const& value, bool override = true);
+    static int try_set(std::string const& name, std::string const& value, bool override = true);
+
     env_var(std::string name)
         : name(std::move(name))
     {}

@@ -14,6 +14,12 @@ inline void stdc_thrower(int result)
         throw stdc_error();
 }
 
+inline void stdc_thrower(int result, std::string const& msg)
+{
+    if(result == -1)
+        throw stdc_error(errno, msg);
+}
+
 inline int shell_logic_or(int a, int b)
 {
     return a == 0 ? b : a;
@@ -68,6 +74,21 @@ line_splitter<FUNC> line_splitter_make(FUNC&& func, char delim = '\n')
     // Cannot be done better without type_traits because of "forwarding reference".
     return line_splitter<FUNC>(std::forward<FUNC>(func), delim);
 }
+
+template<typename FUNC>
+void tokenize_string(std::string const& str, std::string const& delimiters, FUNC&& func)
+{
+    std::string line = str;
+    char* saveptr = nullptr;
+    char* token = strtok_r(&line[0], delimiters.c_str(), &saveptr);
+
+    while(token != nullptr)
+    {
+        func(token);
+        token = strtok_r(nullptr, delimiters.c_str(), &saveptr);
+    }
+}
+
 
 } // namespace ccsh
 
