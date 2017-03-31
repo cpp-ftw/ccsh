@@ -8,79 +8,6 @@ namespace {
 
 using ccsh::fs::path;
 
-const path dot_path{"."};
-constexpr char dot{'.'};
-constexpr char slash{'.'};
-
-path normalize(path lhs)
-{
-    if(lhs.empty())
-        return lhs;
-
-    path temp;
-    path::iterator start(lhs.begin());
-    path::iterator last(lhs.end());
-    path::iterator stop(last--);
-    for(path::iterator itr(start); itr != stop; ++itr)
-    {
-        // ignore "." except at start and last
-        if(itr->native().size() == 1
-           && (itr->native())[0] == dot
-           && itr != start
-           && itr != last)
-            continue;
-
-        // ignore a name and following ".."
-        if(!temp.empty()
-           && itr->native().size() == 2
-           && (itr->native())[0] == dot
-           && (itr->native())[1] == dot) // dot dot
-        {
-            path::string_type lf(temp.filename().native());
-            if(lf.size() > 0
-               && (lf.size() != 1
-                   || (lf[0] != dot
-                       && lf[0] != slash))
-               && (lf.size() != 2
-                   || (lf[0] != dot
-                       && lf[1] != dot
-                   )
-               )
-                )
-            {
-                temp.remove_filename();
-                //// if not root directory, must also remove "/" if any
-                //if (temp.native().size() > 0
-                //  && temp.native()[temp.native().size()-1]
-                //    == separator)
-                //{
-                //  string_type::size_type rds(
-                //    root_directory_start(temp.native(), temp.native().size()));
-                //  if (rds == string_type::npos
-                //    || rds != temp.native().size()-1)
-                //  {
-                //    temp.m_pathname.erase(temp.native().size()-1);
-                //  }
-                //}
-
-                path::iterator next(itr);
-                if(temp.empty() && ++next != stop
-                   && next == last && *last == dot_path)
-                {
-                    temp /= dot_path;
-                }
-                continue;
-            }
-        }
-
-        temp /= *itr;
-    };
-
-    if(temp.empty())
-        temp /= dot_path;
-    return temp;
-}
-
 /* Do the work of changing to the directory NEWDIR. Handle symbolic
    link following, etc. This function *must* return with
    the_current_working_directory either set to NULL (in which case
@@ -94,9 +21,9 @@ int change_to_directory(path newdir, bool follow_symlinks)
     // TDIR is either
     // - the canonicalized absolute pathname of NEWDIR (follow_symlinks)
     // - or the absolute physical pathname of NEWDIR (!follow_symlinks).
-    std::error_code ec;
+    ccsh::fs::error_code ec;
     path tdir = follow_symlinks
-                          ? normalize(tcwd)
+                          ? ccsh::fs::self_lexically_normal(tcwd)
                           : ccsh::fs::canonical(tcwd, ec);
 
     // Use the canonicalized version of NEWDIR, or, if canonicalization
@@ -141,7 +68,7 @@ int change_to_directory(path newdir, bool follow_symlinks)
 int bindpwd(bool follow_symlinks, bool eflag)
 {
     path tcwd = ccsh::get_current_path();
-    std::error_code ec;
+    ccsh::fs::error_code ec;
 
     if(follow_symlinks)
         tcwd = ccsh::fs::canonical(tcwd, ec);

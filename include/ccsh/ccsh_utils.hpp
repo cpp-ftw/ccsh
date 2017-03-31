@@ -6,7 +6,7 @@
 #include <string>
 #include <cstddef>
 
-#include "filesystem.hpp"
+#include "ccsh_filesystem.hpp"
 
 #include "CWrapper.hpp"
 

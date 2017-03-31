@@ -33,7 +33,7 @@ int pwd_t::runx(int, int out, int) const
         return EXIT_SUCCESS;
     }
 
-    std::error_code ec;
+    fs::error_code ec;
     fs::path tcwd = fs::current_path(ec);
     if(verbatim_pwd)
         tcwd = fs::canonical(tcwd);
@@ -51,6 +51,5 @@ int pwd_t::runx(int, int out, int) const
 
     return EXIT_SUCCESS;
 }
-
 
 }
