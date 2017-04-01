@@ -136,6 +136,9 @@ void custom_user_interface::run_interactively()
             prompt = prompt_factory();
             if(indent > 0) // Continuation requested.
                 prompt += '?' + std::string(indent * 3, ' ');
+
+            std::cout.flush();
+            std::cerr.flush();
         }
         catch(cling::InterpreterException& e)
         {
