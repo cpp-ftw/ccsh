@@ -1,8 +1,5 @@
 #include <ccsh/builtins/pwd.hpp>
 #include "../ccsh_internals.hpp"
-#include <cstring>
-#include <iostream>
-#include <cstdlib>
 
 namespace {
 
