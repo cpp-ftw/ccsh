@@ -4,6 +4,9 @@
 #include "ccsh_command.hpp"
 #include <iostream>
 
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wunused-comparison"
+#endif
 
 namespace ccsh {
 
@@ -168,6 +171,11 @@ inline std::string dollar(command const& c)
 }
 
 #ifdef CCSH_NON_STANDARD_DOLLAR
+
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wdollar-in-identifier-extension"
+#endif
+
 inline env_var $(std::string const& name)
 {
     return dollar(name);

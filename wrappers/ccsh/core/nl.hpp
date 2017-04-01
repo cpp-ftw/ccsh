@@ -33,9 +33,9 @@ public:
 private:
 
     static constexpr std::array<const char*, 6> numbering_style_mapping()
-        { return { "a", "a", "t", "t", "n", "n" }; };
+        { return { { "a", "a", "t", "t", "n", "n" } }; };
     static constexpr std::array<const char*, 6> numbering_format_mapping()
-        { return { "ln", "ln", "rn", "rn", "rz", "rz" }; };
+        { return { { "ln", "ln", "rn", "rn", "rz", "rz" } }; };
 
     static const char* flag_to_str(numbering_style flag)
     {

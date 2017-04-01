@@ -26,7 +26,7 @@ public:
 
 private:
     static constexpr std::array<const char*, 2> follow_type_mapping()
-    { return { "descriptor", "name", }; };
+    { return { { "descriptor", "name", } }; };
 
 public:
 
