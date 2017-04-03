@@ -4,6 +4,7 @@ project (ccsh)
 
 option(WITH_LIB   "Compile shared library." ON)
 option(WITH_CLING "Compile cling front-end (interactive shell) as well, requires cling at /opt/cling." ON)
+option(WITH_SAMPLE  "Compile sample code as well, not required for release." ON)
 option(WITH_TEST  "Compile test code as well, not required for release." ON)
 
 option(BOOST_FILESYSTEM  "Use boost::filesystem instead of std::[experimental::]filesystem" OFF)
@@ -20,6 +21,10 @@ include_directories(include)
 
 if(WITH_LIB)
     add_subdirectory(lib)
+endif()
+
+if(WITH_SAMPLE)
+    add_subdirectory(sample)
 endif()
 
 if(WITH_TEST)

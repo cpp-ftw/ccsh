@@ -6,7 +6,12 @@ include_directories(${SHARED_LIB_INCLUDE_DIR})
 include_directories(${WRAPPERS_INCLUDE_DIR})
 
 file(GLOB_RECURSE wrappers ../wrappers/*.hpp)
+file(GLOB_RECURSE tests test*.cpp)
 
-add_executable(ccsh_test main.cpp ${wrappers})
-target_link_libraries( ccsh_test PUBLIC ccsh_lib ${filesystem_lib})
+enable_testing()
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+add_executable(ccsh_test ${tests} ${wrappers})
+target_link_libraries( ccsh_test PUBLIC ccsh_lib ${filesystem_lib} ${GTEST_BOTH_LIBRARIES})
 target_compile_options(ccsh_test PUBLIC -std=c++11 -Wall -Wextra -pedantic -O0 -g -ggdb)
