@@ -23,6 +23,8 @@ void test0()
 
     ccsh::shell("cat", {f.string()});
 
+    ccsh::shell("ls") | ccsh::shell("cat");
+
     ccsh::shell("ls", {"-lh"}) | ccsh::shell("cowsay") | ccsh::shell("lolcat");
 
     std::string str;

@@ -5,7 +5,7 @@
 
 namespace ccsh {
 
-class cd_t : public internal::command_base, public internal::command_builder_base
+class cd_t : public internal::command_builtin
 {
     fs::path p;
     bool eflag = true;

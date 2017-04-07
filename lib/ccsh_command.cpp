@@ -29,81 +29,6 @@ constexpr int fopen_flags(stdfd fd, bool append = false)
 }
 
 
-enum fork_action
-{
-    FORK_CHILD_READ = 0,
-    FORK_CHILD_WRITE = 1
-};
-
-template<typename FUNC_CHILD, typename FUNC_PARENT>
-std::pair<int, int> fork_functor_helper(fork_action child_action, FUNC_CHILD const& func_child,
-                                        FUNC_PARENT const& func_parent)
-{
-    int fail_pipe[2];
-    stdc_thrower(pipe(fail_pipe));
-
-    int pipefd[2];
-    stdc_thrower(pipe(pipefd));
-
-    pid_t pid = fork();
-    stdc_thrower(pid);
-
-    if(pid == 0) // Child process
-    {
-        int fail_code;
-        close_fd(pipefd[!child_action]);
-        close_fd(fail_pipe[0]);
-
-        if(fcntl(fail_pipe[1], F_SETFD, FD_CLOEXEC) < 0)
-        {
-            fail_code = errno;
-            goto fail;
-        }
-
-        try
-        {
-            int result0 = func_child(pipefd[child_action]);
-            close_fd(fail_pipe[1]);
-            _exit(result0);
-        }
-        catch(stdc_error const& x)
-        {
-            fail_code = x.no();
-        }
-
-fail:
-        write(fail_pipe[1], &fail_code, sizeof(int));
-        close_fd(fail_pipe[1]);
-        _exit(-1);
-    }
-    else // Parent process
-    {
-        close_fd(fail_pipe[1]);
-        open_wrapper temp1(fail_pipe[0]);
-
-        close_fd(pipefd[child_action]);
-        open_wrapper temp2(pipefd[!child_action]);
-
-        int fail_code;
-        ssize_t result = read(fail_pipe[0], &fail_code, sizeof(int));
-        stdc_thrower(result);
-
-        if(result > 0)
-            throw stdc_error(fail_code);
-
-        int result1 = func_parent(pipefd[!child_action]);
-        close_fd(pipefd[!child_action]);
-
-        int status;
-        if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
-        {
-            return {WEXITSTATUS(status), result1};
-        }
-
-        return {0, result1};
-    }
-}
-
 } // namespace
 
 using namespace std::placeholders;
@@ -113,7 +38,8 @@ int command_base::last_exit_code = 0;
 int command_base::run() const
 {
     no_autorun();
-    int result = runx(STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO);
+    start_run(STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO, std::vector<int>());
+    int result = finish_run();
     last_exit_code = result;
     return result;
 }
@@ -138,7 +64,7 @@ void command_base::run_autorun() noexcept
 }
 
 
-int command_native::runx(int in, int out, int err) const
+void command_native::start_run(int in, int out, int err, std::vector<int> unused_fds) const
 {
     int fail_pipe[2];
     stdc_thrower(pipe(fail_pipe));
@@ -151,6 +77,9 @@ int command_native::runx(int in, int out, int err) const
     if(pid == 0)
     {
         close_fd(fail_pipe[0]);
+
+        for(int fd : unused_fds)
+            close_fd(fd);
 
         if(in != STDIN_FILENO)
             if(dup2(in, STDIN_FILENO) < 0)
@@ -185,52 +114,84 @@ fail:
         if(result > 0)
             throw stdc_error(fail_code, p.string());
 
-        int status;
-        if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
+        auto f = [pid]
         {
-            return WEXITSTATUS(status);
-        }
+            int status;
+            if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
+            {
+                return WEXITSTATUS(status);
+            }
+            return 0;
+        };
+
+        this->result = std::async(std::launch::async, f);
     }
-    return 0;
 }
 
-int command_pipe::runx(int in, int out, int err) const
+int command_native::finish_run() const
 {
-    auto f1 = std::bind(&command::runx, std::ref(left), in, _1, err);
-    auto f2 = std::bind(&command::runx, std::ref(right), _1, out, err);
-
-    auto p = fork_functor_helper(FORK_CHILD_WRITE, f1, f2);
-    return shell_logic_or(p.first, p.second);
+    return result.get();
 }
 
-int command_in_mapping::runx(int, int out, int err) const
+void command_pipe::start_run(int in, int out, int err, std::vector<int> left_unused_fds) const
+{
+    std::vector<int> right_unused_fds = left_unused_fds;
+    int pipefd[2];
+    stdc_thrower(pipe(pipefd));
+    left_unused_fds.push_back(pipefd[0]);
+    right_unused_fds.push_back(pipefd[1]);
+    left.start_run(in, pipefd[1], err, std::move(left_unused_fds));
+    right.start_run(pipefd[0], out, err, std::move(right_unused_fds));
+    close_fd(pipefd[0]);
+    close_fd(pipefd[1]);
+}
+
+int command_pipe::finish_run() const
+{
+    int result1 = left.finish_run();
+    int result2 = right.finish_run();
+    return shell_logic_or(result1, result2);
+}
+
+void command_in_mapping::start_run(int, int out, int err, std::vector<int> unused_fds) const
 {
     if(init_func) init_func();
-    auto f1 = std::bind(&command::runx, std::ref(c), _1, out, err);
 
-    auto f2 = [this](int pipefd)
+    int pipefd[2];
+    stdc_thrower(pipe(pipefd));
+    unused_fds.push_back(pipefd[1]);
+
+    auto f2 = [this, pipefd](int fd)
     {
+        open_wrapper temp(fd);
         char buf[BUFSIZ];
         ssize_t count;
         while((count = func(buf, BUFSIZ)) > 0)
-            stdc_thrower(write(pipefd, buf, count));
+            stdc_thrower(write(fd, buf, count));
 
         return 0;
     };
 
-    return fork_functor_helper(FORK_CHILD_WRITE, f2, f1).first;
+    c.start_run(pipefd[0], out, err, std::move(unused_fds));
+    close_fd(pipefd[0]);
+    result = std::async(std::launch::async, f2, pipefd[1]);
 }
 
-int command_out_mapping::runx(int in, int, int err) const
+void command_out_mapping::start_run(int in, int, int err, std::vector<int> unused_fds) const
 {
     if(init_func) init_func();
-    auto f1 = std::bind(&command::runx, std::ref(c), in, _1, err);
 
-    auto f2 = [this](int pipefd)
+    int pipefd[2];
+    stdc_thrower(pipe(pipefd));
+    unused_fds.push_back(pipefd[0]);
+
+    auto f2 = [this, pipefd](int fd)
     {
+        open_wrapper temp(fd);
+
         char buf[BUFSIZ];
         ssize_t count;
-        while((count = read(pipefd, buf, BUFSIZ)) > 0)
+        while((count = read(fd, buf, BUFSIZ)) > 0)
             func(buf, count);
 
         stdc_thrower(count);
@@ -238,19 +199,26 @@ int command_out_mapping::runx(int in, int, int err) const
         return 0;
     };
 
-    return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
+    c.start_run(in, pipefd[1], err, std::move(unused_fds));
+    close_fd(pipefd[1]);
+    result = std::async(std::launch::async, f2, pipefd[0]);
 }
 
-int command_err_mapping::runx(int in, int out, int) const
+void command_err_mapping::start_run(int in, int out, int, std::vector<int> unused_fds) const
 {
     if(init_func) init_func();
-    auto f1 = std::bind(&command::runx, std::ref(c), in, out, _1);
 
-    auto f2 = [this](int pipefd)
+    int pipefd[2];
+    unused_fds.push_back(pipefd[0]);
+    stdc_thrower(pipe(pipefd));
+
+    auto f2 = [this, pipefd](int fd)
     {
+        open_wrapper temp(fd);
+
         char buf[BUFSIZ];
         ssize_t count;
-        while((count = read(pipefd, buf, BUFSIZ)) > 0)
+        while((count = read(fd, buf, BUFSIZ)) > 0)
             func(buf, count);
 
         stdc_thrower(count);
@@ -258,7 +226,9 @@ int command_err_mapping::runx(int in, int out, int) const
         return 0;
     };
 
-    return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
+    c.start_run(in, out, pipefd[1], std::move(unused_fds));
+    close_fd(pipefd[1]);
+    result = std::async(std::launch::async, f2, pipefd[0]);
 }
 
 template<stdfd DESC>
@@ -269,12 +239,12 @@ command_redirect<DESC>::command_redirect(command const& c, fs::path const& p, bo
 {}
 
 template<stdfd DESC>
-int command_redirect<DESC>::runx(int in, int out, int err) const
+void command_redirect<DESC>::start_run(int in, int out, int err, std::vector<int> unused_fds) const
 {
     open_wrapper fd{open(p.c_str(), flags, fopen_w_mode)};
     int fds[int(stdfd::count)] = {in, out, err};
     fds[int(DESC)] = fd.get();
-    return c.runx(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)]);
+    c.start_run(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)], std::move(unused_fds));
 }
 
 template
@@ -294,11 +264,11 @@ command_fd<DESC>::command_fd(command const& c, int fd)
 {}
 
 template<stdfd DESC>
-int command_fd<DESC>::runx(int in, int out, int err) const
+void command_fd<DESC>::start_run(int in, int out, int err, std::vector<int> unused_fds) const
 {
     int fds[int(stdfd::count)] = {in, out, err};
     fds[int(DESC)] = ow.get();
-    return c.runx(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)]);
+    c.start_run(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)], std::move(unused_fds));
 }
 
 template
@@ -325,47 +295,61 @@ std::string sh_escape(std::string const& str)
     replace(temp, "'", "'\\''");
     return " '" + temp + "' ";
 }
+
+std::string make_source_command(fs::path const& p, std::vector<std::string> const& args)
+{
+    std::string cmdstr = "source " + sh_escape(p.string());
+    for(std::string const& str : args)
+        cmdstr += sh_escape(str);
+
+    cmdstr += " && (printenv -0) >&";
+    return cmdstr;
 }
 
-int command_source::runx(int in, int out, int err) const
+void env_putter(std::string const& str)
 {
-    auto f1 = [=](int fd) -> int
-    {
-        std::string cmdstr = "source " + sh_escape(p.string());
-        for(std::string const& str : args)
-            cmdstr += sh_escape(str);
+    auto eq_sign = str.find('=');
+    if(eq_sign == std::string::npos) // should never happen
+        throw stdc_error(errno, "Bad format from printenv");
 
-        cmdstr += " && (/bin/sh -c \"printenv -0\") >&" + std::to_string(fd);
+    std::string env_name = str.substr(0, eq_sign);
+    std::string env_value = str.substr(++eq_sign);
 
-        command_native cmd("/bin/sh", {"-c", cmdstr});
-        return cmd.runx(in, out, err);
-    };
+    stdc_thrower(setenv(env_name.c_str(), env_value.c_str(), true));
+}
 
-    auto env_putter = [](std::string const& str)
-    {
-        auto eq_sign = str.find('=');
-        if(eq_sign == std::string::npos) // should never happen
-            throw stdc_error(errno, "Bad format from printenv");
+auto env_applier = [](int fd) -> int
+{
+    auto env_splitter = line_splitter_make(env_putter, '\0');
+    open_wrapper temp(fd);
 
-        std::string env_name = str.substr(0, eq_sign);
-        std::string env_value = str.substr(++eq_sign);
+    char buf[BUFSIZ];
+    ssize_t count;
+    while((count = read(fd, buf, BUFSIZ)) > 0)
+        env_splitter(buf, count);
 
-        stdc_thrower(setenv(env_name.c_str(), env_value.c_str(), true));
-    };
+    return 0;
+};
 
-    auto f2 = [=](int fd) -> int
-    {
-        auto ls = line_splitter_make(env_putter, '\0');
+}
 
-        char buf[BUFSIZ];
-        ssize_t count;
-        while((count = read(fd, buf, BUFSIZ)) > 0)
-            ls(buf, count);
+command_source::command_source(fs::path const& p, std::vector<std::string> const& args)
+    : cmd("/bin/sh", {"-c", ""})
+    , cmdstr(make_source_command(p, args))
+{}
 
-        return 0;
-    };
 
-    return fork_functor_helper(FORK_CHILD_WRITE, f1, f2).first;
+void command_source::start_run(int in, int out, int err, std::vector<int> unused_fds) const
+{
+    int pipefd[2];
+    stdc_thrower(pipe(pipefd));
+    unused_fds.push_back(pipefd[0]);
+
+    cmd.args[1] = cmdstr + std::to_string(pipefd[1]);
+    cmd.start_run(in, out, err, std::move(unused_fds));
+    close_fd(pipefd[1]);
+
+    result = std::async(std::launch::async, env_applier, pipefd[0]);
 }
 
 } // namespace internal

@@ -8,6 +8,8 @@
 #include <vector>
 #include <cstddef>
 #include <functional>
+#include <future>
+#include <utility>
 
 namespace ccsh {
 namespace internal {
@@ -47,7 +49,9 @@ class command_base
     friend class command;
 
 public:
-    virtual int runx(int, int, int) const = 0;
+    virtual void start_run(int, int, int, std::vector<int> unused_fds) const = 0;
+    virtual int finish_run() const = 0;
+
     int run() const;
 
     void no_autorun() const
@@ -59,12 +63,32 @@ public:
     {}
 };
 
-class command_native : public command_base
+class command_async
+{
+protected:
+    mutable std::future<int> result;
+
+    command_async() = default;
+    command_async(command_async&&) = default;
+    command_async(command_async const&)
+    {}
+
+    command_async& operator=(command_async&& other) = default;
+    command_async& operator=(command_async const&)
+    {
+        result = {};
+        return *this;
+    }
+};
+
+class command_native : public command_base, private command_async
 {
 protected:
 
     fs::path p;
     std::vector<std::string> args;
+
+    friend class command_source;
 
     virtual std::vector<const char*> get_argv() const
     {
@@ -91,7 +115,8 @@ public:
         p = dir / p;
     }
 
-    int runx(int in, int out, int err) const override final;
+    void start_run(int in, int out, int err, std::vector<int> unused_fds) const override final;
+    virtual int finish_run() const override final;
 };
 
 class command_runnable : protected std::shared_ptr<command_base>
@@ -122,9 +147,14 @@ public:
             (*this)->no_autorun();
     }
 
-    int runx(int in, int out, int err) const
+    void start_run(int in, int out, int err, std::vector<int> unused_fds) const
     {
-        return (*this)->runx(in, out, err);
+        (*this)->start_run(in, out, err, std::move(unused_fds));
+    }
+
+    int finish_run() const
+    {
+        return (*this)->finish_run();
     }
 
     ~command_runnable()
@@ -187,12 +217,8 @@ public:
     }
 
     using command_runnable::run;
-
-    // cannot "using" this because std::bind would stop working
-    int runx(int in, int out, int err) const
-    {
-        return command_runnable::runx(in, out, err);
-    }
+    using command_runnable::start_run;
+    using command_runnable::finish_run;
 };
 
 template<typename T>
@@ -229,31 +255,53 @@ public:
     {}
 };
 
-class command_and final : public command_pair
+class command_conditonal : public command_pair, protected command_async
 {
 public:
     using command_pair::command_pair;
 
-    int runx(int in, int out, int err) const override
+    void start_run(int in, int out, int err, std::vector<int> unused_fds) const override final
     {
-        int lres = left.runx(in, out, err);
-        if(lres != 0)
-            return lres;
-        return right.runx(in, out, err);
+        auto f = [=]
+        {
+            int lres = this->left.finish_run();
+            if(!start_right(lres))
+                return lres;
+            this->right.start_run(in, out, err, std::move(unused_fds));
+            return this->right.finish_run();
+        };
+
+        left.start_run(in, out, err, std::move(unused_fds));
+        result = std::async(std::launch::async, f);
+    }
+
+    int finish_run() const override
+    {
+        return result.get();
+    }
+
+    virtual bool start_right(int left_result) const = 0;
+};
+
+class command_and final : public command_conditonal
+{
+public:
+    using command_conditonal::command_conditonal;
+
+    bool start_right(int left_result) const override
+    {
+        return left_result == 0;
     }
 };
 
-class command_or final : public command_pair
+class command_or final : public command_conditonal
 {
 public:
-    using command_pair::command_pair;
+    using command_conditonal::command_conditonal;
 
-    int runx(int in, int out, int err) const override
+    bool start_right(int left_result) const override
     {
-        int lres = left.runx(in, out, err);
-        if(lres == 0)
-            return lres;
-        return right.runx(in, out, err);
+        return left_result != 0;
     }
 };
 
@@ -265,7 +313,10 @@ public:
         : b(b)
     {}
 
-    int runx(int, int, int) const override
+    void start_run(int, int, int, std::vector<int>) const override
+    {}
+
+    int finish_run() const override
     {
         return !b; // logical inversion of shell logic
     }
@@ -275,10 +326,11 @@ class command_pipe final : public command_pair
 {
 public:
     using command_pair::command_pair;
-    int runx(int in, int out, int err) const override;
+    void start_run(int in, int out, int err, std::vector<int> unused_fds) const override;
+    int finish_run() const override;
 };
 
-class command_mapping : public command_base
+class command_mapping : public command_base, protected command_async
 {
 protected:
     command c;
@@ -291,27 +343,33 @@ public:
         , func(f)
         , init_func(init_func)
     {}
+
+    int finish_run() const override final
+    {
+        result.wait();
+        return c.finish_run();
+    }
 };
 
 class command_in_mapping final : public command_mapping
 {
 public:
     using command_mapping::command_mapping;
-    int runx(int, int, int) const override;
+    void start_run(int, int, int, std::vector<int>) const override;
 };
 
 class command_out_mapping final : public command_mapping
 {
 public:
     using command_mapping::command_mapping;
-    int runx(int, int, int) const override;
+    void start_run(int, int, int, std::vector<int>) const override;
 };
 
 class command_err_mapping final : public command_mapping
 {
 public:
     using command_mapping::command_mapping;
-    int runx(int, int, int) const override;
+    void start_run(int, int, int, std::vector<int>) const override;
 };
 
 template<stdfd DESC>
@@ -322,7 +380,11 @@ class command_redirect final : public command_base
     int flags;
 public:
     command_redirect(command const& c, fs::path const& p, bool append = false);
-    int runx(int in, int out, int err) const override;
+    void start_run(int in, int out, int err, std::vector<int>) const override;
+    int finish_run() const override
+    {
+        return c.finish_run();
+    }
 };
 
 template<stdfd DESC>
@@ -332,20 +394,47 @@ class command_fd final : public command_base
     open_wrapper ow;
 public:
     command_fd(command const& c, int fd);
-    int runx(int in, int out, int err) const override;
+    void start_run(int in, int out, int err, std::vector<int>) const override;
+    int finish_run() const override
+    {
+        return c.finish_run();
+    }
 };
 
-class command_source final : public command_base
+class command_source final : public command_base, protected command_async
 {
-    fs::path p;
-    std::vector<std::string> args;
-public:
-    command_source(fs::path const& p, std::vector<std::string> const& args = {})
-        : p(p)
-        , args(args)
-    {}
+    mutable command_native cmd;
+    std::string cmdstr;
 
-    int runx(int in, int out, int err) const override;
+public:
+    command_source(fs::path const& p, std::vector<std::string> const& args = {});
+
+    void start_run(int in, int out, int err, std::vector<int>) const override;
+    int finish_run() const override
+    {
+        result.wait();
+        return cmd.finish_run();
+    }
+};
+
+class command_builtin : public command_base, command_builder_base
+{
+private:
+    mutable int result;
+public:
+    using command_base::command_base;
+
+    virtual int runx(int in, int out, int err) const = 0;
+
+    void start_run(int in, int out, int err, std::vector<int>) const override
+    {
+        result = runx(in, out, err);
+    }
+
+    int finish_run() const override
+    {
+        return result;
+    }
 };
 
 } // namespace internal
