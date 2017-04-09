@@ -58,7 +58,7 @@ fs::path get_home()
 
     std::unique_ptr<char[]> buf{new char[bufsize]};
 
-    if(getpwuid_r(getuid(), &pwd, buf.get(), bufsize, &result) != 0 ||
+    if(getpwuid_r(getuid(), &pwd, buf.get(), std::size_t(bufsize), &result) != 0 ||
        result == nullptr ||
        result->pw_dir == nullptr)
     {

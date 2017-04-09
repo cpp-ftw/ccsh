@@ -18,18 +18,6 @@ using command_functor_raw  = std::function<ssize_t(char*, std::size_t)>;
 using command_functor_init = std::function<void(void)>;
 using command_functor_line = std::function<void(std::string const&)>;
 
-class command_builder_base
-{
-    template<typename>
-    friend
-    class command_holder;
-
-    struct ccsh_abstract_guard_t
-    {
-    };
-    virtual void ccsh_abstract_guard(ccsh_abstract_guard_t) const = 0;
-};
-
 template<typename>
 class command_holder;
 
@@ -177,9 +165,6 @@ class command_holder : public TRAITS
     command_holder(command_holder&& old) = default;
     command_holder& operator=(command_holder const& other) = default;
     command_holder& operator=(command_holder&& old) = default;
-
-    void ccsh_abstract_guard(command_builder_base::ccsh_abstract_guard_t) const override
-    {}
 
 public:
 
@@ -417,7 +402,7 @@ public:
     }
 };
 
-class command_builtin : public command_base, command_builder_base
+class command_builtin : public command_base
 {
 private:
     mutable int result;

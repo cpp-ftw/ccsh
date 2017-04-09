@@ -32,7 +32,7 @@ namespace ccsh {
 namespace wrappers {
 
 template<typename DERIVED>
-class options_paths : public internal::command_native, public internal::command_builder_base
+class options_paths : public internal::command_native
 {
 protected:
     std::vector<fs::path> paths;

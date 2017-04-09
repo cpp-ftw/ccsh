@@ -154,7 +154,7 @@ void command_in_mapping::start_run(int, int out, int err, std::vector<int> unuse
         char buf[BUFSIZ];
         ssize_t count;
         while((count = func(buf, BUFSIZ)) > 0)
-            stdc_thrower(CCSH_RETRY_HANDLER(write(fd, buf, count)));
+            stdc_thrower(CCSH_RETRY_HANDLER(write(fd, buf, std::size_t(count))));
 
         return 0;
     };
@@ -179,7 +179,7 @@ void command_out_mapping::start_run(int in, int, int err, std::vector<int> unuse
         char buf[BUFSIZ];
         ssize_t count;
         while((count = read(fd, buf, BUFSIZ)) > 0)
-            func(buf, count);
+            func(buf, std::size_t(count));
 
         stdc_thrower(count);
 
@@ -206,7 +206,7 @@ void command_err_mapping::start_run(int in, int out, int, std::vector<int> unuse
         char buf[BUFSIZ];
         ssize_t count;
         while((count = read(fd, buf, BUFSIZ)) > 0)
-            func(buf, count);
+            func(buf, std::size_t(count));
 
         stdc_thrower(count);
 
@@ -313,7 +313,7 @@ auto env_applier = [](int fd) -> int
     char buf[BUFSIZ];
     ssize_t count;
     while((count = read(fd, buf, BUFSIZ)) > 0)
-        env_splitter(buf, count);
+        env_splitter(buf, std::size_t(count));
 
     return 0;
 };
