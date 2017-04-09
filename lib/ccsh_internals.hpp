@@ -1,20 +1,24 @@
 #ifndef CCSH_INTERNALS_HPP_INCLUDED
 #define CCSH_INTERNALS_HPP_INCLUDED
 
+#include <ccsh/ccsh_utils.hpp>
+
 #include <string>
 #include <cstring>
 #include <cstddef>
+#include <cstdint>
 #include <unistd.h>
+#include <fcntl.h>
 
-namespace ccsh {
+namespace ccsh { namespace internal {
 
-inline void stdc_thrower(int result)
+inline void stdc_thrower(std::intmax_t result)
 {
     if(result == -1)
         throw stdc_error();
 }
 
-inline void stdc_thrower(int result, std::string const& msg)
+inline void stdc_thrower(std::intmax_t result, std::string const& msg)
 {
     if(result == -1)
         throw stdc_error(errno, msg);
@@ -28,6 +32,21 @@ inline int shell_logic_or(int a, int b)
 inline void close_fd(int fd) noexcept
 {
     while(close(fd) == -1 && errno == EINTR);
+}
+
+constexpr mode_t fopen_w_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+
+constexpr int fopen_flags(stdfd fd, bool append = false)
+{
+    return fd == stdfd::in ? O_RDONLY :
+           (append ?
+            (O_WRONLY | O_CREAT | O_APPEND) :
+            (O_WRONLY | O_CREAT | O_TRUNC));
+}
+
+inline void close_on_exec(int fd)
+{
+    stdc_thrower(fcntl(fd, F_SETFD, FD_CLOEXEC));
 }
 
 inline ssize_t mapping_appender(std::string& str, char* buf, std::size_t s)
@@ -90,6 +109,6 @@ void tokenize_string(std::string const& str, std::string const& delimiters, FUNC
 }
 
 
-} // namespace ccsh
+}} // namespace ccsh::internal
 
 #endif // CCSH_INTERNALS_HPP_INCLUDED
