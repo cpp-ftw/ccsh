@@ -95,7 +95,7 @@ fs::path get_current_path_abbreviated()
 std::string get_hostname()
 {
     char buf[HOST_NAME_MAX + 1];
-    stdc_thrower(gethostname(buf, sizeof(buf)));
+    internal::stdc_thrower(gethostname(buf, sizeof(buf)));
     return buf;
 }
 
@@ -135,7 +135,7 @@ const char* env_var::get(std::string const& name)
 
 void env_var::set(std::string const& name, std::string const& value, bool override)
 {
-    stdc_thrower(try_set(name, value, override));
+    internal::stdc_thrower(try_set(name, value, override));
 }
 
 int env_var::try_set(std::string const& name, std::string const& value, bool override)
@@ -161,7 +161,7 @@ env_var::operator std::string() const
 
 env_var& env_var::operator=(std::string const& str)
 {
-    stdc_thrower(setenv(name.c_str(), str.c_str(), true));
+    internal::stdc_thrower(setenv(name.c_str(), str.c_str(), true));
     return *this;
 }
 

@@ -66,24 +66,24 @@ void command_native::start_run(int in, int out, int err, std::vector<int> unused
             close_fd(fd);
 
         if(in != STDIN_FILENO)
-            if(dup2(in, STDIN_FILENO) < 0)
+            if(CCSH_RETRY_HANDLER(dup2(in, STDIN_FILENO)) < 0)
                 goto fail;
 
         if(out != STDOUT_FILENO)
-            if(dup2(out, STDOUT_FILENO) < 0)
+            if(CCSH_RETRY_HANDLER(dup2(out, STDOUT_FILENO)) < 0)
                 goto fail;
 
         if(err != STDERR_FILENO)
-            if(dup2(err, STDERR_FILENO) < 0)
+            if(CCSH_RETRY_HANDLER(dup2(err, STDERR_FILENO)) < 0)
                 goto fail;
 
-        if(fcntl(fail_pipe[1], F_SETFD, FD_CLOEXEC) < 0)
+        if(CCSH_RETRY_HANDLER(fcntl(fail_pipe[1], F_SETFD, FD_CLOEXEC)) < 0)
             goto fail;
 
         execvp(argv[0], (char* const*)argv.data());
 fail:
         int fail_code = errno;
-        write(fail_pipe[1], &fail_code, sizeof(int));
+        CCSH_RETRY_HANDLER(write(fail_pipe[1], &fail_code, sizeof(int)));
         _exit(-1);
     }
     else
@@ -92,7 +92,7 @@ fail:
         open_wrapper temp(fail_pipe[0]);
 
         int fail_code;
-        ssize_t result = read(fail_pipe[0], &fail_code, sizeof(int));
+        ssize_t result = CCSH_RETRY_HANDLER(read(fail_pipe[0], &fail_code, sizeof(int)));
         stdc_thrower(result);
 
         if(result > 0)
@@ -101,9 +101,12 @@ fail:
         auto f = [pid]
         {
             int status;
-            if(waitpid(pid, &status, 0) < 0 || WIFEXITED(status) || WIFSIGNALED(status))
+            while(CCSH_RETRY_HANDLER(waitpid(pid, &status, 0)) >= 0)
             {
-                return WEXITSTATUS(status);
+                if(WIFEXITED(status))
+                    return WEXITSTATUS(status);
+                if(WIFSIGNALED(status))
+                    return -WTERMSIG(status);
             }
             return 0;
         };
@@ -151,7 +154,7 @@ void command_in_mapping::start_run(int, int out, int err, std::vector<int> unuse
         char buf[BUFSIZ];
         ssize_t count;
         while((count = func(buf, BUFSIZ)) > 0)
-            stdc_thrower(write(fd, buf, count));
+            stdc_thrower(CCSH_RETRY_HANDLER(write(fd, buf, count)));
 
         return 0;
     };
