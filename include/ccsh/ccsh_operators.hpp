@@ -146,6 +146,28 @@ inline command_runnable operator||(bool b, command const& a) // provided only fo
 
 /* ******************* logical operators ******************* */
 
+
+/* ******************* Sequencing operators ******************* */
+
+inline command_runnable operator,(command const& a, command const& b)
+{
+    return {new command_comma(a, b)};
+}
+
+inline command_runnable operator,(command const& a, bool b)
+{
+    return {new command_comma(a, command_runnable{new command_bool(b)})};
+}
+
+inline command_runnable operator,(bool b, command const& a) // provided only for consistency, useless anyways
+{
+    return {new command_comma(command_runnable{new command_bool(b)}, a)};
+}
+
+/* ******************* Sequencing operators ******************* */
+
+
+
 } // namespace internal
 
 namespace literals {

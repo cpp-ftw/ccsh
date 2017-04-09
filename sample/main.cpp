@@ -75,6 +75,10 @@ void test3()
 
 void test4()
 {
+    using namespace ccsh::core;
+
+    ls() , ls();
+
     ccsh::core::cat(__FILE__);
 }
 

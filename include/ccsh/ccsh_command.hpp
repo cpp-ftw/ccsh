@@ -290,6 +290,17 @@ public:
     }
 };
 
+class command_comma final : public command_conditonal
+{
+public:
+    using command_conditonal::command_conditonal;
+
+    bool start_right(int) const override
+    {
+        return true;
+    }
+};
+
 class command_bool final : public command_base
 {
     bool b;
