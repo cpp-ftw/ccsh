@@ -59,10 +59,12 @@ protected:
 
     command_async() = default;
     command_async(command_async&&) = default;
+
     command_async(command_async const&)
     {}
 
     command_async& operator=(command_async&& other) = default;
+
     command_async& operator=(command_async const&)
     {
         result = {};
@@ -375,12 +377,25 @@ class command_redirect final : public command_base
     command c;
     fs::path p;
     int flags;
+    mutable open_wrapper fd;
 public:
     command_redirect(command const& c, fs::path const& p, bool append = false);
     void start_run(int in, int out, int err, std::vector<int>) const override;
+
     int finish_run() const override
     {
-        return c.finish_run();
+        int result = 0;
+        try
+        {
+            result = c.finish_run();
+            fd = open_wrapper{};
+        }
+        catch(...)
+        {
+            fd = open_wrapper{};
+            throw;
+        }
+        return result;
     }
 };
 
@@ -392,6 +407,7 @@ class command_fd final : public command_base
 public:
     command_fd(command const& c, int fd);
     void start_run(int in, int out, int err, std::vector<int>) const override;
+
     int finish_run() const override
     {
         return c.finish_run();
@@ -407,6 +423,7 @@ public:
     command_source(fs::path const& p, std::vector<std::string> const& args = {});
 
     void start_run(int in, int out, int err, std::vector<int>) const override;
+
     int finish_run() const override
     {
         result.wait();
@@ -443,6 +460,7 @@ public:
     {}
 
     void start_run(int in, int out, int err, std::vector<int>) const override;
+
     int finish_run() const override
     {
         return result.get();
@@ -455,6 +473,10 @@ using internal::command;
 using internal::command_builder;
 using internal::command_holder;  // easier for wrappers
 
+inline command command_make(internal::command_functor func)
+{
+    return {new internal::command_function{std::move(func)}};
+}
 
 } // namespace ccsh
 

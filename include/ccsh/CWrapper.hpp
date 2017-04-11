@@ -220,6 +220,10 @@ protected:
 
 public:
 
+    CWrapperBase() :
+        ptr{INVALID_T::invalid_value}
+    { }
+
     explicit CWrapperBase(HANDLE_T ptr) :
         ptr{ptr}
     {
@@ -261,6 +265,13 @@ public:
         CWrapperBase{old.ptr}
     {
         old.ptr = INVALID_T::invalid_value;
+    }
+
+    HANDLE_T release() noexcept
+    {
+        HANDLE_T result = ptr;
+        ptr = INVALID_T::invalid_value;
+        return result;
     }
 
     ~CWrapperBase()

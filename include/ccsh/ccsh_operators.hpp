@@ -118,11 +118,12 @@ command_runnable operator>=(command const& c, command_functor_raw func);
 
 inline command_runnable operator|(command const& c, command_functor func)
 {
-    return {new command_pipe{c, command_runnable{new command_function{func}}}};
+    return {new command_pipe{c, command_make(std::move(func))}};
 }
+
 inline command_runnable operator|(command_functor func, command const& c)
 {
-    return {new command_pipe{command_runnable{new command_function{func}}, c}};
+    return {new command_pipe{command_make(std::move(func)), c}};
 }
 
 /* ******************* command functor redirection operators ******************* */

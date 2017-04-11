@@ -125,12 +125,12 @@ void command_pipe::start_run(int in, int out, int err, std::vector<int> left_unu
     std::vector<int> right_unused_fds = left_unused_fds;
     int pipefd[2];
     stdc_thrower(pipe(pipefd));
+    open_wrapper temp0{pipefd[0]};
+    open_wrapper temp1{pipefd[1]};
     left_unused_fds.push_back(pipefd[0]);
     right_unused_fds.push_back(pipefd[1]);
     left.start_run(in, pipefd[1], err, std::move(left_unused_fds));
     right.start_run(pipefd[0], out, err, std::move(right_unused_fds));
-    close_fd(pipefd[0]);
-    close_fd(pipefd[1]);
 }
 
 int command_pipe::finish_run() const
@@ -146,22 +146,22 @@ void command_in_mapping::start_run(int, int out, int err, std::vector<int> unuse
 
     int pipefd[2];
     stdc_thrower(pipe(pipefd));
-    unused_fds.push_back(pipefd[1]);
+    open_wrapper temp0{pipefd[0]};
+    open_wrapper temp1{pipefd[1]};
 
-    auto f2 = [this, pipefd](int fd)
+    unused_fds.push_back(pipefd[1]);
+    auto f2 = [this, pipefd](open_wrapper fd)
     {
-        open_wrapper temp(fd);
         char buf[BUFSIZ];
         ssize_t count;
         while((count = func(buf, BUFSIZ)) > 0)
-            stdc_thrower(CCSH_RETRY_HANDLER(write(fd, buf, std::size_t(count))));
+            stdc_thrower(CCSH_RETRY_HANDLER(write(fd.get(), buf, std::size_t(count))));
 
         return 0;
     };
 
     c.start_run(pipefd[0], out, err, std::move(unused_fds));
-    close_fd(pipefd[0]);
-    result = std::async(std::launch::async, f2, pipefd[1]);
+    result = std::async(std::launch::async, f2, std::move(temp1));
 }
 
 void command_out_mapping::start_run(int in, int, int err, std::vector<int> unused_fds) const
@@ -170,15 +170,15 @@ void command_out_mapping::start_run(int in, int, int err, std::vector<int> unuse
 
     int pipefd[2];
     stdc_thrower(pipe(pipefd));
+    open_wrapper temp0{pipefd[0]};
+    open_wrapper temp1{pipefd[1]};
+
     unused_fds.push_back(pipefd[0]);
-
-    auto f2 = [this, pipefd](int fd)
+    auto f2 = [this, pipefd](open_wrapper fd)
     {
-        open_wrapper temp(fd);
-
         char buf[BUFSIZ];
         ssize_t count;
-        while((count = read(fd, buf, BUFSIZ)) > 0)
+        while((count = read(fd.get(), buf, BUFSIZ)) > 0)
             func(buf, std::size_t(count));
 
         stdc_thrower(count);
@@ -188,7 +188,7 @@ void command_out_mapping::start_run(int in, int, int err, std::vector<int> unuse
 
     c.start_run(in, pipefd[1], err, std::move(unused_fds));
     close_fd(pipefd[1]);
-    result = std::async(std::launch::async, f2, pipefd[0]);
+    result = std::async(std::launch::async, f2, std::move(temp0));
 }
 
 void command_err_mapping::start_run(int in, int out, int, std::vector<int> unused_fds) const
@@ -197,15 +197,15 @@ void command_err_mapping::start_run(int in, int out, int, std::vector<int> unuse
 
     int pipefd[2];
     unused_fds.push_back(pipefd[0]);
+    open_wrapper temp0{pipefd[0]};
+    open_wrapper temp1{pipefd[1]};
+
     stdc_thrower(pipe(pipefd));
-
-    auto f2 = [this, pipefd](int fd)
+    auto f2 = [this, pipefd](open_wrapper fd)
     {
-        open_wrapper temp(fd);
-
         char buf[BUFSIZ];
         ssize_t count;
-        while((count = read(fd, buf, BUFSIZ)) > 0)
+        while((count = read(fd.get(), buf, BUFSIZ)) > 0)
             func(buf, std::size_t(count));
 
         stdc_thrower(count);
@@ -215,7 +215,7 @@ void command_err_mapping::start_run(int in, int out, int, std::vector<int> unuse
 
     c.start_run(in, out, pipefd[1], std::move(unused_fds));
     close_fd(pipefd[1]);
-    result = std::async(std::launch::async, f2, pipefd[0]);
+    result = std::async(std::launch::async, f2, std::move(temp0));
 }
 
 template<stdfd DESC>
@@ -228,7 +228,7 @@ command_redirect<DESC>::command_redirect(command const& c, fs::path const& p, bo
 template<stdfd DESC>
 void command_redirect<DESC>::start_run(int in, int out, int err, std::vector<int> unused_fds) const
 {
-    open_wrapper fd{open(p.c_str(), flags, fopen_w_mode)};
+    fd = open_wrapper{open(p.c_str(), flags, fopen_w_mode)};
     int fds[int(stdfd::count)] = {in, out, err};
     fds[int(DESC)] = fd.get();
     c.start_run(fds[int(stdfd::in)], fds[int(stdfd::out)], fds[int(stdfd::err)], std::move(unused_fds));
@@ -305,14 +305,13 @@ void env_putter(std::string const& str)
     stdc_thrower(setenv(env_name.c_str(), env_value.c_str(), true));
 }
 
-auto env_applier = [](int fd) -> int
+auto env_applier = [](open_wrapper fd) -> int
 {
     auto env_splitter = line_splitter_make(env_putter, '\0');
-    open_wrapper temp(fd);
 
     char buf[BUFSIZ];
     ssize_t count;
-    while((count = read(fd, buf, BUFSIZ)) > 0)
+    while((count = read(fd.get(), buf, BUFSIZ)) > 0)
         env_splitter(buf, std::size_t(count));
 
     return 0;
@@ -330,28 +329,36 @@ void command_source::start_run(int in, int out, int err, std::vector<int> unused
 {
     int pipefd[2];
     stdc_thrower(pipe(pipefd));
-    unused_fds.push_back(pipefd[0]);
+    open_wrapper temp0{pipefd[0]};
+    open_wrapper temp1{pipefd[1]};
 
+    unused_fds.push_back(pipefd[0]);
     cmd.args[1] = cmdstr + std::to_string(pipefd[1]);
     cmd.start_run(in, out, err, std::move(unused_fds));
-    close_fd(pipefd[1]);
 
-    result = std::async(std::launch::async, env_applier, pipefd[0]);
+    result = std::async(std::launch::async, env_applier, std::move(temp0));
 }
 
 void command_function::start_run(int in, int out, int err, std::vector<int>) const
 {
-    stdc_thrower(in  = CCSH_RETRY_HANDLER(fcntl(in,  F_DUPFD_CLOEXEC, 0)));
-    stdc_thrower(out = CCSH_RETRY_HANDLER(fcntl(out, F_DUPFD_CLOEXEC, 0)));
-    stdc_thrower(err = CCSH_RETRY_HANDLER(fcntl(err, F_DUPFD_CLOEXEC, 0)));
-    result = std::async(std::launch::async, [=]
+    open_wrapper in2{CCSH_RETRY_HANDLER(fcntl(in, F_DUPFD_CLOEXEC, 0))};
+    open_wrapper out2{CCSH_RETRY_HANDLER(fcntl(out, F_DUPFD_CLOEXEC, 0))};
+    open_wrapper err2{CCSH_RETRY_HANDLER(fcntl(err, F_DUPFD_CLOEXEC, 0))};
+
+    struct dup_helper // working around missing [=, temp0 = std::move(in2)] feature in C++11
     {
-        open_wrapper temp0{in};
-        open_wrapper temp1{out};
-        open_wrapper temp2{err};
-        int res = func(in, out, err);
-        return res;
-    });
+        open_wrapper in2;
+        open_wrapper out2;
+        open_wrapper err2;
+        command_function const* self;
+        int operator()() const
+        {
+            return self->func(in2.get(), out2.get(), err2.get());
+        }
+    };
+
+    dup_helper helper{std::move(in2), std::move(out2), std::move(err2), this};
+    result = std::async(std::launch::async, std::move(helper));
 }
 
 } // namespace internal
