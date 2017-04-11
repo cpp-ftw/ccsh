@@ -339,6 +339,21 @@ void command_source::start_run(int in, int out, int err, std::vector<int> unused
     result = std::async(std::launch::async, env_applier, pipefd[0]);
 }
 
+void command_function::start_run(int in, int out, int err, std::vector<int>) const
+{
+    stdc_thrower(in  = CCSH_RETRY_HANDLER(fcntl(in,  F_DUPFD_CLOEXEC, 0)));
+    stdc_thrower(out = CCSH_RETRY_HANDLER(fcntl(out, F_DUPFD_CLOEXEC, 0)));
+    stdc_thrower(err = CCSH_RETRY_HANDLER(fcntl(err, F_DUPFD_CLOEXEC, 0)));
+    result = std::async(std::launch::async, [=]
+    {
+        open_wrapper temp0{in};
+        open_wrapper temp1{out};
+        open_wrapper temp2{err};
+        int res = func(in, out, err);
+        return res;
+    });
+}
+
 } // namespace internal
 } // namespace ccsh
 
