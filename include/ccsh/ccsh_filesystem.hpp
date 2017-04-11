@@ -28,7 +28,6 @@ using namespace std::experimental::filesystem;
 using std::error_code;
 
 path relative(path const& p, path const& base, fs::error_code& ec);
-
 }}
 
 #endif
@@ -37,7 +36,6 @@ namespace ccsh { namespace fs {
 
 path self_lexically_relative(path const& self, path const& base);
 path self_lexically_normal(path const& self);
-
 }}
 
 #endif // CCSH_FILESYSTEM_HPP_INCLUDED

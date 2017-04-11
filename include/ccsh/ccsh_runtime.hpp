@@ -19,7 +19,6 @@ std::string get_dollar_sign()
     static const char* normal_d = ccsh::is_user_possibly_elevated() ? "#" : "$";
     return gCling->isRawInputEnabled() ? "!" : normal_d;
 }
-
 }
 
 

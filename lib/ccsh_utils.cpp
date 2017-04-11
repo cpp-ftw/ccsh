@@ -21,7 +21,7 @@ void expand_helper(path const& p, std::vector<path>& result)
     glob_t globbuf;
     glob(p.string().c_str(), GLOB_NOCHECK | GLOB_TILDE_CHECK, NULL, &globbuf);
 
-    for(std::size_t i = 0; i < globbuf.gl_pathc; ++i)
+    for (std::size_t i = 0; i < globbuf.gl_pathc; ++i)
         result.push_back(globbuf.gl_pathv[i]);
 
     globfree(&globbuf);
@@ -39,11 +39,10 @@ std::vector<path> expand(path const& p)
 std::vector<path> expand(std::vector<path> const& paths)
 {
     std::vector<path> result;
-    for(path const& p : paths)
+    for (path const& p : paths)
         expand_helper(p, result);
     return result;
 }
-
 
 }
 
@@ -53,14 +52,14 @@ fs::path get_home()
     struct passwd* result;
 
     long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-    if(bufsize == -1)
+    if (bufsize == -1)
         bufsize = 16384;
 
     std::unique_ptr<char[]> buf{new char[bufsize]};
 
-    if(getpwuid_r(getuid(), &pwd, buf.get(), std::size_t(bufsize), &result) != 0 ||
-       result == nullptr ||
-       result->pw_dir == nullptr)
+    if (getpwuid_r(getuid(), &pwd, buf.get(), std::size_t(bufsize), &result) != 0 ||
+        result == nullptr ||
+        result->pw_dir == nullptr)
     {
         throw stdc_error();
     }
@@ -76,7 +75,7 @@ fs::path get_current_path()
 fs::path get_current_directory()
 {
     fs::path wd = get_current_path();
-    if(wd == get_home())
+    if (wd == get_home())
         return "~";
     return wd.filename();
 }
@@ -87,7 +86,7 @@ fs::path get_current_path_abbreviated()
     fs::path home = get_home();
     fs::error_code errcode;
     auto abb_wd = fs::relative(wd, home, errcode);
-    if(errcode)
+    if (errcode)
         return wd;
     return fs::path("~") / abb_wd;
 }
@@ -103,7 +102,7 @@ std::string get_short_hostname()
 {
     std::string hn = get_hostname();
     auto pos = hn.find('.');
-    if(pos == std::string::npos)
+    if (pos == std::string::npos)
         return hn;
     return hn.substr(0, pos);
 }
@@ -146,12 +145,12 @@ int env_var::try_set(std::string const& name, std::string const& value, bool ove
 stdc_error::stdc_error(int no)
     : std::runtime_error(strerror(errno))
     , error_number(no)
-{}
+{ }
 
 stdc_error::stdc_error(int no, std::string const& msg)
     : std::runtime_error(msg.empty() ? strerror(no) : msg + ": " + strerror(no))
     , error_number(no)
-{}
+{ }
 
 env_var::operator std::string() const
 {
@@ -169,7 +168,7 @@ namespace internal {
 
 void open_traits::dtor_func(int fd) noexcept
 {
-    if(fd != STDIN_FILENO && fd != STDOUT_FILENO && fd != STDERR_FILENO)
+    if (fd != STDIN_FILENO && fd != STDOUT_FILENO && fd != STDERR_FILENO)
         close_fd(fd);
 }
 

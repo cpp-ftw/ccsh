@@ -49,7 +49,7 @@ public:
     }
 
     virtual ~command_base()
-    {}
+    { }
 };
 
 class command_async
@@ -61,7 +61,7 @@ protected:
     command_async(command_async&&) = default;
 
     command_async(command_async const&)
-    {}
+    { }
 
     command_async& operator=(command_async&& other) = default;
 
@@ -87,7 +87,7 @@ protected:
         argv.reserve(args.size() + 2);
 
         argv.push_back(p.c_str());
-        for(const auto& s : this->args)
+        for (const auto& s : this->args)
             argv.push_back(s.c_str());
 
         argv.push_back(nullptr);
@@ -99,7 +99,7 @@ public:
     command_native(fs::path const& p, std::vector<std::string> const& args = {})
         : p(p)
         , args(args)
-    {}
+    { }
 
     void append_dir(fs::path const& dir)
     {
@@ -125,7 +125,7 @@ public:
 
     command_runnable(command_base* other)
         : base(other)
-    {}
+    { }
 
     int run() const
     {
@@ -134,7 +134,7 @@ public:
 
     void no_autorun() const
     {
-        if(*this)
+        if (*this)
             (*this)->no_autorun();
     }
 
@@ -150,7 +150,7 @@ public:
 
     ~command_runnable()
     {
-        if(*this)
+        if (*this)
             (*this)->run_autorun();
     }
 };
@@ -240,7 +240,7 @@ public:
     command_pair(command const& left, command const& right)
         : left(left)
         , right(right)
-    {}
+    { }
 };
 
 class command_conditonal : public command_pair, protected command_async
@@ -253,7 +253,7 @@ public:
         auto f = [=]
         {
             int lres = this->left.finish_run();
-            if(!start_right(lres))
+            if (!start_right(lres))
                 return lres;
             this->right.start_run(in, out, err, std::move(unused_fds));
             return this->right.finish_run();
@@ -310,10 +310,10 @@ class command_bool final : public command_base
 public:
     command_bool(bool b)
         : b(b)
-    {}
+    { }
 
     void start_run(int, int, int, std::vector<int>) const override
-    {}
+    { }
 
     int finish_run() const override
     {
@@ -341,7 +341,7 @@ public:
         : c(c)
         , func(f)
         , init_func(init_func)
-    {}
+    { }
 
     int finish_run() const override final
     {
@@ -390,7 +390,7 @@ public:
             result = c.finish_run();
             fd = open_wrapper{};
         }
-        catch(...)
+        catch (...)
         {
             fd = open_wrapper{};
             throw;
@@ -457,7 +457,7 @@ class command_function : public command_base, protected command_async
 public:
     command_function(command_functor func)
         : func(std::move(func))
-    {}
+    { }
 
     void start_run(int in, int out, int err, std::vector<int>) const override;
 
@@ -466,7 +466,6 @@ public:
         return result.get();
     }
 };
-
 } // namespace internal
 
 using internal::command;
@@ -477,7 +476,6 @@ inline command command_make(internal::command_functor func)
 {
     return {new internal::command_function{std::move(func)}};
 }
-
 } // namespace ccsh
 
 

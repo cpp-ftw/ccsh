@@ -55,12 +55,11 @@ class UITabCompletion : public textinput::TabCompletion
 
 public:
     UITabCompletion(const cling::Interpreter& Parent)
-        :
-        m_ParentInterpreter(Parent)
-    {}
+        : m_ParentInterpreter(Parent)
+    { }
 
     ~UITabCompletion()
-    {}
+    { }
 
     bool Complete(textinput::Text& Line /*in+out*/,
                   std::size_t& Cursor /*in+out*/,
@@ -89,7 +88,7 @@ std::string custom_user_interface::default_prompt()
     static const char* prompt_dollar = ccsh::is_user_possibly_elevated() ? "# " : "$ ";
 
     std::string prompt = "[ccsh]";
-    if(getMetaProcessor()->getInterpreter().isRawInputEnabled())
+    if (getMetaProcessor()->getInterpreter().isRawInputEnabled())
         prompt.append("! ");
     else
         prompt.append(prompt_dollar);
@@ -115,14 +114,14 @@ void custom_user_interface::run_interactively()
     TI.SetPrompt(prompt_factory().c_str());
     std::string line;
     std::string prompt = prompt_factory();
-    while(true)
+    while (true)
     {
         try
         {
             {
                 cling::MetaProcessor::MaybeRedirectOutputRAII RAII(*getMetaProcessor());
                 TI.SetPrompt(prompt.c_str());
-                if(TI.ReadInput() == TextInput::kRREOF)
+                if (TI.ReadInput() == TextInput::kRREOF)
                     break;
                 TI.TakeInput(line);
             }
@@ -130,30 +129,30 @@ void custom_user_interface::run_interactively()
             cling::Interpreter::CompilationResult compRes;
             int indent = getMetaProcessor()->process(line.c_str(), compRes);
             // Quit requested
-            if(indent < 0)
+            if (indent < 0)
                 break;
 
             prompt = prompt_factory();
-            if(indent > 0) // Continuation requested.
+            if (indent > 0) // Continuation requested.
                 prompt += '?' + std::string(indent * 3, ' ');
 
             std::cout.flush();
             std::cerr.flush();
         }
-        catch(cling::InterpreterException& e)
+        catch (cling::InterpreterException& e)
         {
-            if(!e.diagnose())
+            if (!e.diagnose())
             {
                 cling::errs() << ">>> Caught an interpreter exception!\n"
                               << ">>> " << e.what() << '\n';
             }
         }
-        catch(std::exception& e)
+        catch (std::exception& e)
         {
             cling::errs() << ">>> Caught a std::exception!\n"
                           << ">>> " << e.what() << '\n';
         }
-        catch(...)
+        catch (...)
         {
             cling::errs() << "Exception occurred. Recovering...\n";
         }

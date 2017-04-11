@@ -12,8 +12,9 @@ class pwd_t : public internal::command_builtin
     bool helpflag = false;
 
 public:
-    pwd_t(fs::path const& p = get_home()) : p(p)
-    {}
+    pwd_t(fs::path const& p = get_home())
+        : p(p)
+    { }
 
     command_holder<pwd_t>& P()
     {

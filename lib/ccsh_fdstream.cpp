@@ -6,7 +6,7 @@ namespace ccsh { namespace internal {
 
 int ofdstreambuf::overflow(int_type c)
 {
-    if(c == traits_type::eof())
+    if (c == traits_type::eof())
         return traits_type::eof();
 
     char_type ch = traits_type::to_char_type(c);

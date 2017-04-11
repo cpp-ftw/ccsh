@@ -35,10 +35,10 @@ std::vector<const char*> add_args(int argc, const char* const* argv, std::vector
 
     args.push_back(argv[0]);
 
-    for(const auto& param : params)
+    for (const auto& param : params)
         args.push_back(param.c_str());
 
-    for(int i = 1; i <= argc; ++i)
+    for (int i = 1; i <= argc; ++i)
         args.push_back(argv[i]);
 
     return args;
@@ -77,9 +77,9 @@ int main(int argc, const char** argv)
     p = p.parent_path();
 
     ccsh::fs::path ccshrc_path = p / "ui/ccshrc.hpp";
-    if(!ccsh::fs::exists(ccshrc_path))
+    if (!ccsh::fs::exists(ccshrc_path))
         ccshrc_path = ccsh::get_home() / ".ccshrc.hpp";
-    if(!ccsh::fs::exists(ccshrc_path))
+    if (!ccsh::fs::exists(ccshrc_path))
         ccshrc_path = "/etc/ccsh/ccshrc.hpp";
 
     std::vector<std::string> params = {
@@ -97,7 +97,7 @@ int main(int argc, const char** argv)
 
     // Set up the interpreter
     cling::Interpreter interp(args.size() - 1, args.data(), llvmdir);
-    if(interp.getOptions().Help)
+    if (interp.getOptions().Help)
     {
         return 0;
     }
@@ -105,7 +105,7 @@ int main(int argc, const char** argv)
     clang::CompilerInstance* CI = interp.getCI();
     interp.AddIncludePath(".");
 
-    for(size_t I = 0, N = interp.getOptions().LibsToLoad.size(); I < N; ++I)
+    for (size_t I = 0, N = interp.getOptions().LibsToLoad.size(); I < N; ++I)
     {
         interp.loadFile(interp.getOptions().LibsToLoad[I]);
     }
@@ -118,22 +118,22 @@ int main(int argc, const char** argv)
 
     ccsh::ui::custom_user_interface ui(interp);
     // If we are not interactive we're supposed to parse files
-    if(!Interactive)
+    if (!Interactive)
     {
-        for(size_t I = 0, N = Inputs.size(); I < N; ++I)
+        for (size_t I = 0, N = Inputs.size(); I < N; ++I)
         {
             std::string cmd;
             cling::Interpreter::CompilationResult compRes;
-            if(!interp.lookupFileOrLibrary(Inputs[I]).empty())
+            if (!interp.lookupFileOrLibrary(Inputs[I]).empty())
             {
                 std::ifstream infile(interp.lookupFileOrLibrary(Inputs[I]));
                 std::string line;
                 std::getline(infile, line);
-                if(line[0] == '#' && line[1] == '!')
+                if (line[0] == '#' && line[1] == '!')
                 {
                     // TODO: Check whether the filename specified after #! is the current
                     // executable.
-                    while(std::getline(infile, line))
+                    while (std::getline(infile, line))
                     {
                         ui.getMetaProcessor()->process(line.c_str(), compRes, 0);
                     }
@@ -163,7 +163,7 @@ int main(int argc, const char** argv)
 
     // if we are running with -verify a reported has to be returned as unsuccess.
     // This is relevant especially for the test suite.
-    if(CI->getDiagnosticOpts().VerifyDiagnostics)
+    if (CI->getDiagnosticOpts().VerifyDiagnostics)
     {
         // If there was an error that came from the verifier we must return 1 as
         // an exit code for the process. This will make the test fail as expected.

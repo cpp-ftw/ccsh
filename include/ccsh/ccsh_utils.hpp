@@ -62,7 +62,7 @@ public:
 
     env_var(std::string name)
         : name(std::move(name))
-    {}
+    { }
 
     env_var(env_var&&) = default;
     env_var(env_var const&) = delete;
@@ -97,7 +97,7 @@ enum class stdfd : uint8_t
 template<typename ENUM, std::size_t N>
 const char* enum_to_string(ENUM val, const char* const (& mapping)[N])
 {
-    if(val < 0 || val >= N)
+    if (val < 0 || val >= N)
         return "";
     return mapping[val];
 }
@@ -105,11 +105,10 @@ const char* enum_to_string(ENUM val, const char* const (& mapping)[N])
 template<typename ENUM, std::size_t N>
 const char* enum_to_string(ENUM val, std::array<const char*, N> const& mapping)
 {
-    if(val < 0 || val >= N)
+    if (val < 0 || val >= N)
         return "";
     return mapping[val];
 }
-
 } // namespace internal
 
 } // namespace ccsh

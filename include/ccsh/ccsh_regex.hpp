@@ -20,28 +20,28 @@ public:
     explicit regex(const char* str)
         : source(str)
         , ex(str, TYPE)
-    {}
+    { }
 
     explicit regex(std::string const& str)
         : source(str)
         , ex(str, TYPE)
-    {}
+    { }
 
     regex(const char* str, std::size_t count)
         : source(str, count)
         , ex(str, count, TYPE)
-    {}
+    { }
 
     template<class ForwardIt>
     regex(ForwardIt first, ForwardIt last)
         : source(first, last)
         , ex(first, last, TYPE)
-    {}
+    { }
 
     regex(std::initializer_list<char> init)
         : source(init)
         , ex(init, TYPE)
-    {}
+    { }
 
     operator std::string const&() const
     {
@@ -53,7 +53,6 @@ public:
         return ex;
     }
 };
-
 }
 
 #endif // CCSH_REGEX_HPP_INCLUDED

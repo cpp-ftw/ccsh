@@ -13,8 +13,9 @@ class cd_t : public internal::command_builtin
     bool helpflag = false;
 
 public:
-    cd_t(fs::path const& p = get_home()) : p(p)
-    {}
+    cd_t(fs::path const& p = get_home())
+        : p(p)
+    { }
 
     command_holder<cd_t>& P()
     {

@@ -30,18 +30,18 @@ int command_base::run() const
 
 void command_base::run_autorun() noexcept
 {
-    if(!autorun_flag)
+    if (!autorun_flag)
         return;
 
     try
     {
         run();
     }
-    catch(std::exception const& x)
+    catch (std::exception const& x)
     {
         std::cerr << x.what() << std::endl;
     }
-    catch(...)
+    catch (...)
     {
         std::cerr << "An unhandled type of exception was thrown in command::autorun" << std::endl;
     }
@@ -58,26 +58,26 @@ void command_native::start_run(int in, int out, int err, std::vector<int> unused
     pid_t pid = vfork();
     stdc_thrower(pid);
 
-    if(pid == 0)
+    if (pid == 0)
     {
         close_fd(fail_pipe[0]);
 
-        for(int fd : unused_fds)
+        for (int fd : unused_fds)
             close_fd(fd);
 
-        if(in != STDIN_FILENO)
-            if(CCSH_RETRY_HANDLER(dup2(in, STDIN_FILENO)) < 0)
+        if (in != STDIN_FILENO)
+            if (CCSH_RETRY_HANDLER(dup2(in, STDIN_FILENO)) < 0)
                 goto fail;
 
-        if(out != STDOUT_FILENO)
-            if(CCSH_RETRY_HANDLER(dup2(out, STDOUT_FILENO)) < 0)
+        if (out != STDOUT_FILENO)
+            if (CCSH_RETRY_HANDLER(dup2(out, STDOUT_FILENO)) < 0)
                 goto fail;
 
-        if(err != STDERR_FILENO)
-            if(CCSH_RETRY_HANDLER(dup2(err, STDERR_FILENO)) < 0)
+        if (err != STDERR_FILENO)
+            if (CCSH_RETRY_HANDLER(dup2(err, STDERR_FILENO)) < 0)
                 goto fail;
 
-        if(CCSH_RETRY_HANDLER(fcntl(fail_pipe[1], F_SETFD, FD_CLOEXEC)) < 0)
+        if (CCSH_RETRY_HANDLER(fcntl(fail_pipe[1], F_SETFD, FD_CLOEXEC)) < 0)
             goto fail;
 
         execvp(argv[0], (char* const*)argv.data());
@@ -95,17 +95,17 @@ fail:
         ssize_t result = CCSH_RETRY_HANDLER(read(fail_pipe[0], &fail_code, sizeof(int)));
         stdc_thrower(result);
 
-        if(result > 0)
+        if (result > 0)
             throw stdc_error(fail_code, p.string());
 
         auto f = [pid]
         {
             int status;
-            while(CCSH_RETRY_HANDLER(waitpid(pid, &status, 0)) >= 0)
+            while (CCSH_RETRY_HANDLER(waitpid(pid, &status, 0)) >= 0)
             {
-                if(WIFEXITED(status))
+                if (WIFEXITED(status))
                     return WEXITSTATUS(status);
-                if(WIFSIGNALED(status))
+                if (WIFSIGNALED(status))
                     return -WTERMSIG(status);
             }
             return 0;
@@ -142,7 +142,7 @@ int command_pipe::finish_run() const
 
 void command_in_mapping::start_run(int, int out, int err, std::vector<int> unused_fds) const
 {
-    if(init_func) init_func();
+    if (init_func) init_func();
 
     int pipefd[2];
     stdc_thrower(pipe(pipefd));
@@ -154,7 +154,7 @@ void command_in_mapping::start_run(int, int out, int err, std::vector<int> unuse
     {
         char buf[BUFSIZ];
         ssize_t count;
-        while((count = func(buf, BUFSIZ)) > 0)
+        while ((count = func(buf, BUFSIZ)) > 0)
             stdc_thrower(CCSH_RETRY_HANDLER(write(fd.get(), buf, std::size_t(count))));
 
         return 0;
@@ -166,7 +166,7 @@ void command_in_mapping::start_run(int, int out, int err, std::vector<int> unuse
 
 void command_out_mapping::start_run(int in, int, int err, std::vector<int> unused_fds) const
 {
-    if(init_func) init_func();
+    if (init_func) init_func();
 
     int pipefd[2];
     stdc_thrower(pipe(pipefd));
@@ -178,7 +178,7 @@ void command_out_mapping::start_run(int in, int, int err, std::vector<int> unuse
     {
         char buf[BUFSIZ];
         ssize_t count;
-        while((count = read(fd.get(), buf, BUFSIZ)) > 0)
+        while ((count = read(fd.get(), buf, BUFSIZ)) > 0)
             func(buf, std::size_t(count));
 
         stdc_thrower(count);
@@ -193,7 +193,7 @@ void command_out_mapping::start_run(int in, int, int err, std::vector<int> unuse
 
 void command_err_mapping::start_run(int in, int out, int, std::vector<int> unused_fds) const
 {
-    if(init_func) init_func();
+    if (init_func) init_func();
 
     int pipefd[2];
     unused_fds.push_back(pipefd[0]);
@@ -205,7 +205,7 @@ void command_err_mapping::start_run(int in, int out, int, std::vector<int> unuse
     {
         char buf[BUFSIZ];
         ssize_t count;
-        while((count = read(fd.get(), buf, BUFSIZ)) > 0)
+        while ((count = read(fd.get(), buf, BUFSIZ)) > 0)
             func(buf, std::size_t(count));
 
         stdc_thrower(count);
@@ -223,7 +223,7 @@ command_redirect<DESC>::command_redirect(command const& c, fs::path const& p, bo
     : c(c)
     , p(p)
     , flags(fopen_flags(DESC, append))
-{}
+{ }
 
 template<stdfd DESC>
 void command_redirect<DESC>::start_run(int in, int out, int err, std::vector<int> unused_fds) const
@@ -248,7 +248,7 @@ template<stdfd DESC>
 command_fd<DESC>::command_fd(command const& c, int fd)
     : c(c)
     , ow(fd)
-{}
+{ }
 
 template<stdfd DESC>
 void command_fd<DESC>::start_run(int in, int out, int err, std::vector<int> unused_fds) const
@@ -272,7 +272,7 @@ namespace {
 void replace(std::string& str, std::string const& from, std::string const& to)
 {
     std::size_t start_pos;
-    while((start_pos = str.find(from)) != std::string::npos)
+    while ((start_pos = str.find(from)) != std::string::npos)
         str.replace(start_pos, from.length(), to);
 }
 
@@ -286,7 +286,7 @@ std::string sh_escape(std::string const& str)
 std::string make_source_command(fs::path const& p, std::vector<std::string> const& args)
 {
     std::string cmdstr = "source " + sh_escape(p.string());
-    for(std::string const& str : args)
+    for (std::string const& str : args)
         cmdstr += sh_escape(str);
 
     cmdstr += " && (printenv -0) >&";
@@ -296,7 +296,7 @@ std::string make_source_command(fs::path const& p, std::vector<std::string> cons
 void env_putter(std::string const& str)
 {
     auto eq_sign = str.find('=');
-    if(eq_sign == std::string::npos) // should never happen
+    if (eq_sign == std::string::npos) // should never happen
         throw stdc_error(errno, "Bad format from printenv");
 
     std::string env_name = str.substr(0, eq_sign);
@@ -311,7 +311,7 @@ auto env_applier = [](open_wrapper fd) -> int
 
     char buf[BUFSIZ];
     ssize_t count;
-    while((count = read(fd.get(), buf, BUFSIZ)) > 0)
+    while ((count = read(fd.get(), buf, BUFSIZ)) > 0)
         env_splitter(buf, std::size_t(count));
 
     return 0;
@@ -322,7 +322,7 @@ auto env_applier = [](open_wrapper fd) -> int
 command_source::command_source(fs::path const& p, std::vector<std::string> const& args)
     : cmd("/bin/sh", {"-c", ""})
     , cmdstr(make_source_command(p, args))
-{}
+{ }
 
 
 void command_source::start_run(int in, int out, int err, std::vector<int> unused_fds) const
@@ -351,6 +351,7 @@ void command_function::start_run(int in, int out, int err, std::vector<int>) con
         open_wrapper out2;
         open_wrapper err2;
         command_function const* self;
+
         int operator()() const
         {
             return self->func(in2.get(), out2.get(), err2.get());

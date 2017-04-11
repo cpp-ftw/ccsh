@@ -6,8 +6,9 @@ using namespace ccsh;
 using namespace ccsh::literals;
 using namespace ccsh::core;
 
-CCSH_RUN(ccsh::ps::prompt = []{
+CCSH_RUN(ccsh::ps::prompt = []
+{
     return get_current_path_abbreviated().string() +
-        " " +
-        (ccsh::is_user_possibly_elevated() ? "# " : "$ ");
+           " " +
+           (ccsh::is_user_possibly_elevated() ? "# " : "$ ");
 });

@@ -23,13 +23,13 @@ int change_to_directory(path newdir, bool follow_symlinks)
     // - or the absolute physical pathname of NEWDIR (!follow_symlinks).
     ccsh::fs::error_code ec;
     path tdir = follow_symlinks
-                          ? ccsh::fs::self_lexically_normal(tcwd)
-                          : ccsh::fs::canonical(tcwd, ec);
+                ? ccsh::fs::self_lexically_normal(tcwd)
+                : ccsh::fs::canonical(tcwd, ec);
 
     // Use the canonicalized version of NEWDIR, or, if canonicalization
     // failed, use the non-canonical form.
     bool canon_failed = 0;
-    if(ec)
+    if (ec)
     {
         tdir = tcwd;
         canon_failed = 1;
@@ -38,26 +38,26 @@ int change_to_directory(path newdir, bool follow_symlinks)
     // In POSIX mode, if we're resolving symlinks logically and sh_canonpath
     // returns NULL (because it checks the path, it will return NULL if the
     // resolved path doesn't exist), fail immediately.
-    if(follow_symlinks && canon_failed)
+    if (follow_symlinks && canon_failed)
     {
-        if(errno != ENOENT)
+        if (errno != ENOENT)
             errno = ENOTDIR;
         return EXIT_FAILURE;
     }
 
     // If the chdir succeeds, update the_current_working_directory.
-    if(chdir((follow_symlinks ? tdir : newdir).c_str()) == 0)
+    if (chdir((follow_symlinks ? tdir : newdir).c_str()) == 0)
         return EXIT_SUCCESS;
 
     // We failed to change to the appropriate directory name. If we tried what
     // the user passed (follow_symlinks), punt now.
-    if(!follow_symlinks)
+    if (!follow_symlinks)
         return EXIT_FAILURE;
 
     // We're not in physical mode (!follow_symlinks), but we failed to change to the
     // canonicalized directory name (TDIR).  Try what the user passed verbatim.
     int err = errno;
-    if(chdir(newdir.c_str()) == 0)
+    if (chdir(newdir.c_str()) == 0)
         return EXIT_SUCCESS;
     else
         errno = err;
@@ -70,16 +70,16 @@ int bindpwd(bool follow_symlinks, bool eflag)
     path tcwd = ccsh::get_current_path();
     ccsh::fs::error_code ec;
 
-    if(follow_symlinks)
+    if (follow_symlinks)
         tcwd = ccsh::fs::canonical(tcwd, ec);
 
-    if(ec)
+    if (ec)
         return eflag ? EXIT_FAILURE : EXIT_SUCCESS;
 
-    if(ccsh::env_var::try_set("OLDPWD", ccsh::env_var::get("PWD")) < 0)
+    if (ccsh::env_var::try_set("OLDPWD", ccsh::env_var::get("PWD")) < 0)
         return EXIT_FAILURE;
 
-    if(ccsh::env_var::try_set("PWD", tcwd.string()) < 0)
+    if (ccsh::env_var::try_set("PWD", tcwd.string()) < 0)
         return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
@@ -121,7 +121,7 @@ namespace ccsh {
 
 int cd_t::runx(int, int out, int err) const
 {
-    if(helpflag)
+    if (helpflag)
     {
         write(out, help_message.c_str(), help_message.size() + 1);
         return EXIT_SUCCESS;
@@ -129,15 +129,15 @@ int cd_t::runx(int, int out, int err) const
 
     bool printflag = false;
     bool eflag = this->eflag;
-    if(eflag && follow_symlinks)
+    if (eflag && follow_symlinks)
         eflag = 0;
 
     const char* dirname = p.c_str();
 
-    if(dirname == std::string("-"))
+    if (dirname == std::string("-"))
     {
         dirname = env_var::get("OLDPWD");
-        if(dirname == nullptr)
+        if (dirname == nullptr)
         {
             std::string output = "OLDPWD not set\n";
             write(err, output.c_str(), output.size() + 1);
@@ -153,19 +153,19 @@ int cd_t::runx(int, int out, int err) const
         char* saveptr = nullptr;
         char* token = strtok_r(&cdpath[0], ":", &saveptr);
 
-        while(token != nullptr)
+        while (token != nullptr)
         {
             fs::path temp = fs::path{token} / fs::path{dirname};
-            if(change_to_directory(temp, follow_symlinks) == EXIT_SUCCESS)
+            if (change_to_directory(temp, follow_symlinks) == EXIT_SUCCESS)
             {
                 /* POSIX.2 says that if a nonempty directory from CDPATH
                 is used to find the directory to change to, the new
                 directory name is echoed to stdout, whether or not
                 the shell is interactive. */
-                if(token[0] != '\0')
+                if (token[0] != '\0')
                 {
                     std::string output;
-                    if(follow_symlinks)
+                    if (follow_symlinks)
                         output = get_current_path().string() + "\n";
                     else
                         output = temp.string() + "\n";
@@ -180,9 +180,9 @@ int cd_t::runx(int, int out, int err) const
 
     /* When we get here, DIRNAME is the directory to change to.  If we
        chdir successfully, just return. */
-    if(change_to_directory(dirname, follow_symlinks) == EXIT_SUCCESS)
+    if (change_to_directory(dirname, follow_symlinks) == EXIT_SUCCESS)
     {
-        if(printflag)
+        if (printflag)
         {
             std::string output = std::string(dirname) + "\n";
             write(out, output.c_str(), output.size() + 1);
@@ -194,7 +194,6 @@ int cd_t::runx(int, int out, int err) const
     write(err, output.c_str(), output.size() + 1);
     return EXIT_FAILURE;
 }
-
 
 }
 

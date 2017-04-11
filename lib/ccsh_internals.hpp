@@ -17,7 +17,7 @@ int retry_handler(FUNC&& func)
 {
     int result;
     int err;
-    while((result = func()) == -1 && ((err = errno), err == EINTR || err == EAGAIN || err == EWOULDBLOCK));
+    while ((result = func()) == -1 && ((err = errno), err == EINTR || err == EAGAIN || err == EWOULDBLOCK));
     return result;
 }
 
@@ -25,13 +25,13 @@ int retry_handler(FUNC&& func)
 
 inline void stdc_thrower(std::intmax_t result)
 {
-    if(result == -1)
+    if (result == -1)
         throw stdc_error();
 }
 
 inline void stdc_thrower(std::intmax_t result, std::string const& msg)
 {
-    if(result == -1)
+    if (result == -1)
         throw stdc_error(errno, msg);
 }
 
@@ -71,13 +71,13 @@ public:
     explicit line_splitter(FUNC&& func, char delim = '\n')
         : func(std::move(func))
         , delim(delim)
-    {}
+    { }
 
     ssize_t operator()(char* buf, std::size_t s)
     {
         char* newline;
         std::size_t si = s;
-        while(si > 0 && (newline = (char*)memchr(buf, delim, si)))
+        while (si > 0 && (newline = (char*)memchr(buf, delim, si)))
         {
             std::size_t diff = newline - buf;
             temp.append(buf, diff);
@@ -107,13 +107,12 @@ void tokenize_string(std::string const& str, std::string const& delimiters, FUNC
     char* saveptr = nullptr;
     char* token = strtok_r(&line[0], delimiters.c_str(), &saveptr);
 
-    while(token != nullptr)
+    while (token != nullptr)
     {
         func(token);
         token = strtok_r(nullptr, delimiters.c_str(), &saveptr);
     }
 }
-
 
 }} // namespace ccsh::internal
 

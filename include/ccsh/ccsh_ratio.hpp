@@ -13,7 +13,7 @@ class quantity
 public:
     constexpr explicit quantity(int64_t q)
         : q(q)
-    {}
+    { }
 
     constexpr int64_t get() const
     {
@@ -24,7 +24,6 @@ public:
     {
         return quantity(-q);
     }
-
 };
 
 #define CCSH_DEFINE_RATIO_PREFIX(prefix, literal) \
@@ -75,7 +74,6 @@ std::string quantity_to_string(quantity<RATIO> q)
 {
     return std::to_string(q.get()) + RATIO::name;
 }
-
 } // namespace ccsh
 
 #endif // CCSH_RATIO_HPP_INCLUDED

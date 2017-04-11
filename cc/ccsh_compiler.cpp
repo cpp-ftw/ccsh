@@ -61,14 +61,14 @@ std::unordered_set<std::string> gcc_options_with_args = {
 
 std::vector<std::string>::const_iterator find_file(std::vector<std::string> const& options)
 {
-    for(auto it = options.begin(); it != options.end(); ++it)
+    for (auto it = options.begin(); it != options.end(); ++it)
     {
-        if((*it)[0] == '-')
+        if ((*it)[0] == '-')
         {
-            if(gcc_options_with_args.count(*it))
+            if (gcc_options_with_args.count(*it))
                 ++it;
         }
-        else if((*it)[0] != '@')
+        else if ((*it)[0] != '@')
             return it;
     }
     return options.end();
@@ -97,7 +97,7 @@ void print_usage()
 
 int main(int argc, char** argv)
 {
-    if(argc < 2)
+    if (argc < 2)
     {
         print_usage();
         return 1;
@@ -108,16 +108,16 @@ int main(int argc, char** argv)
 
     std::vector<std::string> args;
     args.reserve(std::size_t(argc));
-    for(int i = 1; i < argc; ++i)
+    for (int i = 1; i < argc; ++i)
     {
-        if(argv[i] != compile_only_str)
+        if (argv[i] != compile_only_str)
             args.push_back(argv[i]);
         else
             compile_only = true;
     }
 
     auto file_it = find_file(args);
-    if(file_it == args.end())
+    if (file_it == args.end())
     {
         print_usage();
         return 1;
@@ -128,9 +128,9 @@ int main(int argc, char** argv)
     gcc_args.push_back("-x");
     gcc_args.push_back("c++");
 
-    for(auto it = args.begin(); it != file_it; ++it)
+    for (auto it = args.begin(); it != file_it; ++it)
     {
-        if(*it == compile_only_str)
+        if (*it == compile_only_str)
             compile_only = true;
         else
             gcc_args.push_back(*it);
@@ -146,7 +146,7 @@ int main(int argc, char** argv)
     gcc_args.push_back("-");
 
     std::string cxx = ccsh::$("CXX");
-    if(cxx.empty())
+    if (cxx.empty())
         cxx = "/usr/bin/c++";
 
     auto const& file = *file_it;
@@ -158,16 +158,16 @@ int main(int argc, char** argv)
             std::ifstream ifs(file);
             std::string str;
 
-            while(std::getline(ifs, str))
+            while (std::getline(ifs, str))
             {
-                if(str.length() >= 2 && str[0] == '#' && str[1] == '!')
+                if (str.length() >= 2 && str[0] == '#' && str[1] == '!')
                     continue;
 
                 str.push_back('\n');
                 out << str;
             }
         }
-        catch(std::exception const& x)
+        catch (std::exception const& x)
         {
             std::cerr << file << ": " << x.what() << std::endl;
             return 1;
@@ -177,13 +177,13 @@ int main(int argc, char** argv)
 
     command c = shebang_remover | shell(cxx, gcc_args);
     int result = c.run();
-    if(result == 0 && !compile_only)
+    if (result == 0 && !compile_only)
     {
         std::vector<std::string> program_args;
         std::copy(file_it + 1, args.cend(), std::back_inserter(program_args));
         result = shell(temp, program_args).run();
     }
-    if(result != 0)
+    if (result != 0)
     {
         std::cerr << "While executing " << file << std::endl;
     }

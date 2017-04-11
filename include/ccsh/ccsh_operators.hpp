@@ -28,14 +28,14 @@ inline command_runnable operator|(command const& a, command const& b)
 }
 
 template<typename COMMAND>
-command_holder<COMMAND>&& operator/(fs::path const& p, command_holder<COMMAND>&& c)
+command_holder <COMMAND>&& operator/(fs::path const& p, command_holder <COMMAND>&& c)
 {
     c.append_dir(p);
     return std::move(c);
 }
 
 template<typename COMMAND>
-command_holder<COMMAND>& operator/(fs::path const& p, command_holder<COMMAND>& c)
+command_holder <COMMAND>& operator/(fs::path const& p, command_holder <COMMAND>& c)
 {
     c.append_dir(p);
     return c;
@@ -204,7 +204,7 @@ inline std::string dollar(command const& c)
 {
     std::string x;
     std::string err;
-    if((c > x >= err).run() != 0)
+    if ((c > x >= err).run() != 0)
         throw shell_error(err);
     return x;
 }
@@ -224,6 +224,7 @@ inline std::string $(command const& c)
 {
     return dollar(c);
 }
+
 #endif
 
 inline std::ostream& operator<<(std::ostream& os, env_var const& var)
@@ -231,7 +232,6 @@ inline std::ostream& operator<<(std::ostream& os, env_var const& var)
     os << std::string(var);
     return os;
 }
-
 } // namespace ccsh
 
 

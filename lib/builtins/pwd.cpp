@@ -24,7 +24,7 @@ namespace ccsh {
 
 int pwd_t::runx(int, int out, int) const
 {
-    if(helpflag)
+    if (helpflag)
     {
         write(out, help_message.c_str(), help_message.size() + 1);
         return EXIT_SUCCESS;
@@ -32,21 +32,20 @@ int pwd_t::runx(int, int out, int) const
 
     fs::error_code ec;
     fs::path tcwd = fs::current_path(ec);
-    if(verbatim_pwd)
+    if (verbatim_pwd)
         tcwd = fs::canonical(tcwd);
 
-    if(ec)
+    if (ec)
         return EXIT_FAILURE;
 
     std::string str = tcwd.string() + "\n";
     write(out, str.c_str(), str.size() + 1);
 
     /* This is dumb but posix-mandated. */
-    if(verbatim_pwd)
-        if(env_var::try_set("PWD", tcwd.string()) < 0)
+    if (verbatim_pwd)
+        if (env_var::try_set("PWD", tcwd.string()) < 0)
             return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
 }
-
 }

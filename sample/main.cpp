@@ -37,7 +37,7 @@ void test0()
     std::vector<std::string> vec;
     ccsh::shell("ls", {"-1"}) > vec;
 
-    for(auto const& s : vec)
+    for (auto const& s : vec)
         std::cout << s << std::endl;
 
     // Not compiling, as intended...
@@ -77,7 +77,7 @@ void test4()
 {
     using namespace ccsh::core;
 
-    ls() , ls();
+    ls(), ls();
 
     ccsh::core::cat(__FILE__);
 }

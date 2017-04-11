@@ -42,7 +42,7 @@ protected:
         std::vector<const char*> argv = internal::command_native::get_argv();
         argv.reserve(argv.size() + paths.size());
         argv.pop_back();
-        for(const auto& p : paths)
+        for (const auto& p : paths)
             argv.push_back(p.c_str());
 
         argv.push_back(nullptr);
@@ -54,17 +54,17 @@ public:
     options_paths()
         : command_native(DERIVED::name())
         , paths()
-    {}
+    { }
 
     options_paths(std::vector<fs::path> const& paths)
         : command_native(DERIVED::name())
         , paths(fs::expand(paths))
-    {}
+    { }
 
     options_paths(fs::path const& p)
         : command_native(DERIVED::name())
         , paths(fs::expand(p))
-    {}
+    { }
 
     command_holder <DERIVED>& version()
     {
@@ -78,7 +78,6 @@ public:
         return static_cast<command_holder<DERIVED>&>(*this);
     }
 };
-
 }
 }
 

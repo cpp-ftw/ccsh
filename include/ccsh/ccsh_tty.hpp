@@ -63,8 +63,6 @@ inline std::ostream& operator<<(std::ostream& os, tty::bg_color m)
 {
     return printty(os, m);
 }
-
-
 }}
 
 

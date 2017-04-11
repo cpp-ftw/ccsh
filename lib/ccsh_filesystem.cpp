@@ -31,7 +31,7 @@ constexpr char slash{'.'};
 inline std::pair<path::iterator, path::iterator> mismatch(path::iterator it1, path::iterator it1end,
                                                           path::iterator it2, path::iterator it2end)
 {
-    for(; it1 != it1end && it2 != it2end && *it1 == *it2;)
+    for (; it1 != it1end && it2 != it2end && *it1 == *it2;)
     {
         ++it1;
         ++it2;
@@ -46,14 +46,14 @@ path self_lexically_relative(path const& self, path const& base)
 {
     std::pair<path::iterator, path::iterator> mm
         = mismatch(self.begin(), self.end(), base.begin(), base.end());
-    if(mm.first == self.begin() && mm.second == base.begin())
+    if (mm.first == self.begin() && mm.second == base.begin())
         return fs::path();
-    if(mm.first == self.end() && mm.second == base.end())
+    if (mm.first == self.end() && mm.second == base.end())
         return fs::path(".");
     fs::path tmp;
-    for(; mm.second != base.end(); ++mm.second)
+    for (; mm.second != base.end(); ++mm.second)
         tmp /= fs::path(".");
-    for(; mm.first != self.end(); ++mm.first)
+    for (; mm.first != self.end(); ++mm.first)
         tmp /= *mm.first;
     return tmp;
 }
@@ -61,48 +61,48 @@ path self_lexically_relative(path const& self, path const& base)
 fs::path relative(fs::path const& p, fs::path const& base, fs::error_code& ec)
 {
     fs::path wc_base(fs::canonical(base, ec));
-    if(ec)
+    if (ec)
         return fs::path();
     fs::path wc_p(fs::canonical(p, ec));
-    if(ec)
+    if (ec)
         return fs::path();
     return self_lexically_relative(wc_p, wc_base);
 }
 
 path self_lexically_normal(path const& self)
 {
-    if(self.empty())
+    if (self.empty())
         return self;
 
     path temp;
     path::iterator start(self.begin());
     path::iterator last(self.end());
     path::iterator stop(last--);
-    for(path::iterator itr(start); itr != stop; ++itr)
+    for (path::iterator itr(start); itr != stop; ++itr)
     {
         // ignore "." except at start and last
-        if(itr->native().size() == 1
-           && (itr->native())[0] == dot
-           && itr != start
-           && itr != last)
+        if (itr->native().size() == 1
+            && (itr->native())[0] == dot
+            && itr != start
+            && itr != last)
             continue;
 
         // ignore a name and following ".."
-        if(!temp.empty()
-           && itr->native().size() == 2
-           && (itr->native())[0] == dot
-           && (itr->native())[1] == dot) // dot dot
+        if (!temp.empty()
+            && itr->native().size() == 2
+            && (itr->native())[0] == dot
+            && (itr->native())[1] == dot) // dot dot
         {
             path::string_type lf(temp.filename().native());
-            if(lf.size() > 0
-               && (lf.size() != 1
-                   || (lf[0] != dot
-                       && lf[0] != slash))
-               && (lf.size() != 2
-                   || (lf[0] != dot
-                       && lf[1] != dot
-                   )
-               )
+            if (lf.size() > 0
+                && (lf.size() != 1
+                    || (lf[0] != dot
+                        && lf[0] != slash))
+                && (lf.size() != 2
+                    || (lf[0] != dot
+                        && lf[1] != dot
+                    )
+                )
                 )
             {
                 temp.remove_filename();
@@ -121,8 +121,8 @@ path self_lexically_normal(path const& self)
                 //}
 
                 path::iterator next(itr);
-                if(temp.empty() && ++next != stop
-                   && next == last && *last == dot_path)
+                if (temp.empty() && ++next != stop
+                    && next == last && *last == dot_path)
                 {
                     temp /= dot_path;
                 }
@@ -133,11 +133,10 @@ path self_lexically_normal(path const& self)
         temp /= *itr;
     };
 
-    if(temp.empty())
+    if (temp.empty())
         temp /= dot_path;
     return temp;
 }
-
 
 }}
 

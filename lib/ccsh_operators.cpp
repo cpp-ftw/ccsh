@@ -18,7 +18,7 @@ command_runnable operator<(command const& c, std::string& str)
         std::size_t len = str.length();
         len = len < s ? len : s;
         std::memcpy(buf, str.data(), len);
-        if(len)
+        if (len)
             str.erase(0, len);
         return len;
     };
@@ -56,11 +56,11 @@ command_runnable operator<(command const& c, std::vector<std::string>& vec)
 {
     auto func = [&vec](char* buf, std::size_t s) -> ssize_t
     {
-        if(s == 0 || vec.empty())
+        if (s == 0 || vec.empty())
             return 0;
         std::string& str = vec[0];
         std::size_t len = str.length();
-        if(len < s)
+        if (len < s)
         {
             std::memcpy(buf, str.data(), len);
             buf[len] = '\n';
