@@ -110,6 +110,22 @@ command_runnable operator>=(command const& c, command_functor_raw func);
 
 /* ******************* raw functor redirection operators ******************* */
 
+/* ******************* command functor redirection operators ******************* */
+
+// command_runnable operator<(command const& c, command_functor func);
+// command_runnable operator>(command const& c, command_functor func);
+// command_runnable operator>=(command const& c, command_functor func);
+
+inline command_runnable operator|(command const& c, command_functor func)
+{
+    return {new command_pipe{c, command_runnable{new command_function{func}}}};
+}
+inline command_runnable operator|(command_functor func, command const& c)
+{
+    return {new command_pipe{command_runnable{new command_function{func}}, c}};
+}
+
+/* ******************* command functor redirection operators ******************* */
 
 
 /* ******************* logical operators ******************* */

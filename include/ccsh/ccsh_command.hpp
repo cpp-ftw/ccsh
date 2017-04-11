@@ -17,6 +17,7 @@ namespace internal {
 using command_functor_raw  = std::function<ssize_t(char*, std::size_t)>;
 using command_functor_init = std::function<void(void)>;
 using command_functor_line = std::function<void(std::string const&)>;
+using command_functor      = std::function<int(int, int, int)>;
 
 template<typename>
 class command_holder;
@@ -430,6 +431,21 @@ public:
     int finish_run() const override
     {
         return result;
+    }
+};
+
+class command_function : public command_base, protected command_async
+{
+    command_functor func;
+public:
+    command_function(command_functor func)
+        : func(std::move(func))
+    {}
+
+    void start_run(int in, int out, int err, std::vector<int>) const override;
+    int finish_run() const override
+    {
+        return result.get();
     }
 };
 
