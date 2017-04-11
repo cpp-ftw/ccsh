@@ -10,6 +10,7 @@
 #include "ccsh_operators.hpp"
 #include "ccsh_tty.hpp"
 #include "ccsh_builtins.hpp"
+#include "ccsh_fdstream.hpp"
 
 
 #endif // CCSH_HPP_INCLUDED
