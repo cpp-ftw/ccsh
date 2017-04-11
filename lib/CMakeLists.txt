@@ -6,12 +6,7 @@ set(SHARED_LIB_INCLUDE_DIR ${SHARED_LIB_INCLUDE_DIR} PARENT_SCOPE)
 set(WRAPPERS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../wrappers)
 set(WRAPPERS_INCLUDE_DIR ${WRAPPERS_INCLUDE_DIR} PARENT_SCOPE)
 
-
-if(TARGET ccsh_lib)
-
-message("ccsh_lib is already defined")
-
-else()
+if(NOT TARGET ccsh_lib) # "include guard"
 
 include_directories(${SHARED_LIB_INCLUDE_DIR})
 
@@ -23,4 +18,3 @@ target_link_libraries(ccsh_lib   PUBLIC ${filesystem_lib} pthread)
 target_compile_options(ccsh_lib  PUBLIC -std=c++11 -Wall -Wextra -pedantic -O3 -g -ggdb)
 
 endif()
-
