@@ -1,23 +1,67 @@
 #include <ccsh/ccsh_fdstream.hpp>
+#include "ccsh_internals.hpp"
+
 #include <cstdio>
 #include <unistd.h>
+#include <cstring>
 
-namespace ccsh { namespace internal {
+namespace ccsh {
+namespace internal {
+
+// Code in this file is mostly taken from this article:
+// http://www.mr-edd.co.uk/blog/beginners_guide_streambuf
+// which is licensed under Boost Software License 1.0.
+
+bool ofdstreambuf::do_flush()
+{
+    std::ptrdiff_t n = pptr() - pbase();
+    pbump(int(-n));
+
+    return CCSH_RETRY_HANDLER(::write(fd, pbase(), size_t(n))) != -1;
+}
 
 int ofdstreambuf::overflow(int_type c)
 {
-    if (c == traits_type::eof())
+    if (c != traits_type::eof())
+    {
+        char ch = traits_type::to_char_type(c);
+        *pptr() = ch;
+        pbump(1);
+        if (do_flush())
+            return ch;
+    }
+
+    return traits_type::eof();
+}
+
+int ifdstreambuf::underflow()
+{
+    if (gptr() < egptr()) // buffer not exhausted
+        return traits_type::to_int_type(*gptr());
+
+    char* base = &buffer_.front();
+    char* start = base;
+
+    if (eback() == base) // true when this isn't the first fill
+    {
+        // Make arrangements for putback characters
+        std::memmove(base, egptr() - put_back_size, put_back_size);
+        start += put_back_size;
+    }
+
+    // start is now the start of the buffer, proper.
+    // Read from fptr_ in to the provided buffer
+    ssize_t n = read(fd, start, buffer_.size() - (start - base));
+
+    if (n == 0)
         return traits_type::eof();
 
-    char_type ch = traits_type::to_char_type(c);
-    xsputn(&ch, 1);
-    return 1;
+    // Set buffer pointers
+    setg(base, start, start + n);
+
+    return traits_type::to_int_type(*gptr());
 }
 
-std::streamsize ofdstreambuf::xsputn(const char_type* s, std::streamsize n)
-{
-    return ::write(fd, s, size_t(n));
 }
-
-}}
+}
 
