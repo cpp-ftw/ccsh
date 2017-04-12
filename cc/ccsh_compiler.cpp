@@ -163,8 +163,7 @@ int main(int argc, char** argv)
                 if (str.length() >= 2 && str[0] == '#' && str[1] == '!')
                     continue;
 
-                str.push_back('\n');
-                out << str;
+                out << str << std::endl;
             }
         }
         catch (std::exception const& x)

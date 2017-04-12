@@ -1,5 +1,6 @@
 #include <ccsh/builtins/cd.hpp>
 #include <ccsh/ccsh_operators.hpp>
+#include <ccsh/ccsh_fdstream.hpp>
 #include "../ccsh_internals.hpp"
 #include <cstring>
 #include <cstdlib>
@@ -119,11 +120,14 @@ const std::string help_message = R"delim(cd: cd [-L|[-P [-e]]] [dir]
 
 namespace ccsh {
 
-int cd_t::runx(int, int out, int err) const
+int cd_t::runx(int, int out_fd, int err_fd) const
 {
+    ofdstream out{out_fd};
+    ofdstream err{err_fd};
+
     if (helpflag)
     {
-        write(out, help_message.c_str(), help_message.size() + 1);
+        out << help_message << std::flush;
         return EXIT_SUCCESS;
     }
 
@@ -139,9 +143,7 @@ int cd_t::runx(int, int out, int err) const
         dirname = env_var::get("OLDPWD");
         if (dirname == nullptr)
         {
-            std::string output = "OLDPWD not set\n";
-            write(err, output.c_str(), output.size() + 1);
-
+            err << "OLDPWD not set" << std::endl;
             return EXIT_FAILURE;
         }
         printflag = true;
@@ -164,13 +166,10 @@ int cd_t::runx(int, int out, int err) const
                 the shell is interactive. */
                 if (token[0] != '\0')
                 {
-                    std::string output;
                     if (follow_symlinks)
-                        output = get_current_path().string() + "\n";
+                        out << get_current_path().string() << std::endl;
                     else
-                        output = temp.string() + "\n";
-
-                    write(out, output.c_str(), output.size() + 1);
+                        out << temp.string() << std::endl;
                 }
                 return bindpwd(follow_symlinks, eflag);
             }
@@ -183,15 +182,12 @@ int cd_t::runx(int, int out, int err) const
     if (change_to_directory(dirname, follow_symlinks) == EXIT_SUCCESS)
     {
         if (printflag)
-        {
-            std::string output = std::string(dirname) + "\n";
-            write(out, output.c_str(), output.size() + 1);
-        }
+            out << dirname << std::endl;
+
         return bindpwd(follow_symlinks, eflag);
     }
 
-    std::string output = std::string(dirname) + ": " + strerror(errno) + "\n";
-    write(err, output.c_str(), output.size() + 1);
+    err << dirname << ": " << strerror(errno) << std::endl;
     return EXIT_FAILURE;
 }
 

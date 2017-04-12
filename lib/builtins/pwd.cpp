@@ -1,4 +1,5 @@
 #include <ccsh/builtins/pwd.hpp>
+#include <ccsh/ccsh_fdstream.hpp>
 #include "../ccsh_internals.hpp"
 
 namespace {
@@ -22,11 +23,13 @@ const std::string help_message = R"delim(pwd: pwd [-LP]
 
 namespace ccsh {
 
-int pwd_t::runx(int, int out, int) const
+int pwd_t::runx(int, int out_fd, int) const
 {
+    ofdstream out{out_fd};
+
     if (helpflag)
     {
-        write(out, help_message.c_str(), help_message.size() + 1);
+        out << help_message << std::flush;
         return EXIT_SUCCESS;
     }
 
@@ -38,8 +41,7 @@ int pwd_t::runx(int, int out, int) const
     if (ec)
         return EXIT_FAILURE;
 
-    std::string str = tcwd.string() + "\n";
-    write(out, str.c_str(), str.size() + 1);
+    out << tcwd.string() << std::endl;
 
     /* This is dumb but posix-mandated. */
     if (verbatim_pwd)
