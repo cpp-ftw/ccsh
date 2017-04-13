@@ -55,7 +55,7 @@ void command_native::start_run(int in, int out, int err, std::vector<int> unused
 
     auto argv = get_argv();
 
-    pid_t pid = vfork();
+    pid_t pid = fork();
     stdc_thrower(pid);
 
     if (pid == 0)
