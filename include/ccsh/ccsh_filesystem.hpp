@@ -24,11 +24,8 @@ using boost::system::error_code;
 #include <experimental/filesystem>
 
 namespace ccsh { namespace fs {
-
 using namespace std::experimental::filesystem;
 using std::error_code;
-
-path relative(path const& p, path const& base, fs::error_code& ec);
 }}
 
 #endif
@@ -37,6 +34,11 @@ namespace ccsh { namespace fs {
 
 path self_lexically_relative(path const& self, path const& base);
 path self_lexically_normal(path const& self);
+
+#if !defined(CCSH_FILESYSTEM_BOOST) || BOOST_VERSION < 106000
+path relative(path const& p, path const& base, fs::error_code& ec);
+#endif
+
 }}
 
 #endif // CCSH_FILESYSTEM_HPP_INCLUDED

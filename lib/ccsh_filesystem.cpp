@@ -1,7 +1,7 @@
 #include <ccsh/ccsh_filesystem.hpp>
 #include <utility>
 
-#ifdef CCSH_FILESYSTEM_BOOST
+#if defined(CCSH_FILESYSTEM_BOOST) && BOOST_VERSION >= 106000
 
 namespace ccsh { namespace fs {
 
