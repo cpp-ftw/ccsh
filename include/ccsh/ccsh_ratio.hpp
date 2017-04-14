@@ -32,7 +32,7 @@ struct prefix : public std:: prefix \
     static constexpr const char * name = #prefix; \
 }; \
 namespace literals { \
-constexpr quantity<prefix> operator""_##literal(unsigned long long q) \
+constexpr quantity<prefix> operator"" _##literal(unsigned long long q) \
 { \
     return quantity<prefix>(q); \
 } \
@@ -44,7 +44,7 @@ struct prefix : public std::ratio<num, 1> \
     static constexpr const char * name = #prefix; \
 }; \
 namespace literals { \
-constexpr quantity<prefix> operator""_##literal(unsigned long long q) \
+constexpr quantity<prefix> operator"" _##literal(unsigned long long q) \
 { \
     return quantity<prefix>(q); \
 } \
