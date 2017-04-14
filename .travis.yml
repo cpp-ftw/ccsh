@@ -20,7 +20,9 @@ before_script:
   - rm -rf gtest_build
   - cmake -DWITH_CLING=OFF -DBOOST_FILESYSTEM=ON .
 
-script: make
+script:
+  - make
+  - test/ccsh_test
 
 compiler:
   - clang
