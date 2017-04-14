@@ -3,6 +3,8 @@
 
 #ifdef CCSH_FILESYSTEM_BOOST
 
+namespace ccsh { namespace fs {
+
 path self_lexically_relative(path const& self, path const& base)
 {
     return self.lexically_relative(base);
@@ -10,8 +12,10 @@ path self_lexically_relative(path const& self, path const& base)
 
 path self_lexically_normal(path const& self)
 {
-    return self.lexically_normal(base);
+    return self.lexically_normal();
 }
+
+}}
 
 #else
 

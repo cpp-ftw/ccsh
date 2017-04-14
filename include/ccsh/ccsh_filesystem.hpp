@@ -15,7 +15,8 @@
 
 namespace ccsh { namespace fs {
 using namespace boost::filesystem;
-}
+using boost::system::error_code;
+}}
 
 #else
 
