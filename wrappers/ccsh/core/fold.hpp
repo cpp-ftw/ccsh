@@ -24,7 +24,7 @@ public:
     CCSH_WRAPPER_ARG0(fold_t, s, "-s")
     CCSH_WRAPPER_ARG0(fold_t, spaces, "--spaces")
 
-    CCSH_WRAPPER_ARG1(fold_t, w, "-w", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(fold_t, w, "-w", unsigned, std::to_string(arg))
     CCSH_WRAPPER_ARG1_FWD(fold_t, width, w, unsigned)
 
 };

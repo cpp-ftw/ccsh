@@ -3,6 +3,7 @@
 
 #include <string>
 #include <ratio>
+#include <cstdint>
 
 namespace ccsh {
 

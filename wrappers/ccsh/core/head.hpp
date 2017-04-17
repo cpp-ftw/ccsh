@@ -29,16 +29,17 @@ public:
     CCSH_WRAPPER_ARG0(head_t, z, "-z")
     CCSH_WRAPPER_ARG0(head_t, zero_terminated, "--zero-terminated")
 
-    template<typename RATIO>
-    CCSH_WRAPPER_ARG1(head_t, c, "-c", quantity<RATIO>, quantity_to_string)
-    template<typename RATIO>
-    CCSH_WRAPPER_ARG1_FWD(head_t, bytes, c, quantity<RATIO>)
+    template<typename RATIO> command_holder<head_t>&  c(quantity<RATIO> arg)&  { return add_larg_s("-c", quantity_to_string(arg)); }
+    template<typename RATIO> command_holder<head_t>&& c(quantity<RATIO> arg)&& { return add_rarg_s("-c", quantity_to_string(arg)); }
 
-    template<typename RATIO>
-    CCSH_WRAPPER_ARG1(head_t, n, "-n", quantity<RATIO>, quantity_to_string)
-    template<typename RATIO>
-    CCSH_WRAPPER_ARG1_FWD(head_t, lines, n, quantity<RATIO>)
+    template<typename RATIO> command_holder<head_t>&  bytes(quantity<RATIO> arg)&  { return add_larg_e("--bytes", quantity_to_string(arg)); }
+    template<typename RATIO> command_holder<head_t>&& bytes(quantity<RATIO> arg)&& { return add_rarg_e("--bytes", quantity_to_string(arg)); }
 
+    template<typename RATIO> command_holder<head_t>&  n(quantity<RATIO> arg)&  { return add_larg_s("-n", quantity_to_string(arg)); }
+    template<typename RATIO> command_holder<head_t>&& n(quantity<RATIO> arg)&& { return add_rarg_s("-n", quantity_to_string(arg)); }
+
+    template<typename RATIO> command_holder<head_t>&  lines(quantity<RATIO> arg)&  { return add_larg_e("--lines", quantity_to_string(arg)); }
+    template<typename RATIO> command_holder<head_t>&& lines(quantity<RATIO> arg)&& { return add_rarg_e("--lines", quantity_to_string(arg)); }
 };
 
 using head = command_holder<head_t>;

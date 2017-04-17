@@ -34,17 +34,13 @@ public:
 
     CCSH_WRAPPER_ARG0(tail_t, f, "-f")
     CCSH_WRAPPER_ARG0(tail_t, follow, "--follow")
-    command_holder<tail_t>& follow(follow_type type)
-    {
-        args.push_back(std::string("--follow=") + internal::enum_to_string(type, follow_type_mapping()));
-        return static_cast<command_holder<tail_t>&>(*this);
-    }
+    CCSH_WRAPPER_ARG1_E(tail_t, follow, "--follow", follow_type, enum_to_string(arg, follow_type_mapping()))
 
     CCSH_WRAPPER_ARG0(tail_t, F, "-F")
 
-    CCSH_WRAPPER_ARG1(tail_t, max_unchanged_stats, "--max-unchanged-stats", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(tail_t, max_unchanged_stats, "--max-unchanged-stats", unsigned, std::to_string(arg))
 
-    CCSH_WRAPPER_ARG1(tail_t, pid, "--pid", int, std::to_string)
+    CCSH_WRAPPER_ARG1_S(tail_t, pid, "--pid", int, std::to_string(arg))
 
     CCSH_WRAPPER_ARG0(tail_t, q, "-q")
     CCSH_WRAPPER_ARG0(tail_t, quiet, "--quiet")
@@ -52,12 +48,7 @@ public:
 
     CCSH_WRAPPER_ARG0(tail_t, retry, "--retry")
 
-    command_holder<tail_t>& s(std::chrono::seconds arg)
-    {
-        args.push_back("-s");
-        args.push_back(std::to_string(arg.count()));
-        return static_cast<command_holder<tail_t>&>(*this);
-    }
+    CCSH_WRAPPER_ARG1_S(tail_t, s, "-s", std::chrono::seconds, std::to_string(arg.count()))
     CCSH_WRAPPER_ARG1_FWD(tail_t, sleep_interval, s, std::chrono::seconds)
 
     CCSH_WRAPPER_ARG0(tail_t, v, "-v")
@@ -66,16 +57,17 @@ public:
     CCSH_WRAPPER_ARG0(tail_t, z, "-z")
     CCSH_WRAPPER_ARG0(tail_t, zero_terminated, "--zero-terminated")
 
-    template<typename RATIO>
-    CCSH_WRAPPER_ARG1(tail_t, c, "-c", quantity<RATIO>, quantity_to_string)
-    template<typename RATIO>
-    CCSH_WRAPPER_ARG1_FWD(tail_t, bytes, c, quantity<RATIO>)
+    template<typename RATIO> command_holder<tail_t>&  c(quantity<RATIO> arg)&  { return add_larg_s("-c", quantity_to_string(arg)); }
+    template<typename RATIO> command_holder<tail_t>&& c(quantity<RATIO> arg)&& { return add_rarg_s("-c", quantity_to_string(arg)); }
 
-    template<typename RATIO>
-    CCSH_WRAPPER_ARG1(tail_t, n, "-n", quantity<RATIO>, quantity_to_string)
-    template<typename RATIO>
-    CCSH_WRAPPER_ARG1_FWD(tail_t, lines, n, quantity<RATIO>)
+    template<typename RATIO> command_holder<tail_t>&  bytes(quantity<RATIO> arg)&  { return add_larg_cat("--bytes", "=", quantity_to_string(arg)); }
+    template<typename RATIO> command_holder<tail_t>&& bytes(quantity<RATIO> arg)&& { return add_rarg_cat("--bytes", "=", quantity_to_string(arg)); }
 
+    template<typename RATIO> command_holder<tail_t>&  n(quantity<RATIO> arg)&  { return add_larg_s("-n", quantity_to_string(arg)); }
+    template<typename RATIO> command_holder<tail_t>&& n(quantity<RATIO> arg)&& { return add_rarg_s("-n", quantity_to_string(arg)); }
+
+    template<typename RATIO> command_holder<tail_t>&  lines(quantity<RATIO> arg)&  { return add_larg_cat("--lines", "=", quantity_to_string(arg)); }
+    template<typename RATIO> command_holder<tail_t>&& lines(quantity<RATIO> arg)&& { return add_rarg_cat("--lines", "=", quantity_to_string(arg)); }
 };
 
 using tail = command_holder<tail_t>;

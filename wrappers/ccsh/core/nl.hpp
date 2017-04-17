@@ -39,55 +39,55 @@ private:
 
     static const char* flag_to_str(numbering_style flag)
     {
-        return internal::enum_to_string(flag, numbering_style_mapping());
+        return enum_to_string(flag, numbering_style_mapping());
     }
 
     static const char* flag_to_str(numbering_format flag)
     {
-        return internal::enum_to_string(flag, numbering_format_mapping());
+        return enum_to_string(flag, numbering_format_mapping());
     }
 
 public:
 
     using base::base;
 
-    CCSH_WRAPPER_ARG1(nl_t, b, "-b", numbering_style, flag_to_str)
+    CCSH_WRAPPER_ARG1_S(nl_t, b, "-b", numbering_style, flag_to_str(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, body_numbering, b, numbering_style)
 
-    CCSH_WRAPPER_ARG1(nl_t, b, "-b", regex<regex_type::basic> const&, 'p' + std::string)
+    CCSH_WRAPPER_ARG1_S(nl_t, b, "-b", regex<regex_type::basic> const&, 'p' + std::string(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, body_numbering, b, regex<regex_type::basic>)
 
-    CCSH_WRAPPER_ARG1(nl_t, h, "-h", numbering_style, flag_to_str)
+    CCSH_WRAPPER_ARG1_S(nl_t, h, "-h", numbering_style, flag_to_str(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, header_numbering, h, numbering_style)
 
-    CCSH_WRAPPER_ARG1(nl_t, h, "-h", regex<regex_type::basic> const&, 'p' + std::string)
+    CCSH_WRAPPER_ARG1_S(nl_t, h, "-h", regex<regex_type::basic> const&, 'p' + std::string(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, header_numbering, h, regex<regex_type::basic>)
 
-    CCSH_WRAPPER_ARG1(nl_t, f, "-f", numbering_style, flag_to_str)
+    CCSH_WRAPPER_ARG1_S(nl_t, f, "-f", numbering_style, flag_to_str(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, footer_numbering, f, numbering_style)
 
-    CCSH_WRAPPER_ARG1(nl_t, f, "-f", regex<regex_type::basic> const&, 'p' + std::string)
+    CCSH_WRAPPER_ARG1_S(nl_t, f, "-f", regex<regex_type::basic> const&, 'p' + std::string(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, footer_numbering, f, regex<regex_type::basic>)
 
-    CCSH_WRAPPER_ARG1(nl_t, n, "-n", numbering_format, flag_to_str)
+    CCSH_WRAPPER_ARG1_S(nl_t, n, "-n", numbering_format, flag_to_str(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, number_format, n, numbering_format)
 
-    CCSH_WRAPPER_ARG1(nl_t, i, "-i", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(nl_t, i, "-i", unsigned, std::to_string(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, line_increment, i, unsigned)
 
-    CCSH_WRAPPER_ARG1(nl_t, l, "-l", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(nl_t, l, "-l", unsigned, std::to_string(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, join_blank_lines, l, unsigned)
 
-    CCSH_WRAPPER_ARG1(nl_t, v, "-v", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(nl_t, v, "-v", unsigned, std::to_string(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, starting_line_number, v, unsigned)
 
-    CCSH_WRAPPER_ARG1(nl_t, w, "-w", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(nl_t, w, "-w", unsigned, std::to_string(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, number_width, w, unsigned)
 
-    CCSH_WRAPPER_ARG1(nl_t, d, "-d", std::string, std::move)
+    CCSH_WRAPPER_ARG1_S(nl_t, d, "-d", std::string, std::move(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, section_delimiter, d, std::string)
 
-    CCSH_WRAPPER_ARG1(nl_t, s, "-s", std::string, std::move)
+    CCSH_WRAPPER_ARG1_S(nl_t, s, "-s", std::string, std::move(arg))
     CCSH_WRAPPER_ARG1_FWD(nl_t, number_separator, s, std::string)
 
     CCSH_WRAPPER_ARG0(nl_t, p, "-p")

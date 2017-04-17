@@ -18,10 +18,7 @@ public:
 
     using base::base;
 
-    // sorry
-#define args base::args
-
-    CCSH_WRAPPER_ARG1(base_t, w, "-w", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(base_t, w, "-w", unsigned, std::to_string(arg))
     CCSH_WRAPPER_ARG1_FWD(base_t, wrap, w, unsigned)
 
     CCSH_WRAPPER_ARG0(base_t, d, "-d")
@@ -29,8 +26,6 @@ public:
 
     CCSH_WRAPPER_ARG0(base_t, i, "-i")
     CCSH_WRAPPER_ARG0(base_t, ignore_garbage, "--ignore_garbage")
-
-#undef args
 
 };
 

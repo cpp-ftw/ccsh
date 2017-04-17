@@ -23,7 +23,7 @@ public:
     CCSH_WRAPPER_ARG0(tac_t, r, "-r")
     CCSH_WRAPPER_ARG0(tac_t, regex, "--regex")
 
-    CCSH_WRAPPER_ARG1(tac_t, s, "-s", std::string, std::move)
+    CCSH_WRAPPER_ARG1_S(tac_t, s, "-s", std::string, std::move(arg))
     CCSH_WRAPPER_ARG1_FWD(tac_t, separator, s, std::string)
 
 };

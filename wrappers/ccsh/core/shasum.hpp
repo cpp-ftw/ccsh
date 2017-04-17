@@ -19,9 +19,6 @@ public:
 
     using base::base;
 
-    // sorry
-#define args base::args
-
     CCSH_WRAPPER_ARG0(shasum_t, b, "-b")
     CCSH_WRAPPER_ARG0(shasum_t, binary, "--binary")
 
@@ -43,8 +40,6 @@ public:
     CCSH_WRAPPER_ARG0(shasum_t, warn, "--warn")
 
     CCSH_WRAPPER_ARG0(shasum_t, strict, "--strict")
-
-#undef args
 
 };
 

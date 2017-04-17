@@ -30,13 +30,13 @@ public:
     CCSH_WRAPPER_ARG0(fmt_t, u, "-u")
     CCSH_WRAPPER_ARG0(fmt_t, uniform_spacing, "--uniform-spacing")
 
-    CCSH_WRAPPER_ARG1(fmt_t, w, "-w", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(fmt_t, w, "-w", unsigned, std::to_string(arg))
     CCSH_WRAPPER_ARG1_FWD(fmt_t, width, w, unsigned)
 
-    CCSH_WRAPPER_ARG1(fmt_t, g, "-g", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(fmt_t, g, "-g", unsigned, std::to_string(arg))
     CCSH_WRAPPER_ARG1_FWD(fmt_t, goal, g, unsigned)
 
-    CCSH_WRAPPER_ARG1(fmt_t, p, "-p", std::string, std::move)
+    CCSH_WRAPPER_ARG1_S(fmt_t, p, "-p", std::string, std::move(arg))
     CCSH_WRAPPER_ARG1_FWD(fmt_t, prefix, p, std::string)
 
 };

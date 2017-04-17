@@ -147,7 +147,6 @@ private:
     {
         "slash",
         "file_type",
-        "shell-escape",
         "classify",
         "none"
     };
@@ -190,9 +189,6 @@ public:
 
     using base::base;
 
-// sorry
-#define args (base::args)
-
     // 1. Which fields are listed
 
     CCSH_WRAPPER_ARG0(ls_t, a, "-a")
@@ -213,13 +209,9 @@ public:
     CCSH_WRAPPER_ARG0(ls_t, dereference_command_line_symlink_to_dir, "--dereference-command-line-symlink-to-dir")
     CCSH_WRAPPER_ARG0(ls_t, group_directories_first, "--group-directories-first")
 
-    command_holder<ls_t>& hide(std::string const& pattern)
-    {
-        args.push_back("--hide=" + pattern);
-        return static_cast<command_holder<ls_t>&>(*this);
-    }
+    CCSH_WRAPPER_ARG1_E(ls_t, hide, "--hide", std::string const&, arg)
 
-    CCSH_WRAPPER_ARG1(ls_t, I, "-I", std::string, std::move)
+    CCSH_WRAPPER_ARG1_S(ls_t, I, "-I", std::string, std::move)
     CCSH_WRAPPER_ARG1_FWD(ls_t, ignore, I, std::string)
 
     CCSH_WRAPPER_ARG0(ls_t, L, "-L")
@@ -262,24 +254,15 @@ public:
 
     // 3. Sorting the output
 
-    command_holder<ls_t>& sort(time_type style)
-    {
-        args.push_back(std::string("--sort=") + enum_to_string(style, time_type_mapping));
-        return static_cast<command_holder<ls_t>&>(*this);
-    }
+    CCSH_WRAPPER_ARG1_E(ls_t, sort, "--sort", sort_type, enum_to_string(arg, sort_type_mapping))
 
     CCSH_WRAPPER_ARG0(ls_t, c, "-c") // --time=ctime; --time=status
-
     CCSH_WRAPPER_ARG0(ls_t, f, "-f")
 
     CCSH_WRAPPER_ARG0(ls_t, r, "-r")
     CCSH_WRAPPER_ARG0(ls_t, reverse, "--reverse")
 
-    command_holder<ls_t>& time(sort_type style)
-    {
-        args.push_back(std::string("--time=") + enum_to_string(style, sort_type_mapping));
-        return static_cast<command_holder<ls_t>&>(*this);
-    }
+    CCSH_WRAPPER_ARG1_E(ls_t, time, "--time", time_type, enum_to_string(arg, time_type_mapping))
 
     CCSH_WRAPPER_ARG0(ls_t, S, "-S") // --sort=size
     CCSH_WRAPPER_ARG0(ls_t, t, "-t") // --sort=time
@@ -290,41 +273,24 @@ public:
 
     // 5. General output formatting
 
-    command_holder<ls_t>& format(format_styles style)
-    {
-        args.push_back(std::string("--format=") + internal::enum_to_string(style, format_styles_mapping));
-        return static_cast<command_holder<ls_t>&>(*this);
-    }
+    CCSH_WRAPPER_ARG1_E(ls_t, format, "--format", format_styles, base::enum_to_string(arg, format_styles_mapping))
 
     CCSH_WRAPPER_ARG0(ls_t, one, "-1") // --format=single-column
     CCSH_WRAPPER_ARG0(ls_t, C, "-C")   // --format=vertical
 
     CCSH_WRAPPER_ARG0(ls_t, color, "--color")   // --color=always
-
-    command_holder<ls_t>& color(color_type style)
-    {
-        args.push_back(std::string("--color=") + internal::enum_to_string(style, color_type_mapping));
-        return static_cast<command_holder<ls_t>&>(*this);
-    }
+    CCSH_WRAPPER_ARG1_E(ls_t, color, "--color", color_type, base::enum_to_string(arg, color_type_mapping))
 
     CCSH_WRAPPER_ARG0(ls_t, F, "-F")   // --indicator-style=classify
     CCSH_WRAPPER_ARG0(ls_t, classify, "--classify")
 
     CCSH_WRAPPER_ARG0(ls_t, file_type, "--file-type")
 
-    command_holder<ls_t>& indicator_style(indicator_styles style)
-    {
-        args.push_back(std::string("--indicator-style=") + internal::enum_to_string(style, indicator_styles_mapping));
-        return static_cast<command_holder<ls_t>&>(*this);
-    }
+    CCSH_WRAPPER_ARG1_E(ls_t, indicator_style, "--indicator-style", indicator_styles, base::enum_to_string(arg, indicator_styles_mapping))
 
     // TODO: --block-size="'1kB" (apostrophe for separating commas)
-    template<typename RATIO>
-    command_holder<ls_t>& block_size(quantity<RATIO> q)
-    {
-        args.push_back(std::string("--block-size=") + quantity_to_string(q));
-        return static_cast<command_holder<ls_t>&>(*this);
-    }
+    template<typename RATIO> command_holder <ls_t>& block_size(quantity<RATIO> arg)& { return this->add_larg_cat("--block-size", "=", (quantity_to_string(arg))); }
+    template<typename RATIO> command_holder <ls_t>&& block_size(quantity<RATIO> arg)&& { return this->add_rarg_cat("--block-size", "=", (quantity_to_string(arg))); }
 
     CCSH_WRAPPER_ARG0(ls_t, k, "-k")
     CCSH_WRAPPER_ARG0(ls_t, kibibytes, "--kibibytes")
@@ -333,19 +299,15 @@ public:
     CCSH_WRAPPER_ARG0(ls_t, p, "-p") // --indicator-style=slash
     CCSH_WRAPPER_ARG0(ls_t, x, "-x") // --format=across; --format=horizontal
 
-    CCSH_WRAPPER_ARG1(ls_t, T, "-T", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(ls_t, T, "-T", unsigned, std::to_string)
     CCSH_WRAPPER_ARG1_FWD(ls_t, tabsize, T, unsigned)
 
-    CCSH_WRAPPER_ARG1(ls_t, w, "-wrappers", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(ls_t, w, "-wrappers", unsigned, std::to_string)
     CCSH_WRAPPER_ARG1_FWD(ls_t, width, w, unsigned)
 
     // 6. Formatting file timestamps
 
-    command_holder<ls_t>& time_style(time_styles style)
-    {
-        args.push_back(std::string("--time-style=") + enum_to_string(style, time_styles_mapping));
-        return static_cast<command_holder<ls_t>&>(*this);
-    }
+    CCSH_WRAPPER_ARG1_E(ls_t, time_style, "--time-style", time_styles, base::enum_to_string(arg, time_styles_mapping))
 
     // 7. Formatting the file names
 
@@ -361,12 +323,8 @@ public:
     CCSH_WRAPPER_ARG0(ls_t, Q, "-Q")   // --quoting-style=c
     CCSH_WRAPPER_ARG0(ls_t, quote_name, "--quote-name")
 
-    command_holder<ls_t>& quoting_style(quoting_styles style)
-    {
-        args.push_back(std::string("--quoting-style=") + enum_to_string(style, quoting_styles_mapping));
-        return static_cast<command_holder<ls_t>&>(*this);
-    }
-#undef args
+    CCSH_WRAPPER_ARG1_E(ls_t, quoting_style, "--quoting-style", quoting_styles, base::enum_to_string(arg, quoting_styles_mapping))
+
 };
 
 template<typename T> constexpr const char * ls_t<T>::format_styles_mapping[];
