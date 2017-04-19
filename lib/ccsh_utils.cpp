@@ -4,7 +4,7 @@
 #include <cstring>
 #include <sys/types.h>
 #include <unistd.h>
-#include <limits.h>
+#include <climits>
 #include <pwd.h>
 #include <glob.h>
 
@@ -19,10 +19,10 @@ namespace {
 void expand_helper(path const& p, std::vector<path>& result)
 {
     glob_t globbuf;
-    glob(p.string().c_str(), GLOB_NOCHECK | GLOB_TILDE_CHECK, NULL, &globbuf);
+    glob(p.string().c_str(), GLOB_NOCHECK | GLOB_TILDE_CHECK, nullptr, &globbuf);
 
     for (std::size_t i = 0; i < globbuf.gl_pathc; ++i)
-        result.push_back(globbuf.gl_pathv[i]);
+        result.emplace_back(globbuf.gl_pathv[i]);
 
     globfree(&globbuf);
 }

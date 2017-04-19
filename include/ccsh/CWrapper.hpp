@@ -53,7 +53,7 @@ enum class CWrapperType
 
 struct CWrapperException : public std::exception
 {
-    virtual const char* what() const noexcept override
+    const char* what() const noexcept override
     {
         return "CWrapperException";
     }

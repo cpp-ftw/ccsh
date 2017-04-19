@@ -59,15 +59,15 @@ class options_paths : public internal::command_native
 protected:
     std::vector<fs::path> paths;
 
-    virtual std::vector<const char*> get_argv() const override final
+    std::vector<const char*> get_argv() const final
     {
         std::vector<const char*> argv = internal::command_native::get_argv();
         argv.reserve(argv.size() + paths.size());
         argv.pop_back();
         for (const auto& p : paths)
-            argv.push_back(p.c_str());
+            argv.emplace_back(p.c_str());
 
-        argv.push_back(nullptr);
+        argv.emplace_back(nullptr);
         return argv;
     }
 
@@ -105,7 +105,7 @@ protected:
     command_holder <DERIVED>& add_larg_s(const char* name, ARG&& arg)
     {
         args.emplace_back(name);
-        args.push_back(arg);
+        args.push_back(std::forward<ARG>(arg));
         return static_cast<command_holder<DERIVED>&>(*this);
     }
 
@@ -113,7 +113,7 @@ protected:
     command_holder <DERIVED>&& add_rarg_s(const char* name, ARG&& arg)
     {
         args.emplace_back(name);
-        args.push_back(arg);
+        args.push_back(std::forward<ARG>(arg));
         return std::move(static_cast<command_holder<DERIVED>&>(*this));
     }
 
@@ -123,7 +123,7 @@ protected:
         std::string res = name;
         using swallow = int[];
         MAGIC(res += arg);
-        args.push_back(res);
+        args.push_back(std::move(res));
         return static_cast<command_holder<DERIVED>&>(*this);
     }
     template<typename... ARG>
@@ -132,7 +132,7 @@ protected:
         std::string res = name;
         using swallow = int[];
         MAGIC(res += arg);
-        args.push_back(res);
+        args.push_back(std::move(res));
         return std::move(static_cast<command_holder<DERIVED>&>(*this));
     }
 

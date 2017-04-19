@@ -111,7 +111,7 @@ int main(int argc, char** argv)
     for (int i = 1; i < argc; ++i)
     {
         if (argv[i] != compile_only_str)
-            args.push_back(argv[i]);
+            args.emplace_back(argv[i]);
         else
             compile_only = true;
     }
@@ -125,10 +125,10 @@ int main(int argc, char** argv)
 
     std::vector<std::string> gcc_args;
     gcc_args.reserve(file_it - args.begin() + 5);
-    gcc_args.push_back("-x");
-    gcc_args.push_back("c++");
-    gcc_args.push_back("-l");
-    gcc_args.push_back("ccsh_lib");
+    gcc_args.emplace_back("-x");
+    gcc_args.emplace_back("c++");
+    gcc_args.emplace_back("-l");
+    gcc_args.emplace_back("ccsh_lib");
 
     for (auto it = args.begin(); it != file_it; ++it)
     {
@@ -143,9 +143,9 @@ int main(int argc, char** argv)
 
     temp /= generate_filename();
 
-    gcc_args.push_back("-o");
+    gcc_args.emplace_back("-o");
     gcc_args.push_back(temp.string());
-    gcc_args.push_back("-");
+    gcc_args.emplace_back("-");
 
     std::string cxx = ccsh::$("CXX");
     if (cxx.empty())

@@ -52,13 +52,13 @@ public:
         setg(end, end, end);
     }
 
-private:
-    int_type underflow() override;
-
     ifdstreambuf(ifdstreambuf&&) = default;
     ifdstreambuf(ifdstreambuf const&) = delete;
     ifdstreambuf& operator=(ifdstreambuf&&) = default;
     ifdstreambuf& operator=(ifdstreambuf const&) = delete;
+
+private:
+    int_type underflow() override;
 };
 
 }

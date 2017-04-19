@@ -5,9 +5,9 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
-#include <string.h>
+#include <cstring>
 
 #include <iostream>
 #include <utility>
@@ -219,9 +219,9 @@ void command_err_mapping::start_run(int in, int out, int, std::vector<int> unuse
 }
 
 template<stdfd DESC>
-command_redirect<DESC>::command_redirect(command const& c, fs::path const& p, bool append)
-    : c(c)
-    , p(p)
+command_redirect<DESC>::command_redirect(command c, fs::path p, bool append)
+    : c(std::move(c))
+    , p(std::move(p))
     , flags(fopen_flags(DESC, append))
 { }
 
@@ -245,8 +245,8 @@ class command_redirect<stdfd::err>;
 
 
 template<stdfd DESC>
-command_fd<DESC>::command_fd(command const& c, int fd)
-    : c(c)
+command_fd<DESC>::command_fd(command c, int fd)
+    : c(std::move(c))
     , ow(fd)
 { }
 
@@ -279,7 +279,7 @@ void replace(std::string& str, std::string const& from, std::string const& to)
 std::string sh_escape(std::string const& str)
 {
     std::string temp = str;
-    replace(temp, "'", "'\\''");
+    replace(temp, "'", R"('\'')");
     return " '" + temp + "' ";
 }
 

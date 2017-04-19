@@ -48,8 +48,7 @@ public:
         autorun_flag = false;
     }
 
-    virtual ~command_base()
-    { }
+    virtual ~command_base() = default;
 };
 
 class command_async
@@ -96,9 +95,9 @@ protected:
 
 public:
 
-    command_native(fs::path const& p, std::vector<std::string> const& args = {})
-        : p(p)
-        , args(args)
+    explicit command_native(fs::path p, std::vector<std::string> args = {})
+        : p(std::move(p))
+        , args(std::move(args))
     { }
 
     void append_dir(fs::path const& dir)
@@ -106,8 +105,8 @@ public:
         p = dir / p;
     }
 
-    void start_run(int in, int out, int err, std::vector<int> unused_fds) const override final;
-    virtual int finish_run() const override final;
+    void start_run(int in, int out, int err, std::vector<int> unused_fds) const final;
+    int finish_run() const final;
 };
 
 class command_runnable : protected std::shared_ptr<command_base>
@@ -175,7 +174,7 @@ public:
 
     using TRAITS::TRAITS;
 
-    ~command_holder()
+    ~command_holder() override
     {
         TRAITS::run_autorun();
     }
@@ -237,9 +236,9 @@ protected:
     command right;
 
 public:
-    command_pair(command const& left, command const& right)
-        : left(left)
-        , right(right)
+    command_pair(command left, command right)
+        : left(std::move(left))
+        , right(std::move(right))
     { }
 };
 
@@ -248,7 +247,7 @@ class command_conditonal : public command_pair, protected command_async
 public:
     using command_pair::command_pair;
 
-    void start_run(int in, int out, int err, std::vector<int> unused_fds) const override final
+    void start_run(int in, int out, int err, std::vector<int> unused_fds) const final
     {
         auto f = [=]
         {
@@ -337,13 +336,13 @@ protected:
     command_functor_init init_func;
 
 public:
-    command_mapping(command const& c, command_functor_raw const& f, command_functor_init const& init_func = nullptr)
-        : c(c)
-        , func(f)
-        , init_func(init_func)
+    command_mapping(command c, command_functor_raw f, command_functor_init init_func = nullptr)
+        : c(std::move(c))
+        , func(std::move(f))
+        , init_func(std::move(init_func))
     { }
 
-    int finish_run() const override final
+    int finish_run() const final
     {
         result.wait();
         return c.finish_run();
@@ -379,7 +378,7 @@ class command_redirect final : public command_base
     int flags;
     mutable open_wrapper fd;
 public:
-    command_redirect(command const& c, fs::path const& p, bool append = false);
+    command_redirect(command c, fs::path p, bool append = false);
     void start_run(int in, int out, int err, std::vector<int>) const override;
 
     int finish_run() const override
@@ -405,7 +404,7 @@ class command_fd final : public command_base
     command c;
     open_wrapper ow;
 public:
-    command_fd(command const& c, int fd);
+    command_fd(command c, int fd);
     void start_run(int in, int out, int err, std::vector<int>) const override;
 
     int finish_run() const override
