@@ -65,7 +65,7 @@ std::vector<std::string>::const_iterator find_file(std::vector<std::string> cons
     {
         if ((*it)[0] == '-')
         {
-            if (gcc_options_with_args.count(*it))
+            if (gcc_options_with_args.count(*it) != 0)
                 ++it;
         }
         else if ((*it)[0] != '@')

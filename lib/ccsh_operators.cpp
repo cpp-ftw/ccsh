@@ -18,7 +18,7 @@ command_runnable operator<(command const& c, std::string& str)
         std::size_t len = str.length();
         len = len < s ? len : s;
         std::memcpy(buf, str.data(), len);
-        if (len)
+        if (len != 0)
             str.erase(0, len);
         return len;
     };
@@ -67,12 +67,10 @@ command_runnable operator<(command const& c, std::vector<std::string>& vec)
             vec.erase(vec.begin()); // shit
             return len + 1;
         }
-        else
-        {
-            std::memcpy(buf, str.data(), s);
-            str.erase(0, s);
-            return s;
-        }
+        
+        std::memcpy(buf, str.data(), s);
+        str.erase(0, s);
+        return s;
     };
     return {new command_in_mapping(c, func)};
 }

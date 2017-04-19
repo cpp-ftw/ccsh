@@ -302,7 +302,7 @@ void env_putter(std::string const& str)
     std::string env_name = str.substr(0, eq_sign);
     std::string env_value = str.substr(++eq_sign);
 
-    stdc_thrower(setenv(env_name.c_str(), env_value.c_str(), true));
+    stdc_thrower(setenv(env_name.c_str(), env_value.c_str(), int(true)));
 }
 
 auto env_applier = [](open_wrapper fd) -> int

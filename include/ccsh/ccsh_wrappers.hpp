@@ -140,7 +140,6 @@ public:
 
     options_paths()
         : command_native(DERIVED::name())
-        , paths()
     { }
 
     options_paths(std::vector<fs::path> const& paths)

@@ -139,7 +139,7 @@ void env_var::set(std::string const& name, std::string const& value, bool overri
 
 int env_var::try_set(std::string const& name, std::string const& value, bool override)
 {
-    return setenv(name.c_str(), value.c_str(), override);
+    return setenv(name.c_str(), value.c_str(), int(override));
 }
 
 stdc_error::stdc_error(int no)
@@ -160,7 +160,7 @@ env_var::operator std::string() const
 
 env_var& env_var::operator=(std::string const& str)
 {
-    internal::stdc_thrower(setenv(name.c_str(), str.c_str(), true));
+    internal::stdc_thrower(setenv(name.c_str(), str.c_str(), int(true)));
     return *this;
 }
 

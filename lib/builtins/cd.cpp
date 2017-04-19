@@ -60,8 +60,8 @@ int change_to_directory(path newdir, bool follow_symlinks)
     int err = errno;
     if (chdir(newdir.c_str()) == 0)
         return EXIT_SUCCESS;
-    else
-        errno = err;
+
+    errno = err;
     return EXIT_FAILURE;
 }
 

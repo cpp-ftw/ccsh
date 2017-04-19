@@ -98,7 +98,7 @@ path self_lexically_normal(path const& self)
             && (itr->native())[1] == dot) // dot dot
         {
             path::string_type lf(temp.filename().native());
-            if (lf.size() > 0
+            if (!lf.empty()
                 && (lf.size() != 1
                     || (lf[0] != dot
                         && lf[0] != slash))

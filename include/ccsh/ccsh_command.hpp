@@ -316,7 +316,7 @@ public:
 
     int finish_run() const override
     {
-        return !b; // logical inversion of shell logic
+        return int(!b); // logical inversion of shell logic
     }
 };
 
