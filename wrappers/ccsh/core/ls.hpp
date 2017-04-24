@@ -211,7 +211,7 @@ public:
 
     CCSH_WRAPPER_ARG1_E(ls_t, hide, "--hide", std::string const&, arg)
 
-    CCSH_WRAPPER_ARG1_S(ls_t, I, "-I", std::string, std::move)
+    CCSH_WRAPPER_ARG1_S(ls_t, I, "-I", std::string, std::move(arg))
     CCSH_WRAPPER_ARG1_FWD(ls_t, ignore, I, std::string)
 
     CCSH_WRAPPER_ARG0(ls_t, L, "-L")
@@ -299,10 +299,10 @@ public:
     CCSH_WRAPPER_ARG0(ls_t, p, "-p") // --indicator-style=slash
     CCSH_WRAPPER_ARG0(ls_t, x, "-x") // --format=across; --format=horizontal
 
-    CCSH_WRAPPER_ARG1_S(ls_t, T, "-T", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(ls_t, T, "-T", unsigned, std::to_string(arg))
     CCSH_WRAPPER_ARG1_FWD(ls_t, tabsize, T, unsigned)
 
-    CCSH_WRAPPER_ARG1_S(ls_t, w, "-wrappers", unsigned, std::to_string)
+    CCSH_WRAPPER_ARG1_S(ls_t, w, "-wrappers", unsigned, std::to_string(arg))
     CCSH_WRAPPER_ARG1_FWD(ls_t, width, w, unsigned)
 
     // 6. Formatting file timestamps
