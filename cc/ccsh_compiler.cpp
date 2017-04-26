@@ -127,6 +127,8 @@ int main(int argc, char** argv)
     gcc_args.reserve(file_it - args.begin() + 5);
     gcc_args.push_back("-x");
     gcc_args.push_back("c++");
+    gcc_args.push_back("-l");
+    gcc_args.push_back("ccsh_lib");
 
     for (auto it = args.begin(); it != file_it; ++it)
     {
