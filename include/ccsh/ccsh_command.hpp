@@ -116,10 +116,10 @@ class command_runnable : protected std::shared_ptr<command_base>
 
     friend class command;
 
-    command_runnable(command_runnable const& other) = default;
-    command_runnable(command_runnable&& old) = default;
-    command_runnable& operator=(command_runnable const& other) = default;
-    command_runnable& operator=(command_runnable&& old) = default;
+    command_runnable(command_runnable const&) = default;
+    command_runnable(command_runnable&&) = default;
+    command_runnable& operator=(command_runnable const&) = default;
+    command_runnable& operator=(command_runnable&&) = default;
 
 public:
 
