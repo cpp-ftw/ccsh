@@ -5,7 +5,6 @@
 #include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
-namespace core {
 
 
 class od_t : public wrappers::options_paths<od_t>
@@ -24,7 +23,6 @@ public:
 using od = command_holder<od_t>;
 
 
-}
 }
 
 #endif // CCSH_CORE_OD_HPP_INCLUDED

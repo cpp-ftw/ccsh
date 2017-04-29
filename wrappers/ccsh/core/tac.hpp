@@ -5,7 +5,6 @@
 #include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
-namespace core {
 
 class tac_t : public wrappers::options_paths<tac_t>
 {
@@ -31,7 +30,6 @@ public:
 using tac = command_holder<tac_t>;
 
 
-}
 }
 
 #endif // CCSH_CORE_TAC_HPP_INCLUDED

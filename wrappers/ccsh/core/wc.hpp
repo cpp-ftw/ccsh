@@ -5,7 +5,6 @@
 #include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
-namespace core {
 
 
 class wc_t : public wrappers::options_paths<wc_t>
@@ -39,7 +38,6 @@ public:
 
 using wc = command_holder<wc_t>;
 
-}
 }
 
 #endif // CCSH_CORE_WC_HPP_INCLUDED

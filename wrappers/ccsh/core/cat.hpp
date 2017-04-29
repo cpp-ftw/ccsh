@@ -5,7 +5,6 @@
 #include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
-namespace core {
 
 
 class cat_t : public wrappers::options_paths<cat_t>
@@ -48,7 +47,6 @@ public:
 
 using cat = command_holder<cat_t>;
 
-}
 }
 
 #endif // CCSH_CORE_CAT_HPP_INCLUDED

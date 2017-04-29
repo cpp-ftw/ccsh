@@ -5,7 +5,6 @@
 #include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
-namespace core {
 
 
 class sum_t : public wrappers::options_paths<sum_t>
@@ -27,7 +26,6 @@ public:
 
 using sum = command_holder<sum_t>;
 
-}
 }
 
 #endif // CCSH_CORE_SUM_HPP_INCLUDED

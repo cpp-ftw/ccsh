@@ -5,7 +5,6 @@
 #include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
-namespace core {
 
 
 class fmt_t : public wrappers::options_paths<fmt_t>
@@ -43,7 +42,6 @@ public:
 
 using fmt = command_holder<fmt_t>;
 
-}
 }
 
 #endif // CCSH_CORE_FMT_HPP_INCLUDED

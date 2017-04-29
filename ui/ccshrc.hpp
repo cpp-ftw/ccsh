@@ -4,7 +4,6 @@
 
 using namespace ccsh;
 using namespace ccsh::literals;
-using namespace ccsh::core;
 
 CCSH_RUN(ccsh::ps::prompt = []
 {

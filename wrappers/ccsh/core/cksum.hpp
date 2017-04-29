@@ -5,7 +5,6 @@
 #include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
-namespace core {
 
 
 class cksum_t : public wrappers::options_paths<cksum_t>
@@ -22,7 +21,6 @@ public:
 
 using cksum = command_holder<cksum_t>;
 
-}
 }
 
 #endif // CCSH_CORE_CKSUM_HPP_INCLUDED

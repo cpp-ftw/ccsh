@@ -8,8 +8,6 @@
 #include <ccsh/ccsh_ratio.hpp>
 
 namespace ccsh {
-namespace core {
-
 
 class tail_t : public wrappers::options_paths<tail_t>
 {
@@ -72,7 +70,6 @@ public:
 
 using tail = command_holder<tail_t>;
 
-}
 }
 
 #endif // CCSH_CORE_TAIL_HPP_INCLUDED

@@ -46,10 +46,10 @@ void test0()
 
 void test1()
 {
-    using namespace ccsh::core;
-    ccsh::command c1 = cat().e();
+    using namespace ccsh;
+    command c1 = cat().e();
     auto c2 = c1;
-    ccsh::command_builder<cat> x = cat().n();
+    command_builder<cat> x = cat().n();
 
     x.T();
 }
@@ -67,19 +67,18 @@ void test2()
 
 void test3()
 {
-    using namespace ccsh::core;
+    using namespace ccsh;
     ls().l().color(ls::auto_);
-
     ls("CMake*").l();
 }
 
 void test4()
 {
-    using namespace ccsh::core;
+    using namespace ccsh;
 
     ls(), ls();
 
-    ccsh::core::cat(__FILE__);
+    cat(__FILE__);
 }
 
 void test5()

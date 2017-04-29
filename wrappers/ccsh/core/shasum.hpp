@@ -5,7 +5,6 @@
 #include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
-namespace core {
 
 
 template<const char* NAME>
@@ -57,7 +56,6 @@ using sha256sum = command_holder<sha256sum_t>;
 using sha384sum = command_holder<sha384sum_t>;
 using sha512sum = command_holder<sha512sum_t>;
 
-}
 }
 
 #endif // CCSH_CORE_SHASUM_HPP_INCLUDED

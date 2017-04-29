@@ -6,7 +6,6 @@
 #include <ccsh/ccsh_regex.hpp>
 
 namespace ccsh {
-namespace core {
 
 class nl_t : public wrappers::options_paths<nl_t>
 {
@@ -96,7 +95,6 @@ public:
 
 using nl = command_holder<nl_t>;
 
-}
 }
 
 #endif // CCSH_CORE_NL_HPP_INCLUDED

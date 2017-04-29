@@ -5,7 +5,6 @@
 #include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
-namespace core {
 
 namespace hidden {
 
@@ -344,7 +343,6 @@ using ls_t = hidden::ls_t<>;
 
 using ls = command_holder<ls_t>;
 
-}
 }
 
 #endif // CCSH_CORE_LS_HPP_INCLUDED

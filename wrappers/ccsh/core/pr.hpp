@@ -5,7 +5,6 @@
 #include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
-namespace core {
 
 class pr_t : public wrappers::options_paths<pr_t>
 {
@@ -118,7 +117,6 @@ public:
 using pr = command_holder<pr_t>;
 
 
-}
 }
 
 #endif // CCSH_CORE_PR_HPP_INCLUDED

@@ -5,7 +5,6 @@
 #include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
-namespace core {
 
 
 class fold_t : public wrappers::options_paths<fold_t>
@@ -31,7 +30,6 @@ public:
 
 using fold = command_holder<fold_t>;
 
-}
 }
 
 #endif // CCSH_CORE_FOLD_HPP_INCLUDED

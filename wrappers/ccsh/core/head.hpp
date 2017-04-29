@@ -6,7 +6,6 @@
 #include <ccsh/ccsh_ratio.hpp>
 
 namespace ccsh {
-namespace core {
 
 
 class head_t : public wrappers::options_paths<head_t>
@@ -44,7 +43,6 @@ public:
 
 using head = command_holder<head_t>;
 
-}
 }
 
 #endif // CCSH_CORE_HEAD_HPP_INCLUDED
