@@ -16,6 +16,9 @@ public:
 
     using base::base;
 
+    CCSH_WRAPPER_ARG1_N(pr_t, operator(), "+", unsigned, std::to_string(arg))
+    CCSH_WRAPPER_ARG2_NC(pr_t, operator(), "+", unsigned, std::to_string(arg1), unsigned, std::to_string(arg2))
+
     CCSH_WRAPPER_ARG1_E(pr_t, pages, "--pages", int, std::to_string(arg))
     CCSH_WRAPPER_ARG2_EC(pr_t, pages, "--pages", int, std::to_string(arg1), int, std::to_string(arg2))
 

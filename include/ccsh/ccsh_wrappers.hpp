@@ -41,6 +41,10 @@
     command_holder <comm>&  method(ty1 arg1, ty2 arg2) &  { return this->add_larg_cat(argstr, (userarg1), (userarg2)); } \
     command_holder <comm>&& method(ty1 arg1, ty2 arg2) && { return this->add_rarg_cat(argstr, (userarg1), (userarg2)); }
 
+#define CCSH_WRAPPER_ARG2_NC(comm, method, argstr, ty1, userarg1, ty2, userarg2) \
+    command_holder <comm>&  method(ty1 arg1, ty2 arg2) &  { return this->add_larg_cat(argstr, (userarg1), ":", (userarg2)); } \
+    command_holder <comm>&& method(ty1 arg1, ty2 arg2) && { return this->add_rarg_cat(argstr, (userarg1), ":", (userarg2)); }
+
 
 #define CCSH_WRAPPER_COMMON_CLASS(basecmd, cmdname, cmdstr) \
     namespace hidden { constexpr const char cmdname##_name[] = cmdstr; } \
