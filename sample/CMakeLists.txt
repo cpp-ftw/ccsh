@@ -9,4 +9,3 @@ file(GLOB_RECURSE wrappers ../wrappers/*.hpp)
 
 add_executable(ccsh_sample main.cpp ${wrappers})
 target_link_libraries( ccsh_sample PUBLIC ccsh_lib ${filesystem_lib})
-target_compile_options(ccsh_sample PUBLIC -std=c++11 -Wall -Wextra -pedantic -O0 -g -ggdb)

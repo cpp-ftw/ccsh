@@ -14,7 +14,6 @@ file(GLOB sources *.cpp *.hpp builtins/*.cpp)
 file(GLOB headers ../include/ccsh/*.hpp ../include/ccsh/builtins/*.hpp)
 
 add_library(ccsh_lib SHARED ${sources} ${headers})
-target_link_libraries(ccsh_lib   PUBLIC ${filesystem_lib} pthread)
-target_compile_options(ccsh_lib  PUBLIC -std=c++11 -Wall -Wextra -pedantic -O3 -g -ggdb)
+target_link_libraries(ccsh_lib PUBLIC ${filesystem_lib} pthread)
 
 endif()

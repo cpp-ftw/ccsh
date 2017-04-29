@@ -14,4 +14,3 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 add_executable(ccsh_test ${tests} ${wrappers})
 target_link_libraries( ccsh_test PUBLIC ccsh_lib ${filesystem_lib} ${GTEST_BOTH_LIBRARIES})
-target_compile_options(ccsh_test PUBLIC -std=c++11 -Wall -Wextra -pedantic -O0 -g -ggdb)
