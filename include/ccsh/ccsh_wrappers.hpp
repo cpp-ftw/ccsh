@@ -25,7 +25,7 @@
     command_holder <comm>&& method(ty arg) && { return this->add_rarg_cat(argstr, (userarg)); }
 
 #define CCSH_WRAPPER_ARG1_FWD(comm, method, fwd_to, ty) \
-    command_holder<comm>&  method(ty arg)&  { return this->fwd_to(std::move(arg)); } \
+    command_holder<comm>&  method(ty arg)&  { return static_cast<command_holder<comm>&>(this->fwd_to(std::move(arg))); } \
     command_holder<comm>&& method(ty arg)&& { return std::move(this->fwd_to(std::move(arg))); }
 
 
