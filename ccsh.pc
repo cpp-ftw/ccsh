@@ -1,0 +1,10 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: ccsh
+Description: C++ shell scripting library
+Version: rolling
+Libs: -L${libdir} -lccsh_lib
+Cflags: -I${includedir} -std=c++11
