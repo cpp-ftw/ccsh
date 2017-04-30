@@ -1,13 +1,13 @@
 #include <ccsh/ccsh.hpp>
 #include <cstdio>
-#include <string>
 #include <fstream>
+#include <string>
 
 #include <gtest/gtest.h>
 
 using namespace ccsh;
 
-std::string ReadAllText(fs::path filename)
+std::string ReadAllText(fs::path const& filename)
 {
     std::ifstream t(filename.c_str());
     return std::string(std::istreambuf_iterator<char>(t),

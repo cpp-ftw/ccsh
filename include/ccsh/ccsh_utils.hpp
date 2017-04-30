@@ -1,10 +1,10 @@
-#ifndef CCSH_UTILS_HPP_INCLUDED
-#define CCSH_UTILS_HPP_INCLUDED
+#ifndef CCSH_CCSH_UTILS_HPP
+#define CCSH_CCSH_UTILS_HPP
 
+#include <cstddef>
 #include <exception>
 #include <stdexcept>
 #include <string>
-#include <cstddef>
 
 #include "ccsh_filesystem.hpp"
 
@@ -15,7 +15,8 @@ namespace ccsh {
 namespace fs {
 std::vector<path> expand(path const& p);
 std::vector<path> expand(std::vector<path> const& paths);
-}
+} // namespace fs
+
 // NEVER EVER USE boost::filesystem DIRECTLY, ALWAYS USE ccsh::fs
 // boost::filesystem WILL BE CHANGED TO std::filesystem WITH C++17
 
@@ -37,7 +38,7 @@ class stdc_error : public std::runtime_error
 {
     int error_number;
 public:
-    stdc_error(int no = errno);
+    explicit stdc_error(int no = errno);
     stdc_error(int no, std::string const& msg);
 
     int no() const
@@ -60,7 +61,7 @@ public:
     static void set(std::string const& name, std::string const& value, bool override = true);
     static int try_set(std::string const& name, std::string const& value, bool override = true);
 
-    env_var(std::string name)
+    explicit env_var(std::string name)
         : name(std::move(name))
     { }
 
@@ -97,4 +98,4 @@ enum class stdfd : uint8_t
 
 } // namespace ccsh
 
-#endif // CCSH_UTILS_HPP_INCLUDED
+#endif // CCSH_CCSH_UTILS_HPP

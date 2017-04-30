@@ -1,10 +1,10 @@
-#ifndef CCSH_CCSH_FDSTREAM_HPP_INCLUDED
-#define CCSH_CCSH_FDSTREAM_HPP_INCLUDED
+#ifndef CCSH_CCSH_FDSTREAM_HPP
+#define CCSH_CCSH_FDSTREAM_HPP
 
-#include <iostream>
 #include <array>
-#include <memory>
 #include <cstdio>
+#include <iostream>
+#include <memory>
 
 namespace ccsh {
 
@@ -52,16 +52,16 @@ public:
         setg(end, end, end);
     }
 
-private:
-    int_type underflow() override;
-
     ifdstreambuf(ifdstreambuf&&) = default;
     ifdstreambuf(ifdstreambuf const&) = delete;
     ifdstreambuf& operator=(ifdstreambuf&&) = default;
     ifdstreambuf& operator=(ifdstreambuf const&) = delete;
+
+private:
+    int_type underflow() override;
 };
 
-}
+} // namespace internal
 
 class ofdstream : public std::ostream
 {
@@ -83,6 +83,6 @@ public:
     { }
 };
 
-}
+} // namespace ccsh
 
-#endif //CCSH_CCSH_FDSTREAM_HPP_INCLUDED
+#endif // CCSH_CCSH_FDSTREAM_HPP

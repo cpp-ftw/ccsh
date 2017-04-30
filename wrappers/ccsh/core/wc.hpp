@@ -38,6 +38,6 @@ public:
 
 using wc = command_holder<wc_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_WC_HPP_INCLUDED

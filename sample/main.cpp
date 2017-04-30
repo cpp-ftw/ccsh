@@ -47,9 +47,8 @@ void test0()
 void test1()
 {
     using namespace ccsh;
-    command c1 = cat().e();
-    auto c2 = c1;
-    command_builder<cat> x = cat().n();
+    ccsh::command c1 = cat().e();
+    ccsh::command_builder<cat> x = cat().n();
 
     x.T();
 }

@@ -1,13 +1,13 @@
-#include <ccsh/ccsh_command.hpp>
 #include "ccsh_internals.hpp"
+#include <ccsh/ccsh_command.hpp>
 
+#include <cstdio>
+#include <cstring>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdio.h>
 #include <unistd.h>
-#include <string.h>
 
 #include <iostream>
 #include <utility>
@@ -80,7 +80,7 @@ void command_native::start_run(int in, int out, int err, std::vector<int> unused
         if (CCSH_RETRY_HANDLER(fcntl(fail_pipe[1], F_SETFD, FD_CLOEXEC)) < 0)
             goto fail;
 
-        execvp(argv[0], (char* const*)argv.data());
+        execvp(argv[0], const_cast<char* const*>(argv.data()));
 fail:
         int fail_code = errno;
         CCSH_RETRY_HANDLER(write(fail_pipe[1], &fail_code, sizeof(int)));
@@ -196,11 +196,11 @@ void command_err_mapping::start_run(int in, int out, int, std::vector<int> unuse
     if (init_func) init_func();
 
     int pipefd[2];
+    stdc_thrower(pipe(pipefd));
     unused_fds.push_back(pipefd[0]);
     open_wrapper temp0{pipefd[0]};
     open_wrapper temp1{pipefd[1]};
 
-    stdc_thrower(pipe(pipefd));
     auto f2 = [this, pipefd](open_wrapper fd)
     {
         char buf[BUFSIZ];
@@ -219,9 +219,9 @@ void command_err_mapping::start_run(int in, int out, int, std::vector<int> unuse
 }
 
 template<stdfd DESC>
-command_redirect<DESC>::command_redirect(command const& c, fs::path const& p, bool append)
-    : c(c)
-    , p(p)
+command_redirect<DESC>::command_redirect(command c, fs::path p, bool append)
+    : c(std::move(c))
+    , p(std::move(p))
     , flags(fopen_flags(DESC, append))
 { }
 
@@ -245,8 +245,8 @@ class command_redirect<stdfd::err>;
 
 
 template<stdfd DESC>
-command_fd<DESC>::command_fd(command const& c, int fd)
-    : c(c)
+command_fd<DESC>::command_fd(command c, int fd)
+    : c(std::move(c))
     , ow(fd)
 { }
 
@@ -279,7 +279,7 @@ void replace(std::string& str, std::string const& from, std::string const& to)
 std::string sh_escape(std::string const& str)
 {
     std::string temp = str;
-    replace(temp, "'", "'\\''");
+    replace(temp, "'", R"('\'')");
     return " '" + temp + "' ";
 }
 
@@ -302,12 +302,12 @@ void env_putter(std::string const& str)
     std::string env_name = str.substr(0, eq_sign);
     std::string env_value = str.substr(++eq_sign);
 
-    stdc_thrower(setenv(env_name.c_str(), env_value.c_str(), true));
+    stdc_thrower(setenv(env_name.c_str(), env_value.c_str(), int(true)));
 }
 
 auto env_applier = [](open_wrapper fd) -> int
 {
-    auto env_splitter = line_splitter_make(env_putter, '\0');
+    auto env_splitter = line_splitter_make(&env_putter, '\0');
 
     char buf[BUFSIZ];
     ssize_t count;
@@ -317,7 +317,7 @@ auto env_applier = [](open_wrapper fd) -> int
     return 0;
 };
 
-}
+}  // namespace
 
 command_source::command_source(fs::path const& p, std::vector<std::string> const& args)
     : cmd("/bin/sh", {"-c", ""})

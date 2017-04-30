@@ -2,8 +2,8 @@
 #define CCSH_CORE_HEAD_HPP_INCLUDED
 
 #include <ccsh/ccsh_command.hpp>
-#include <ccsh/ccsh_wrappers.hpp>
 #include <ccsh/ccsh_ratio.hpp>
+#include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
 
@@ -43,6 +43,6 @@ public:
 
 using head = command_holder<head_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_HEAD_HPP_INCLUDED

@@ -1,7 +1,9 @@
-#ifndef CCSH_PWD_HPP_INCLUDED
-#define CCSH_PWD_HPP_INCLUDED
+#ifndef CCSH_BUILTINS_PWD_HPP
+#define CCSH_BUILTINS_PWD_HPP
 
 #include "../ccsh_command.hpp"
+
+#include <utility>
 
 namespace ccsh {
 
@@ -12,8 +14,8 @@ class pwd_t : public internal::command_builtin
     bool helpflag = false;
 
 public:
-    pwd_t(fs::path const& p = get_home())
-        : p(p)
+    explicit pwd_t(fs::path p = get_home())
+        : p(std::move(p))
     { }
 
     command_holder<pwd_t>& P()
@@ -34,12 +36,12 @@ public:
         return static_cast<command_holder<pwd_t>&>(*this);
     }
 
-    int runx(int in, int out, int err) const override final;
+    int runx(int in, int out, int err) const final;
 };
 
 using pwd = command_holder<pwd_t>;
 
 
-}
+} // namespace ccsh
 
-#endif // CCSH_PWD_HPP_INCLUDED
+#endif // CCSH_BUILTINS_PWD_HPP

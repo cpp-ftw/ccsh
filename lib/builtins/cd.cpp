@@ -1,9 +1,9 @@
-#include <ccsh/builtins/cd.hpp>
-#include <ccsh/ccsh_operators.hpp>
-#include <ccsh/ccsh_fdstream.hpp>
 #include "../ccsh_internals.hpp"
-#include <cstring>
+#include <ccsh/builtins/cd.hpp>
+#include <ccsh/ccsh_fdstream.hpp>
+#include <ccsh/ccsh_operators.hpp>
 #include <cstdlib>
+#include <cstring>
 
 namespace {
 
@@ -29,11 +29,11 @@ int change_to_directory(path newdir, bool follow_symlinks)
 
     // Use the canonicalized version of NEWDIR, or, if canonicalization
     // failed, use the non-canonical form.
-    bool canon_failed = 0;
+    bool canon_failed = false;
     if (ec)
     {
         tdir = tcwd;
-        canon_failed = 1;
+        canon_failed = true;
     }
 
     // In POSIX mode, if we're resolving symlinks logically and sh_canonpath
@@ -60,8 +60,8 @@ int change_to_directory(path newdir, bool follow_symlinks)
     int err = errno;
     if (chdir(newdir.c_str()) == 0)
         return EXIT_SUCCESS;
-    else
-        errno = err;
+
+    errno = err;
     return EXIT_FAILURE;
 }
 
@@ -134,7 +134,7 @@ int cd_t::runx(int, int out_fd, int err_fd) const
     bool printflag = false;
     bool eflag = this->eflag;
     if (eflag && follow_symlinks)
-        eflag = 0;
+        eflag = false;
 
     const char* dirname = p.c_str();
 
@@ -191,5 +191,5 @@ int cd_t::runx(int, int out_fd, int err_fd) const
     return EXIT_FAILURE;
 }
 
-}
+} // namespace ccsh
 

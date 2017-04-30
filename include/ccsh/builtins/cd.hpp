@@ -1,7 +1,9 @@
-#ifndef CCSH_CD_HPP_INCLUDED
-#define CCSH_CD_HPP_INCLUDED
+#ifndef CCSH_BUILTINS_CD_HPP
+#define CCSH_BUILTINS_CD_HPP
 
 #include "../ccsh_command.hpp"
+
+#include <utility>
 
 namespace ccsh {
 
@@ -13,8 +15,8 @@ class cd_t : public internal::command_builtin
     bool helpflag = false;
 
 public:
-    cd_t(fs::path const& p = get_home())
-        : p(p)
+    explicit cd_t(fs::path p = get_home())
+        : p(std::move(p))
     { }
 
     command_holder<cd_t>& P()
@@ -41,12 +43,12 @@ public:
         return static_cast<command_holder<cd_t>&>(*this);
     }
 
-    int runx(int in, int out, int err) const override final;
+    int runx(int in, int out, int err) const final;
 };
 
 using cd = command_holder<cd_t>;
 
 
-}
+} // namespace ccsh
 
-#endif // CCSH_CD_HPP_INCLUDED
+#endif // CCSH_BUILTINS_CD_HPP

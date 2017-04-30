@@ -120,6 +120,6 @@ public:
 using pr = command_holder<pr_t>;
 
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_PR_HPP_INCLUDED

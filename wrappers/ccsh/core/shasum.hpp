@@ -56,6 +56,6 @@ using sha256sum = command_holder<sha256sum_t>;
 using sha384sum = command_holder<sha384sum_t>;
 using sha512sum = command_holder<sha512sum_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_SHASUM_HPP_INCLUDED

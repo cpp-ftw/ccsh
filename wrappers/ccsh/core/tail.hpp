@@ -4,8 +4,8 @@
 #include <chrono>
 
 #include <ccsh/ccsh_command.hpp>
-#include <ccsh/ccsh_wrappers.hpp>
 #include <ccsh/ccsh_ratio.hpp>
+#include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
 
@@ -70,6 +70,6 @@ public:
 
 using tail = command_holder<tail_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_TAIL_HPP_INCLUDED

@@ -30,6 +30,6 @@ public:
 using tac = command_holder<tac_t>;
 
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_TAC_HPP_INCLUDED

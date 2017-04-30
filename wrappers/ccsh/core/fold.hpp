@@ -30,6 +30,6 @@ public:
 
 using fold = command_holder<fold_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_FOLD_HPP_INCLUDED

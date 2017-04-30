@@ -47,6 +47,6 @@ public:
 
 using cat = command_holder<cat_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_CAT_HPP_INCLUDED

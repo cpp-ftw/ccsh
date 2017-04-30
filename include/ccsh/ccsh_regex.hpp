@@ -1,5 +1,5 @@
-#ifndef CCSH_REGEX_HPP_INCLUDED
-#define CCSH_REGEX_HPP_INCLUDED
+#ifndef CCSH_CCSH_REGEX_HPP
+#define CCSH_CCSH_REGEX_HPP
 
 #include "ccsh_utils.hpp"
 
@@ -53,6 +53,7 @@ public:
         return ex;
     }
 };
-}
 
-#endif // CCSH_REGEX_HPP_INCLUDED
+} // namespace ccsh
+
+#endif // CCSH_CCSH_REGEX_HPP

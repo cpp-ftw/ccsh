@@ -34,6 +34,6 @@ CCSH_WRAPPER_COMMON_CLASS(base_t, base64_t, "base64")
 using base32 = command_holder<base32_t>;
 using base64 = command_holder<base64_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_BASE3264_HPP_INCLUDED

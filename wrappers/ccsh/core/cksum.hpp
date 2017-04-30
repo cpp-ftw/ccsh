@@ -21,6 +21,6 @@ public:
 
 using cksum = command_holder<cksum_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_CKSUM_HPP_INCLUDED

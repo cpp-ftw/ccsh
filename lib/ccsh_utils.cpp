@@ -1,12 +1,12 @@
-#include <ccsh/ccsh_utils.hpp>
 #include "ccsh_internals.hpp"
+#include <ccsh/ccsh_utils.hpp>
 
+#include <climits>
 #include <cstring>
+#include <glob.h>
+#include <pwd.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <limits.h>
-#include <pwd.h>
-#include <glob.h>
 
 #include <memory>
 
@@ -19,15 +19,15 @@ namespace {
 void expand_helper(path const& p, std::vector<path>& result)
 {
     glob_t globbuf;
-    glob(p.string().c_str(), GLOB_NOCHECK | GLOB_TILDE_CHECK, NULL, &globbuf);
+    glob(p.string().c_str(), GLOB_NOCHECK | GLOB_TILDE_CHECK, nullptr, &globbuf);
 
     for (std::size_t i = 0; i < globbuf.gl_pathc; ++i)
-        result.push_back(globbuf.gl_pathv[i]);
+        result.emplace_back(globbuf.gl_pathv[i]);
 
     globfree(&globbuf);
 }
 
-}
+} // namespace
 
 std::vector<path> expand(path const& p)
 {
@@ -44,14 +44,14 @@ std::vector<path> expand(std::vector<path> const& paths)
     return result;
 }
 
-}
+} // namespace fs
 
 fs::path get_home()
 {
     struct passwd pwd;
     struct passwd* result;
 
-    long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+    auto bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
     if (bufsize == -1)
         bufsize = 16384;
 
@@ -139,7 +139,7 @@ void env_var::set(std::string const& name, std::string const& value, bool overri
 
 int env_var::try_set(std::string const& name, std::string const& value, bool override)
 {
-    return setenv(name.c_str(), value.c_str(), override);
+    return setenv(name.c_str(), value.c_str(), int(override));
 }
 
 stdc_error::stdc_error(int no)
@@ -160,7 +160,7 @@ env_var::operator std::string() const
 
 env_var& env_var::operator=(std::string const& str)
 {
-    internal::stdc_thrower(setenv(name.c_str(), str.c_str(), true));
+    internal::stdc_thrower(setenv(name.c_str(), str.c_str(), int(true)));
     return *this;
 }
 
@@ -176,6 +176,5 @@ static_assert(int(stdfd::in) == STDIN_FILENO, "Error in stdfd enum.");
 static_assert(int(stdfd::out) == STDOUT_FILENO, "Error in stdfd enum.");
 static_assert(int(stdfd::err) == STDERR_FILENO, "Error in stdfd enum.");
 
-}
-
+} // namespace internal
 } // namespace ccsh

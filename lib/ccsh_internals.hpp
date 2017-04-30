@@ -4,13 +4,15 @@
 #include <ccsh/ccsh_utils.hpp>
 
 #include <string>
+#include <type_traits>
 #include <cstring>
 #include <cstddef>
 #include <cstdint>
 #include <unistd.h>
 #include <fcntl.h>
 
-namespace ccsh { namespace internal {
+namespace ccsh {
+namespace internal {
 
 template<typename FUNC>
 int retry_handler(FUNC&& func)
@@ -68,7 +70,7 @@ class line_splitter
     FUNC func;
     char delim;
 public:
-    explicit line_splitter(FUNC&& func, char delim = '\n')
+    explicit line_splitter(FUNC func, char delim = '\n')
         : func(std::move(func))
         , delim(delim)
     { }
@@ -77,7 +79,7 @@ public:
     {
         char* newline;
         std::size_t si = s;
-        while (si > 0 && (newline = (char*)memchr(buf, delim, si)))
+        while (si > 0 && (newline = (char*)memchr(buf, delim, si)) != nullptr)
         {
             std::size_t diff = newline - buf;
             temp.append(buf, diff);
@@ -93,11 +95,9 @@ public:
 };
 
 template<typename FUNC>
-line_splitter<FUNC> line_splitter_make(FUNC&& func, char delim = '\n')
+line_splitter<typename std::remove_reference<FUNC>::type> line_splitter_make(FUNC&& func, char delim = '\n')
 {   // Comes handy when you have a lambda.
-    // If you see an error here: *call this function only with rvalues*!
-    // Cannot be done better without type_traits because of "forwarding reference".
-    return line_splitter<FUNC>(std::forward<FUNC>(func), delim);
+    return line_splitter<typename std::remove_reference<FUNC>::type>(std::forward<FUNC>(func), delim);
 }
 
 template<typename FUNC>
@@ -114,6 +114,7 @@ void tokenize_string(std::string const& str, std::string const& delimiters, FUNC
     }
 }
 
-}} // namespace ccsh::internal
+} // namespace internal
+} // namespace ccsh
 
 #endif // CCSH_INTERNALS_HPP_INCLUDED

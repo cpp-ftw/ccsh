@@ -1,8 +1,8 @@
-#ifndef CCSH_TTY_HPP_INCLUDED
-#define CCSH_TTY_HPP_INCLUDED
+#ifndef CCSH_CCSH_TTY_HPP
+#define CCSH_CCSH_TTY_HPP
 
-#include <iostream>
 #include <cstdint>
+#include <iostream>
 
 namespace ccsh { namespace tty {
 
@@ -63,7 +63,9 @@ inline std::ostream& operator<<(std::ostream& os, tty::bg_color m)
 {
     return printty(os, m);
 }
-}}
+
+} // namespace tty
+} // namespace ccsh
 
 
-#endif // CCSH_TTY_HPP_INCLUDED
+#endif // CCSH_CCSH_TTY_HPP

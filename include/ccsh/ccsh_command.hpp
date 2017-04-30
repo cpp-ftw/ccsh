@@ -1,15 +1,15 @@
-#ifndef CCSH_COMMAND_HPP_INCLUDED
-#define CCSH_COMMAND_HPP_INCLUDED
+#ifndef CCSH_CCSH_COMMAND_HPP
+#define CCSH_CCSH_COMMAND_HPP
 
 #include "ccsh_utils.hpp"
 
-#include <string>
-#include <memory>
-#include <vector>
 #include <cstddef>
 #include <functional>
 #include <future>
+#include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
 namespace ccsh {
 namespace internal {
@@ -48,8 +48,7 @@ public:
         autorun_flag = false;
     }
 
-    virtual ~command_base()
-    { }
+    virtual ~command_base() = default;
 };
 
 class command_async
@@ -96,9 +95,9 @@ protected:
 
 public:
 
-    command_native(fs::path const& p, std::vector<std::string> const& args = {})
-        : p(p)
-        , args(args)
+    explicit command_native(fs::path p, std::vector<std::string> args = {})
+        : p(std::move(p))
+        , args(std::move(args))
     { }
 
     void append_dir(fs::path const& dir)
@@ -106,8 +105,8 @@ public:
         p = dir / p;
     }
 
-    void start_run(int in, int out, int err, std::vector<int> unused_fds) const override final;
-    virtual int finish_run() const override final;
+    void start_run(int in, int out, int err, std::vector<int> unused_fds) const final;
+    int finish_run() const final;
 };
 
 class command_runnable : protected std::shared_ptr<command_base>
@@ -175,7 +174,7 @@ public:
 
     using TRAITS::TRAITS;
 
-    ~command_holder()
+    ~command_holder() override
     {
         TRAITS::run_autorun();
     }
@@ -237,9 +236,9 @@ protected:
     command right;
 
 public:
-    command_pair(command const& left, command const& right)
-        : left(left)
-        , right(right)
+    command_pair(command left, command right)
+        : left(std::move(left))
+        , right(std::move(right))
     { }
 };
 
@@ -248,14 +247,14 @@ class command_conditonal : public command_pair, protected command_async
 public:
     using command_pair::command_pair;
 
-    void start_run(int in, int out, int err, std::vector<int> unused_fds) const override final
+    void start_run(int in, int out, int err, std::vector<int> unused_fds) const final
     {
         auto f = [=]
         {
             int lres = this->left.finish_run();
             if (!start_right(lres))
                 return lres;
-            this->right.start_run(in, out, err, std::move(unused_fds));
+            this->right.start_run(in, out, err, unused_fds);
             return this->right.finish_run();
         };
 
@@ -308,7 +307,7 @@ class command_bool final : public command_base
 {
     bool b;
 public:
-    command_bool(bool b)
+    explicit command_bool(bool b)
         : b(b)
     { }
 
@@ -317,7 +316,7 @@ public:
 
     int finish_run() const override
     {
-        return !b; // logical inversion of shell logic
+        return int(!b); // logical inversion of shell logic
     }
 };
 
@@ -337,13 +336,13 @@ protected:
     command_functor_init init_func;
 
 public:
-    command_mapping(command const& c, command_functor_raw const& f, command_functor_init const& init_func = nullptr)
-        : c(c)
-        , func(f)
-        , init_func(init_func)
+    command_mapping(command c, command_functor_raw f, command_functor_init init_func = nullptr)
+        : c(std::move(c))
+        , func(std::move(f))
+        , init_func(std::move(init_func))
     { }
 
-    int finish_run() const override final
+    int finish_run() const final
     {
         result.wait();
         return c.finish_run();
@@ -379,7 +378,7 @@ class command_redirect final : public command_base
     int flags;
     mutable open_wrapper fd;
 public:
-    command_redirect(command const& c, fs::path const& p, bool append = false);
+    command_redirect(command c, fs::path p, bool append = false);
     void start_run(int in, int out, int err, std::vector<int>) const override;
 
     int finish_run() const override
@@ -405,7 +404,7 @@ class command_fd final : public command_base
     command c;
     open_wrapper ow;
 public:
-    command_fd(command const& c, int fd);
+    command_fd(command c, int fd);
     void start_run(int in, int out, int err, std::vector<int>) const override;
 
     int finish_run() const override
@@ -420,7 +419,7 @@ class command_source final : public command_base, protected command_async
     std::string cmdstr;
 
 public:
-    command_source(fs::path const& p, std::vector<std::string> const& args = {});
+    explicit command_source(fs::path const& p, std::vector<std::string> const& args = {});
 
     void start_run(int in, int out, int err, std::vector<int>) const override;
 
@@ -455,7 +454,7 @@ class command_function : public command_base, protected command_async
 {
     command_functor func;
 public:
-    command_function(command_functor func)
+    explicit command_function(command_functor func)
         : func(std::move(func))
     { }
 
@@ -474,9 +473,9 @@ using internal::command_holder;  // easier for wrappers
 
 inline command command_make(internal::command_functor func)
 {
-    return {new internal::command_function{std::move(func)}};
+    return internal::command_runnable{new internal::command_function{std::move(func)}};
 }
 } // namespace ccsh
 
 
-#endif // CCSH_COMMAND_HPP_INCLUDED
+#endif // CCSH_CCSH_COMMAND_HPP

@@ -1,9 +1,9 @@
-#ifndef CCSH_RATIO_HPP_INCLUDED
-#define CCSH_RATIO_HPP_INCLUDED
+#ifndef CCSH_CCSH_RATIO_HPP
+#define CCSH_CCSH_RATIO_HPP
 
-#include <string>
-#include <ratio>
 #include <cstdint>
+#include <ratio>
+#include <string>
 
 namespace ccsh {
 
@@ -77,4 +77,4 @@ std::string quantity_to_string(quantity<RATIO> q)
 }
 } // namespace ccsh
 
-#endif // CCSH_RATIO_HPP_INCLUDED
+#endif // CCSH_CCSH_RATIO_HPP

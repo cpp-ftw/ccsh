@@ -1,5 +1,5 @@
-#include <ccsh/ccsh_operators.hpp>
 #include "ccsh_internals.hpp"
+#include <ccsh/ccsh_operators.hpp>
 
 #include <cstring>
 #include <functional>
@@ -18,7 +18,7 @@ command_runnable operator<(command const& c, std::string& str)
         std::size_t len = str.length();
         len = len < s ? len : s;
         std::memcpy(buf, str.data(), len);
-        if (len)
+        if (len != 0)
             str.erase(0, len);
         return len;
     };
@@ -67,12 +67,10 @@ command_runnable operator<(command const& c, std::vector<std::string>& vec)
             vec.erase(vec.begin()); // shit
             return len + 1;
         }
-        else
-        {
-            std::memcpy(buf, str.data(), s);
-            str.erase(0, s);
-            return s;
-        }
+
+        std::memcpy(buf, str.data(), s);
+        str.erase(0, s);
+        return s;
     };
     return {new command_in_mapping(c, func)};
 }
@@ -81,7 +79,7 @@ command_runnable operator>(command const& c, std::vector<std::string>& vec)
 {
     auto pusher = [&vec](std::string&& str)
     { vec.push_back(std::move(str)); };
-    return {new command_out_mapping(c, line_splitter_make(std::move(pusher)),
+    return {new command_out_mapping(c, line_splitter_make(pusher),
                                     std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
 }
 
@@ -89,14 +87,14 @@ command_runnable operator>>(command const& c, std::vector<std::string>& vec)
 {
     auto pusher = [&vec](std::string&& str)
     { vec.push_back(std::move(str)); };
-    return {new command_out_mapping(c, line_splitter_make(std::move(pusher)))};
+    return {new command_out_mapping(c, line_splitter_make(pusher))};
 }
 
 command_runnable operator>=(command const& c, std::vector<std::string>& vec)
 {
     auto pusher = [&vec](std::string&& str)
     { vec.push_back(std::move(str)); };
-    return {new command_err_mapping(c, line_splitter_make(std::move(pusher)),
+    return {new command_err_mapping(c, line_splitter_make(pusher),
                                     std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
 }
 
@@ -104,7 +102,7 @@ command_runnable operator>>=(command const& c, std::vector<std::string>& vec)
 {
     auto pusher = [&vec](std::string&& str)
     { vec.push_back(std::move(str)); };
-    return {new command_err_mapping(c, line_splitter_make(std::move(pusher)))};
+    return {new command_err_mapping(c, line_splitter_make(pusher))};
 }
 
 /* ******************* vector redirection operators ******************* */
