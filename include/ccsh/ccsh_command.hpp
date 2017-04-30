@@ -307,7 +307,7 @@ class command_bool final : public command_base
 {
     bool b;
 public:
-    command_bool(bool b)
+    explicit command_bool(bool b)
         : b(b)
     { }
 
@@ -419,7 +419,7 @@ class command_source final : public command_base, protected command_async
     std::string cmdstr;
 
 public:
-    command_source(fs::path const& p, std::vector<std::string> const& args = {});
+    explicit command_source(fs::path const& p, std::vector<std::string> const& args = {});
 
     void start_run(int in, int out, int err, std::vector<int>) const override;
 
@@ -454,7 +454,7 @@ class command_function : public command_base, protected command_async
 {
     command_functor func;
 public:
-    command_function(command_functor func)
+    explicit command_function(command_functor func)
         : func(std::move(func))
     { }
 
@@ -473,7 +473,7 @@ using internal::command_holder;  // easier for wrappers
 
 inline command command_make(internal::command_functor func)
 {
-    return {new internal::command_function{std::move(func)}};
+    return internal::command_runnable{new internal::command_function{std::move(func)}};
 }
 } // namespace ccsh
 

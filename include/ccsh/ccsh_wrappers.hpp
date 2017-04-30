@@ -142,12 +142,12 @@ public:
         : command_native(DERIVED::name())
     { }
 
-    options_paths(std::vector<fs::path> const& paths)
+    explicit options_paths(std::vector<fs::path> const& paths)
         : command_native(DERIVED::name())
         , paths(fs::expand(paths))
     { }
 
-    options_paths(fs::path const& p)
+    explicit options_paths(fs::path const& p)
         : command_native(DERIVED::name())
         , paths(fs::expand(p))
     { }

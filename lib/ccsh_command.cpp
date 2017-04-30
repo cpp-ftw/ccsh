@@ -80,7 +80,7 @@ void command_native::start_run(int in, int out, int err, std::vector<int> unused
         if (CCSH_RETRY_HANDLER(fcntl(fail_pipe[1], F_SETFD, FD_CLOEXEC)) < 0)
             goto fail;
 
-        execvp(argv[0], (char* const*)argv.data());
+        execvp(argv[0], const_cast<char* const*>(argv.data()));
 fail:
         int fail_code = errno;
         CCSH_RETRY_HANDLER(write(fail_pipe[1], &fail_code, sizeof(int)));
@@ -196,11 +196,11 @@ void command_err_mapping::start_run(int in, int out, int, std::vector<int> unuse
     if (init_func) init_func();
 
     int pipefd[2];
+    stdc_thrower(pipe(pipefd));
     unused_fds.push_back(pipefd[0]);
     open_wrapper temp0{pipefd[0]};
     open_wrapper temp1{pipefd[1]};
 
-    stdc_thrower(pipe(pipefd));
     auto f2 = [this, pipefd](open_wrapper fd)
     {
         char buf[BUFSIZ];

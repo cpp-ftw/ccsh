@@ -51,7 +51,7 @@ fs::path get_home()
     struct passwd pwd;
     struct passwd* result;
 
-    long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+    auto bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
     if (bufsize == -1)
         bufsize = 16384;
 

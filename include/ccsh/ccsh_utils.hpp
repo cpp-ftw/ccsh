@@ -37,7 +37,7 @@ class stdc_error : public std::runtime_error
 {
     int error_number;
 public:
-    stdc_error(int no = errno);
+    explicit stdc_error(int no = errno);
     stdc_error(int no, std::string const& msg);
 
     int no() const
@@ -60,7 +60,7 @@ public:
     static void set(std::string const& name, std::string const& value, bool override = true);
     static int try_set(std::string const& name, std::string const& value, bool override = true);
 
-    env_var(std::string name)
+    explicit env_var(std::string name)
         : name(std::move(name))
     { }
 
