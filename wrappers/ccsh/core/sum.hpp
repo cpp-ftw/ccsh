@@ -26,6 +26,6 @@ public:
 
 using sum = command_holder<sum_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_SUM_HPP_INCLUDED

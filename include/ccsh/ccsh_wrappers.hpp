@@ -1,9 +1,9 @@
-#ifndef CCSH_WRAPPERS_HPP_INCLUDED
-#define CCSH_WRAPPERS_HPP_INCLUDED
+#ifndef CCSH_CCSH_WRAPPERS_HPP
+#define CCSH_CCSH_WRAPPERS_HPP
 
 #include "ccsh_command.hpp"
-#include <utility>
 #include <string>
+#include <utility>
 
 #define MAGIC(x) (void)swallow{0, ((void)(x), 0)...}
 
@@ -166,7 +166,7 @@ public:
 
 #undef MAGIC
 
-}
-}
+} // namespace wrappers
+} // namespace ccsh
 
-#endif // CCSH_WRAPPERS_HPP_INCLUDED
+#endif // CCSH_CCSH_WRAPPERS_HPP

@@ -4,14 +4,14 @@
 
 #include <ccsh/ccsh.hpp>
 
-#include <iostream>
 #include <algorithm>
-#include <vector>
-#include <string>
-#include <random>
-#include <unordered_set>
-#include <fstream>
 #include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <random>
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 #include <unistd.h>
 

@@ -1,15 +1,15 @@
-#ifndef CCSH_COMMAND_HPP_INCLUDED
-#define CCSH_COMMAND_HPP_INCLUDED
+#ifndef CCSH_CCSH_COMMAND_HPP
+#define CCSH_CCSH_COMMAND_HPP
 
 #include "ccsh_utils.hpp"
 
-#include <string>
-#include <memory>
-#include <vector>
 #include <cstddef>
 #include <functional>
 #include <future>
+#include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
 namespace ccsh {
 namespace internal {
@@ -478,4 +478,4 @@ inline command command_make(internal::command_functor func)
 } // namespace ccsh
 
 
-#endif // CCSH_COMMAND_HPP_INCLUDED
+#endif // CCSH_CCSH_COMMAND_HPP

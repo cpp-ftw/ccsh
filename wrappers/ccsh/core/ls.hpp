@@ -337,12 +337,12 @@ template<typename T> constexpr const char * ls_t<T>::color_type_mapping[];
 template<typename T> constexpr typename ls_t<T>::none_t ls_t<T>::none;
 template<typename T> constexpr typename ls_t<T>::locale_t ls_t<T>::locale;
 
-}
+}  // namespace hidden
 
 using ls_t = hidden::ls_t<>;
 
 using ls = command_holder<ls_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_LS_HPP_INCLUDED

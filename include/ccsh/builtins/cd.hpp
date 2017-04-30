@@ -1,5 +1,5 @@
-#ifndef CCSH_CD_HPP_INCLUDED
-#define CCSH_CD_HPP_INCLUDED
+#ifndef CCSH_BUILTINS_CD_HPP
+#define CCSH_BUILTINS_CD_HPP
 
 #include "../ccsh_command.hpp"
 
@@ -49,6 +49,6 @@ public:
 using cd = command_holder<cd_t>;
 
 
-}
+} // namespace ccsh
 
-#endif // CCSH_CD_HPP_INCLUDED
+#endif // CCSH_BUILTINS_CD_HPP

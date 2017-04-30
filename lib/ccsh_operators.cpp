@@ -1,5 +1,5 @@
-#include <ccsh/ccsh_operators.hpp>
 #include "ccsh_internals.hpp"
+#include <ccsh/ccsh_operators.hpp>
 
 #include <cstring>
 #include <functional>

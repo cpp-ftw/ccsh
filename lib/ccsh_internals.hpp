@@ -10,7 +10,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-namespace ccsh { namespace internal {
+namespace ccsh {
+namespace internal {
 
 template<typename FUNC>
 int retry_handler(FUNC&& func)
@@ -114,6 +115,7 @@ void tokenize_string(std::string const& str, std::string const& delimiters, FUNC
     }
 }
 
-}} // namespace ccsh::internal
+} // namespace internal
+} // namespace ccsh
 
 #endif // CCSH_INTERNALS_HPP_INCLUDED

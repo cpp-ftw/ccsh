@@ -1,13 +1,13 @@
-#include <ccsh/ccsh_command.hpp>
 #include "ccsh_internals.hpp"
+#include <ccsh/ccsh_command.hpp>
 
+#include <cstdio>
+#include <cstring>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <cstdio>
 #include <unistd.h>
-#include <cstring>
 
 #include <iostream>
 #include <utility>
@@ -317,7 +317,7 @@ auto env_applier = [](open_wrapper fd) -> int
     return 0;
 };
 
-}
+}  // namespace
 
 command_source::command_source(fs::path const& p, std::vector<std::string> const& args)
     : cmd("/bin/sh", {"-c", ""})

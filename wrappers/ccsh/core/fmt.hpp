@@ -42,6 +42,6 @@ public:
 
 using fmt = command_holder<fmt_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_FMT_HPP_INCLUDED

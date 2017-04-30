@@ -1,12 +1,12 @@
-#include <ccsh/ccsh_utils.hpp>
 #include "ccsh_internals.hpp"
+#include <ccsh/ccsh_utils.hpp>
 
+#include <climits>
 #include <cstring>
+#include <glob.h>
+#include <pwd.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <climits>
-#include <pwd.h>
-#include <glob.h>
 
 #include <memory>
 
@@ -27,7 +27,7 @@ void expand_helper(path const& p, std::vector<path>& result)
     globfree(&globbuf);
 }
 
-}
+} // namespace
 
 std::vector<path> expand(path const& p)
 {
@@ -44,7 +44,7 @@ std::vector<path> expand(std::vector<path> const& paths)
     return result;
 }
 
-}
+} // namespace fs
 
 fs::path get_home()
 {
@@ -176,6 +176,5 @@ static_assert(int(stdfd::in) == STDIN_FILENO, "Error in stdfd enum.");
 static_assert(int(stdfd::out) == STDOUT_FILENO, "Error in stdfd enum.");
 static_assert(int(stdfd::err) == STDERR_FILENO, "Error in stdfd enum.");
 
-}
-
+} // namespace internal
 } // namespace ccsh

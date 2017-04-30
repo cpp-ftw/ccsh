@@ -1,9 +1,9 @@
-#include <ccsh/ccsh_fdstream.hpp>
 #include "ccsh_internals.hpp"
+#include <ccsh/ccsh_fdstream.hpp>
 
 #include <cstdio>
-#include <unistd.h>
 #include <cstring>
+#include <unistd.h>
 
 namespace ccsh {
 namespace internal {
@@ -62,6 +62,6 @@ int ifdstreambuf::underflow()
     return traits_type::to_int_type(*gptr());
 }
 
-}
-}
+} // namespace internal
+} // namespace ccsh
 

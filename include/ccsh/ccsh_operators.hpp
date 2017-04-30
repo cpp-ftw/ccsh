@@ -1,5 +1,5 @@
-#ifndef CCSH_OPERATORS_HPP_INCLUDED
-#define CCSH_OPERATORS_HPP_INCLUDED
+#ifndef CCSH_CCSH_OPERATORS_HPP
+#define CCSH_CCSH_OPERATORS_HPP
 
 #include "ccsh_command.hpp"
 #include <iostream>
@@ -236,4 +236,4 @@ inline std::ostream& operator<<(std::ostream& os, env_var const& var)
 } // namespace ccsh
 
 
-#endif // CCSH_OPERATORS_HPP_INCLUDED
+#endif // CCSH_CCSH_OPERATORS_HPP

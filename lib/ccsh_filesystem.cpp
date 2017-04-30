@@ -3,7 +3,8 @@
 
 #if defined(CCSH_FILESYSTEM_BOOST) && BOOST_VERSION >= 106000
 
-namespace ccsh { namespace fs {
+namespace ccsh {
+namespace fs {
 
 path self_lexically_relative(path const& self, path const& base)
 {
@@ -15,14 +16,16 @@ path self_lexically_normal(path const& self)
     return self.lexically_normal();
 }
 
-}}
+} // namespace fs
+} // namespace ccsh
 
 #else
 
 // Code below was taken from boost source.
 // See http://www.boost.org/users/license.html for license.
 
-namespace ccsh { namespace fs {
+namespace ccsh {
+namespace fs {
 
 namespace {
 
@@ -43,7 +46,7 @@ inline std::pair<path::iterator, path::iterator> mismatch(path::iterator it1, pa
     return std::make_pair(it1, it2);
 }
 
-}
+} // namespace
 
 
 path self_lexically_relative(path const& self, path const& base)
@@ -142,6 +145,7 @@ path self_lexically_normal(path const& self)
     return temp;
 }
 
-}}
+} // namespace fs
+} // namespace ccsh
 
 #endif

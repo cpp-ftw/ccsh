@@ -1,6 +1,6 @@
+#include "../ccsh_internals.hpp"
 #include <ccsh/builtins/pwd.hpp>
 #include <ccsh/ccsh_fdstream.hpp>
-#include "../ccsh_internals.hpp"
 
 namespace {
 
@@ -50,4 +50,5 @@ int pwd_t::runx(int, int out_fd, int) const
 
     return EXIT_SUCCESS;
 }
-}
+
+} // namespace ccsh

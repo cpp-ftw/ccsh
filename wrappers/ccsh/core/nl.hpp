@@ -2,8 +2,8 @@
 #define CCSH_CORE_NL_HPP_INCLUDED
 
 #include <ccsh/ccsh_command.hpp>
-#include <ccsh/ccsh_wrappers.hpp>
 #include <ccsh/ccsh_regex.hpp>
+#include <ccsh/ccsh_wrappers.hpp>
 
 namespace ccsh {
 
@@ -95,6 +95,6 @@ public:
 
 using nl = command_holder<nl_t>;
 
-}
+}  // namespace ccsh
 
 #endif // CCSH_CORE_NL_HPP_INCLUDED

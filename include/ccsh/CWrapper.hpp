@@ -1,10 +1,10 @@
-#ifndef CWRAPPER_HPP_INCLUDED
-#define CWRAPPER_HPP_INCLUDED
+#ifndef CCSH_CWRAPPER_HPP
+#define CCSH_CWRAPPER_HPP
 
 /** https://github.com/dobragab/CWrapper */
 
-#include <utility>
 #include <exception>
+#include <utility>
 
 #define HAS_STATIC_MEMBER_DETECTOR(member)                                  \
 template<typename T>                                                        \
@@ -368,7 +368,8 @@ template<
     CWrapperType TYPE = CWrapperType::Get,
     bool CONSTSAFE = true>
 using CWrapper = typename CWrapperFriend<HANDLE_T, FUNCTIONS, TYPE, CONSTSAFE>::type;
-}
+
+} // namespace CW
 
 #undef HAS_STATIC_MEMBER_DETECTOR
 #undef HAS_STATIC_MEMBER
@@ -376,4 +377,4 @@ using CWrapper = typename CWrapperFriend<HANDLE_T, FUNCTIONS, TYPE, CONSTSAFE>::
 #undef HAS_NESTED_TYPE
 
 
-#endif // CWRAPPER_HPP_INCLUDED
+#endif // CCSH_CWRAPPER_HPP

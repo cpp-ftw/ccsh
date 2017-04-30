@@ -1,9 +1,9 @@
-#include <ccsh/builtins/cd.hpp>
-#include <ccsh/ccsh_operators.hpp>
-#include <ccsh/ccsh_fdstream.hpp>
 #include "../ccsh_internals.hpp"
-#include <cstring>
+#include <ccsh/builtins/cd.hpp>
+#include <ccsh/ccsh_fdstream.hpp>
+#include <ccsh/ccsh_operators.hpp>
 #include <cstdlib>
+#include <cstring>
 
 namespace {
 
@@ -191,5 +191,5 @@ int cd_t::runx(int, int out_fd, int err_fd) const
     return EXIT_FAILURE;
 }
 
-}
+} // namespace ccsh
 

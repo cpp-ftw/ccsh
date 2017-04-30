@@ -1,5 +1,5 @@
-#ifndef CCSH_PWD_HPP_INCLUDED
-#define CCSH_PWD_HPP_INCLUDED
+#ifndef CCSH_BUILTINS_PWD_HPP
+#define CCSH_BUILTINS_PWD_HPP
 
 #include "../ccsh_command.hpp"
 
@@ -42,6 +42,6 @@ public:
 using pwd = command_holder<pwd_t>;
 
 
-}
+} // namespace ccsh
 
-#endif // CCSH_PWD_HPP_INCLUDED
+#endif // CCSH_BUILTINS_PWD_HPP
