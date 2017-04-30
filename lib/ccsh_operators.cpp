@@ -67,7 +67,7 @@ command_runnable operator<(command const& c, std::vector<std::string>& vec)
             vec.erase(vec.begin()); // shit
             return len + 1;
         }
-        
+
         std::memcpy(buf, str.data(), s);
         str.erase(0, s);
         return s;
@@ -79,7 +79,7 @@ command_runnable operator>(command const& c, std::vector<std::string>& vec)
 {
     auto pusher = [&vec](std::string&& str)
     { vec.push_back(std::move(str)); };
-    return {new command_out_mapping(c, line_splitter_make(std::move(pusher)),
+    return {new command_out_mapping(c, line_splitter_make(pusher),
                                     std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
 }
 
@@ -87,14 +87,14 @@ command_runnable operator>>(command const& c, std::vector<std::string>& vec)
 {
     auto pusher = [&vec](std::string&& str)
     { vec.push_back(std::move(str)); };
-    return {new command_out_mapping(c, line_splitter_make(std::move(pusher)))};
+    return {new command_out_mapping(c, line_splitter_make(pusher))};
 }
 
 command_runnable operator>=(command const& c, std::vector<std::string>& vec)
 {
     auto pusher = [&vec](std::string&& str)
     { vec.push_back(std::move(str)); };
-    return {new command_err_mapping(c, line_splitter_make(std::move(pusher)),
+    return {new command_err_mapping(c, line_splitter_make(pusher),
                                     std::bind(&std::vector<std::string>::clear, std::ref(vec)))};
 }
 
@@ -102,7 +102,7 @@ command_runnable operator>>=(command const& c, std::vector<std::string>& vec)
 {
     auto pusher = [&vec](std::string&& str)
     { vec.push_back(std::move(str)); };
-    return {new command_err_mapping(c, line_splitter_make(std::move(pusher)))};
+    return {new command_err_mapping(c, line_splitter_make(pusher))};
 }
 
 /* ******************* vector redirection operators ******************* */

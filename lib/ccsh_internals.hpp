@@ -4,6 +4,7 @@
 #include <ccsh/ccsh_utils.hpp>
 
 #include <string>
+#include <type_traits>
 #include <cstring>
 #include <cstddef>
 #include <cstdint>
@@ -69,7 +70,7 @@ class line_splitter
     FUNC func;
     char delim;
 public:
-    explicit line_splitter(FUNC&& func, char delim = '\n')
+    explicit line_splitter(FUNC func, char delim = '\n')
         : func(std::move(func))
         , delim(delim)
     { }
@@ -94,11 +95,9 @@ public:
 };
 
 template<typename FUNC>
-line_splitter<FUNC> line_splitter_make(FUNC&& func, char delim = '\n')
+line_splitter<typename std::remove_reference<FUNC>::type> line_splitter_make(FUNC&& func, char delim = '\n')
 {   // Comes handy when you have a lambda.
-    // If you see an error here: *call this function only with rvalues*!
-    // Cannot be done better without type_traits because of "forwarding reference".
-    return line_splitter<FUNC>(std::forward<FUNC>(func), delim);
+    return line_splitter<typename std::remove_reference<FUNC>::type>(std::forward<FUNC>(func), delim);
 }
 
 template<typename FUNC>

@@ -307,7 +307,7 @@ void env_putter(std::string const& str)
 
 auto env_applier = [](open_wrapper fd) -> int
 {
-    auto env_splitter = line_splitter_make(env_putter, '\0');
+    auto env_splitter = line_splitter_make(&env_putter, '\0');
 
     char buf[BUFSIZ];
     ssize_t count;

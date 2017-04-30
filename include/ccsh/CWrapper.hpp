@@ -277,7 +277,7 @@ class CWrapperFriend
             CWrapperBase{FUNCTIONS::ctor_func(std::forward<ARGS>(args)...)}
         { }
 
-        CWrapperBase(CWrapperBase&& old)
+        CWrapperBase(CWrapperBase&& old) noexcept
             :
             CWrapperBase{old.ptr}
         {
@@ -297,7 +297,7 @@ class CWrapperFriend
                 FUNCTIONS::dtor_func(ptr);
         }
 
-        CWrapperBase& operator=(CWrapperBase other)
+        CWrapperBase& operator=(CWrapperBase other) noexcept
         {
             std::swap(ptr, other.ptr);
             return *this;

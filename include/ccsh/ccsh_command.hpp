@@ -254,7 +254,7 @@ public:
             int lres = this->left.finish_run();
             if (!start_right(lres))
                 return lres;
-            this->right.start_run(in, out, err, std::move(unused_fds));
+            this->right.start_run(in, out, err, unused_fds);
             return this->right.finish_run();
         };
 
