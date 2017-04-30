@@ -20,8 +20,7 @@ endif()
 
 include_directories(include)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -ansi") # warning level
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror") # warning == error
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic") # warning level
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") # ensure C++11
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g") # add debug symbols even in release
 
