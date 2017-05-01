@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 2.6)
 
 project (ccsh)
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+
 option(WITH_LIB         "Compile shared library." ON)
 option(WITH_CLING       "Compile cling front-end (interactive shell) as well, requires cling at /opt/cling." ON)
 option(WITH_COMPILER    "Compile ccshc." ON)
@@ -42,4 +44,11 @@ endif()
 
 if(WITH_CLING)
     add_subdirectory(ui)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    include(CodeCoverage)
+    setup_target_for_coverage(coverage ccsh_test coverage)
+else()
+    add_custom_target(coverage)
 endif()
