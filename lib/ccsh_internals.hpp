@@ -79,7 +79,7 @@ public:
     {
         char* newline;
         std::size_t si = s;
-        while (si > 0 && (newline = (char*)memchr(buf, delim, si)) != nullptr)
+        while (si > 0 && (newline = static_cast<char*>(memchr(buf, delim, si))) != nullptr)
         {
             std::size_t diff = newline - buf;
             temp.append(buf, diff);
