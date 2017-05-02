@@ -23,6 +23,7 @@ before_script:
 
 script:
   - make
+  - test/ccsh_test
   - make coverage
 
 compiler:
