@@ -54,3 +54,6 @@ Makefile
 *.workspace
 .codelite/*
 .idea/*
+
+# Coverage reports
+coverage/*

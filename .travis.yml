@@ -8,6 +8,7 @@ before_install: sudo apt-get update -qq
 install:
   - sudo apt-get install libboost-filesystem-dev
   - sudo apt-get install libgtest-dev
+  - sudo apt-get install lcov
 
 before_script:
   - mkdir gtest_build
@@ -18,12 +19,16 @@ before_script:
   - sudo cp *.a /usr/lib
   - cd ..
   - rm -rf gtest_build
-  - cmake -DWITH_CLING=OFF -DBOOST_FILESYSTEM=ON .
+  - cmake . -DWITH_CLING=OFF -DBOOST_FILESYSTEM=ON -DCMAKE_BUILD_TYPE=Coverage
 
 script:
   - make
   - test/ccsh_test
+  - make coverage
 
 compiler:
   - clang
   - gcc
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
