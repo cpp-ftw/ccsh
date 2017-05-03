@@ -3,14 +3,15 @@ language: cpp
 dist: trusty
 sudo: required
 
-before_install: sudo apt-get update -qq
+addons:
+  apt:
+    packages:
+      - libboost-filesystem-dev
+      - libgtest-dev
+      - lcov
+      - curl
 
 install:
-  - sudo apt-get install libboost-filesystem-dev
-  - sudo apt-get install libgtest-dev
-  - sudo apt-get install lcov
-
-before_script:
   - mkdir gtest_build
   - cd gtest_build
   - cp -r /usr/src/gtest/* ./
@@ -19,6 +20,8 @@ before_script:
   - sudo cp *.a /usr/lib
   - cd ..
   - rm -rf gtest_build
+
+before_script:
   - cmake . -DWITH_CLING=OFF -DBOOST_FILESYSTEM=ON -DCMAKE_BUILD_TYPE=Coverage
 
 script:
