@@ -1,4 +1,5 @@
 #include <ccsh/ccsh.hpp>
+#include <ccsh/core.hpp>
 #include <cstdio>
 #include <fstream>
 #include <string>
@@ -16,21 +17,29 @@ std::string ReadAllText3(fs::path const& filename)
 
 TEST(NativeTest, append)
 {
-    fs::path p1=ccsh::get_home()/"test.txt";
+    fs::path p1=ccsh::get_home()/"nofilenamedlikethis.txt";
+    fs::path p2=ccsh::get_home()/"nofilenamedlikethis2.txt";
 
-    shell("rm",{p1.string()});
+    std::string s1, s2;
+
+    shell("rm",{p1.string()})>=p2;
+    shell("rm",{p1.string()})>>=p2;
     EXPECT_EQ(fs::exists(p1), false);
+
+    (shell("wc",{"-l"})<p2>s1).run();
+    EXPECT_EQ(s1, "2\n");
 
     (shell("echo", {"test"})>p1).run();
     EXPECT_EQ(fs::exists(p1), true);
 
-    std::string s1;
+
     shell("cat",{p1.string()})>s1;
 
     (shell("echo", {"append"})>>p1).run();
 
     EXPECT_EQ(ReadAllText3(p1), "test\nappend\n");
 
+    shell("rm",{p1.string()});
     shell("rm",{p1.string()});
     EXPECT_EQ(fs::exists(p1), false);
 }
