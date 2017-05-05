@@ -1,10 +1,6 @@
-#include <ccsh/ccsh.hpp>
-#include <ccsh/core.hpp>
-#include <cstdio>
-#include <fstream>
-#include <string>
+#include "commons.hpp"
 
-#include <gtest/gtest.h>
+#include <ccsh/core.hpp>
 
 using namespace ccsh;
 

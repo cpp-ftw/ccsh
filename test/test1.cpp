@@ -1,18 +1,6 @@
-#include <ccsh/ccsh.hpp>
-#include <cstdio>
-#include <fstream>
-#include <string>
-
-#include <gtest/gtest.h>
+#include "commons.hpp"
 
 using namespace ccsh;
-
-std::string ReadAllText(fs::path const& filename)
-{
-    std::ifstream t(filename.c_str());
-    return std::string(std::istreambuf_iterator<char>(t),
-                       std::istreambuf_iterator<char>());
-}
 
 TEST(NativeTest, CopyRemoveFile)
 {
@@ -22,7 +10,7 @@ TEST(NativeTest, CopyRemoveFile)
     std::string example_content1 = ReadAllText(example_path1);
     EXPECT_NE(example_content1, "");
 
-    shell("rm", {example_path2.string()});
+    shell("rm", {"-f", example_path2.string()});
     EXPECT_EQ(fs::exists(example_path2), false);
 
     shell("cp", {example_path1.string(), example_path2.string()});
