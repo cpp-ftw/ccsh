@@ -1,19 +1,8 @@
-#include <ccsh/ccsh.hpp>
-#include <ccsh/core.hpp>
-#include <cstdio>
-#include <fstream>
-#include <string>
+#include "commons.hpp"
 
-#include <gtest/gtest.h>
+#include <ccsh/core.hpp>
 
 using namespace ccsh;
-
-std::string ReadAllText3(fs::path const& filename)
-{
-    std::ifstream t(filename.c_str());
-    return std::string(std::istreambuf_iterator<char>(t),
-                       std::istreambuf_iterator<char>());
-}
 
 TEST(NativeTest, append)
 {
@@ -37,9 +26,9 @@ TEST(NativeTest, append)
 
     (shell("echo", {"append"})>>p1).run();
 
-    EXPECT_EQ(ReadAllText3(p1), "test\nappend\n");
+    EXPECT_EQ(ReadAllText(p1), "test\nappend\n");
 
-    shell("rm",{p1.string()});
-    shell("rm",{p1.string()});
+    shell("rm",{"-f", p1.string()});
+    shell("rm",{"-f", p1.string()});
     EXPECT_EQ(fs::exists(p1), false);
 }

@@ -1,14 +1,6 @@
-#define CCSH_NON_STANDARD_DOLLAR
-
-#include <ccsh/ccsh.hpp>
-#include <cstdio>
-#include <fstream>
-#include <string>
-
-#include <gtest/gtest.h>
+#include "commons.hpp"
 
 using namespace ccsh;
-
 
 TEST(WrapperTest, dollar)
 {
