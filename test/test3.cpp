@@ -4,7 +4,7 @@ using namespace ccsh;
 
 TEST(NativeTest, pipe)
 {
-    fs::path p1=ccsh::get_home()/"test.txt";
+    fs::path p1=test_dir()/"test.txt"_p;
 
     shell("rm",{"-f", p1.string()});
     EXPECT_EQ(fs::exists(p1), false);

@@ -6,7 +6,7 @@ using namespace ccsh;
 
 TEST(NativeTest, source)
 {
-    fs::path vars = test_dir / "vars.sh";
+    fs::path vars = fs::path{__FILE__}.parent_path() / "vars.sh"_p;
     ASSERT_EQ(fs::exists(vars), true);
     source(vars);
     std::string var1, var2;

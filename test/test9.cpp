@@ -4,7 +4,7 @@ using namespace ccsh;
 
 TEST(NativeTest, errorAppend)
 {
-    fs::path p1=ccsh::get_home()/"surethereisnofilenamedlikethis.txt";
+    fs::path p1=test_dir()/"surethereisnofilenamedlikethis.txt"_p;
 
     std::string s1;
     shell("rm",{p1.string()})>=s1;
