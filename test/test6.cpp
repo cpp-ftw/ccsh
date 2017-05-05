@@ -6,8 +6,8 @@ using namespace ccsh;
 
 TEST(NativeTest, append)
 {
-    fs::path p1=ccsh::get_home()/"nofilenamedlikethis.txt";
-    fs::path p2=ccsh::get_home()/"nofilenamedlikethis2.txt";
+    fs::path p1=test_dir()/"nofilenamedlikethis.txt";
+    fs::path p2=test_dir()/"nofilenamedlikethis2.txt";
 
     std::string s1, s2;
 
@@ -29,6 +29,6 @@ TEST(NativeTest, append)
     EXPECT_EQ(ReadAllText(p1), "test\nappend\n");
 
     shell("rm",{"-f", p1.string()});
-    shell("rm",{"-f", p1.string()});
+    shell("rm",{"-f", p2.string()});
     EXPECT_EQ(fs::exists(p1), false);
 }

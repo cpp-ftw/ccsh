@@ -6,7 +6,7 @@ using namespace ccsh;
 
 TEST(WrapperTest, cat)
 {
-    fs::path p1=ccsh::get_home()/"test.txt";
+    fs::path p1=test_dir()/"test.txt"_p;
 
     shell("rm",{"-f", p1.string()});
 
@@ -16,7 +16,7 @@ TEST(WrapperTest, cat)
 
     shell("cat",{p1.string()})>natstr;
 
-    cat(p1.string())>wrapstr;
+    cat(p1)>wrapstr;
 
     EXPECT_EQ(natstr, wrapstr);
 

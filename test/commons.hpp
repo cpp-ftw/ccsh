@@ -19,6 +19,14 @@ inline std::string ReadAllText(ccsh::fs::path const& filename)
                        std::istreambuf_iterator<char>());
 }
 
-static ccsh::fs::path test_dir = ccsh::fs::path{__FILE__}.parent_path();
+inline ccsh::fs::path test_dir()
+{
+    static ccsh::fs::path result = ccsh::fs::path{__FILE__}.parent_path() / "temp"_p;
+    static ccsh::fs::error_code ec;
+    static bool unused = (ccsh::fs::create_directory(result, ec), false);
+    (void)ec;
+    (void)unused;
+    return result;
+}
 
 #endif //CCSH_COMMONS_HPP
