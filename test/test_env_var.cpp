@@ -35,3 +35,22 @@ TEST(EnvVarTest, source)
     EXPECT_EQ(var1, "");
     EXPECT_EQ(var2, "value2");
 }
+
+TEST(EnvVarTest, set)
+{
+    int result;
+
+    result = env_var::try_set("NAME", "value");
+    EXPECT_EQ(result, 0);
+
+    result = env_var::try_set("", "value");
+    EXPECT_LT(result, 0);
+
+    EXPECT_THROW({
+                     env_var::set("", "value");
+                 }, stdc_error);
+
+    EXPECT_NO_THROW({
+                        env_var::set("NAME", "value");
+                    });
+}
