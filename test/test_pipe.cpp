@@ -2,7 +2,7 @@
 
 using namespace ccsh;
 
-TEST(NativeTest, pipe)
+TEST(PipeTest, simple)
 {
     fs::path p1=test_dir()/"test.txt"_p;
 
@@ -21,3 +21,6 @@ TEST(NativeTest, pipe)
     shell("rm",{p1.string()});
     EXPECT_EQ(fs::exists(p1), false);
 }
+
+
+
