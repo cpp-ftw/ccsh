@@ -276,11 +276,10 @@ void replace(std::string& str, std::string const& from, std::string const& to)
         str.replace(start_pos, from.length(), to);
 }
 
-std::string sh_escape(std::string const& str)
+std::string sh_escape(std::string str)
 {
-    std::string temp = str;
-    replace(temp, "'", R"('\'')");
-    return " '" + temp + "' ";
+    replace(str, "'", R"('\'')");
+    return " '" + str + "' ";
 }
 
 std::string make_source_command(fs::path const& p, std::vector<std::string> const& args)
@@ -293,16 +292,14 @@ std::string make_source_command(fs::path const& p, std::vector<std::string> cons
     return cmdstr;
 }
 
-void env_putter(std::string const& str)
+void env_putter(std::string str)
 {
     auto eq_sign = str.find('=');
     if (eq_sign == std::string::npos) // should never happen
         throw stdc_error(errno, "Bad format from printenv");
 
-    std::string env_name = str.substr(0, eq_sign);
-    std::string env_value = str.substr(++eq_sign);
-
-    stdc_thrower(setenv(env_name.c_str(), env_value.c_str(), int(true)));
+    str[eq_sign] = '\0';
+    stdc_thrower(setenv(&str[0], &str[eq_sign + 1], int(true)));
 }
 
 auto env_applier = [](open_wrapper fd) -> int
