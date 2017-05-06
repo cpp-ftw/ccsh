@@ -285,7 +285,7 @@ std::string sh_escape(std::string const& str)
 
 std::string make_source_command(fs::path const& p, std::vector<std::string> const& args)
 {
-    std::string cmdstr = "source " + sh_escape(p.string());
+    std::string cmdstr = ". " + sh_escape(p.string());
     for (std::string const& str : args)
         cmdstr += sh_escape(str);
 
