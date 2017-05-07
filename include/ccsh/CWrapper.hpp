@@ -279,7 +279,7 @@ class CWrapperFriend
 
         CWrapperBase(CWrapperBase&& old) noexcept
             :
-            CWrapperBase{old.ptr}
+            ptr{old.ptr}
         {
             old.ptr = INVALID_T::invalid_value;
         }
