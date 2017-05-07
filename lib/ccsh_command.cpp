@@ -12,6 +12,8 @@
 #include <iostream>
 #include <utility>
 
+#include <ccsh/tmp-lib/call_kill.hpp>
+
 namespace ccsh {
 namespace internal {
 
@@ -150,7 +152,7 @@ void command_in_mapping::start_run(int, int out, int err, std::vector<int> unuse
     open_wrapper temp1{pipefd[1]};
 
     unused_fds.push_back(pipefd[1]);
-    auto f2 = [this, pipefd](open_wrapper fd)
+    auto f2 = [this](open_wrapper fd)
     {
         char buf[BUFSIZ];
         ssize_t count;
@@ -174,7 +176,7 @@ void command_out_mapping::start_run(int in, int, int err, std::vector<int> unuse
     open_wrapper temp1{pipefd[1]};
 
     unused_fds.push_back(pipefd[0]);
-    auto f2 = [this, pipefd](open_wrapper fd)
+    auto f2 = [this](open_wrapper fd)
     {
         char buf[BUFSIZ];
         ssize_t count;
@@ -186,8 +188,8 @@ void command_out_mapping::start_run(int in, int, int err, std::vector<int> unuse
         return 0;
     };
 
-    c.start_run(in, pipefd[1], err, std::move(unused_fds));
-    close_fd(pipefd[1]);
+    c.start_run(in, temp1.get(), err, std::move(unused_fds));
+    close_fd(temp1.release());
     result = std::async(std::launch::async, f2, std::move(temp0));
 }
 
@@ -201,7 +203,7 @@ void command_err_mapping::start_run(int in, int out, int, std::vector<int> unuse
     open_wrapper temp0{pipefd[0]};
     open_wrapper temp1{pipefd[1]};
 
-    auto f2 = [this, pipefd](open_wrapper fd)
+    auto f2 = [this](open_wrapper fd)
     {
         char buf[BUFSIZ];
         ssize_t count;
@@ -213,8 +215,8 @@ void command_err_mapping::start_run(int in, int out, int, std::vector<int> unuse
         return 0;
     };
 
-    c.start_run(in, out, pipefd[1], std::move(unused_fds));
-    close_fd(pipefd[1]);
+    c.start_run(in, out, temp1.get(), std::move(unused_fds));
+    close_fd(temp1.release());
     result = std::async(std::launch::async, f2, std::move(temp0));
 }
 
@@ -344,9 +346,9 @@ void command_function::start_run(int in, int out, int err, std::vector<int>) con
 
     struct dup_helper // working around missing [=, temp0 = std::move(in2)] feature in C++11
     {
-        open_wrapper in2;
-        open_wrapper out2;
-        open_wrapper err2;
+        mutable open_wrapper in2;
+        mutable open_wrapper out2;
+        mutable open_wrapper err2;
         command_function const* self;
 
         int operator()() const
@@ -356,7 +358,7 @@ void command_function::start_run(int in, int out, int err, std::vector<int>) con
     };
 
     dup_helper helper{std::move(in2), std::move(out2), std::move(err2), this};
-    result = std::async(std::launch::async, std::move(helper));
+    result = std::async(std::launch::async, tmp_lib::call_kill(std::move(helper)));
 }
 
 } // namespace internal
