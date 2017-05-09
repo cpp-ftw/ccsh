@@ -84,6 +84,8 @@ fs::path get_current_path_abbreviated()
 {
     fs::path wd = get_current_path();
     fs::path home = get_home();
+    if(wd == home)
+        return fs::path("~");
     fs::error_code errcode;
     auto abb_wd = fs::relative(wd, home, errcode);
     if (errcode)
