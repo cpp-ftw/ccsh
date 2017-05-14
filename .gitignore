@@ -55,6 +55,20 @@ compile_commands.json
 *.workspace
 .codelite/*
 .idea/*
+.vs/*
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.dir
+Bin/*
+Win32/*
+packages/*
+packages.config
+_ReSharper.Caches/
 
 # Coverage reports
 coverage/*
+
+# Test temp files
+test/temp/*

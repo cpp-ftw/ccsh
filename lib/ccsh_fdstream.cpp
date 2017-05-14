@@ -3,7 +3,6 @@
 
 #include <cstdio>
 #include <cstring>
-#include <unistd.h>
 
 namespace ccsh {
 namespace internal {
@@ -17,7 +16,11 @@ bool ofdstreambuf::do_flush()
     std::ptrdiff_t n = pptr() - pbase();
     pbump(int(-n));
 
+#ifdef _WIN32
+    return WriteFile(fd, pbase(), n, nullptr, nullptr);
+#else
     return CCSH_RETRY_HANDLER(::write(fd, pbase(), size_t(n))) != -1;
+#endif 
 }
 
 int ofdstreambuf::overflow(int_type c)
@@ -51,7 +54,12 @@ int ifdstreambuf::underflow()
 
     // start is now the start of the buffer, proper.
     // Read from fptr_ in to the provided buffer
-    ssize_t n = read(fd, start, buffer_.size() - (start - base));
+#ifdef _WIN32
+    DWORD n;
+    ReadFile(fd, start, n, &n, nullptr);
+#else
+    ssize_t n = CCSH_RETRY_HANDLER(::read(fd, start, buffer_.size() - (start - base)));
+#endif
 
     if (n == 0)
         return traits_type::eof();

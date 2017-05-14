@@ -10,16 +10,16 @@ TEST(NativeTest, CopyRemoveFile)
     std::string example_content1 = ReadAllText(example_path1);
     EXPECT_NE(example_content1, "");
 
-    shell("rm", {"-f", example_path2.string()});
+    shell("rm"_p, {"-f", example_path2.string()});
     EXPECT_EQ(fs::exists(example_path2), false);
 
-    shell("cp", {example_path1.string(), example_path2.string()});
+    shell("cp"_p, {example_path1.string(), example_path2.string()});
     EXPECT_EQ(fs::exists(example_path2), true);
 
-    fs::path example_content2 = ReadAllText(example_path2);
+    std::string example_content2 = ReadAllText(example_path2);
     EXPECT_EQ(example_content1, example_content2);
 
-    shell("rm", {example_path2.string()});
+    shell("rm"_p, {example_path2.string()});
     EXPECT_EQ(fs::exists(example_path2), false);
 }
 

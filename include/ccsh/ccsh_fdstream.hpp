@@ -12,10 +12,10 @@ namespace internal {
 
 class ofdstreambuf : public std::streambuf
 {
-    int fd;
+    fd_t fd;
     std::array<char, BUFSIZ> buffer_;
 public:
-    explicit ofdstreambuf(int fd)
+    explicit ofdstreambuf(fd_t fd)
         : fd(fd)
     {
         char* base = &buffer_.front();
@@ -41,11 +41,11 @@ class ifdstreambuf : public std::streambuf
 private:
     static constexpr std::size_t put_back_size = 8;
 
-    int fd;
+    fd_t fd;
     std::array<char, BUFSIZ> buffer_;
 
 public:
-    explicit ifdstreambuf(int fd)
+    explicit ifdstreambuf(fd_t fd)
         : fd(fd)
     {
         char* end = &buffer_.front() + buffer_.size();
@@ -67,7 +67,7 @@ class ofdstream : public std::ostream
 {
     std::unique_ptr<std::streambuf> buf;
 public:
-    explicit ofdstream(int fd)
+    explicit ofdstream(fd_t fd)
         : std::ostream{new internal::ofdstreambuf{fd}}
         , buf(rdbuf())
     { }
@@ -77,7 +77,7 @@ class ifdstream : public std::istream
 {
     std::unique_ptr<std::streambuf> buf;
 public:
-    explicit ifdstream(int fd)
+    explicit ifdstream(fd_t fd)
         : std::istream{new internal::ifdstreambuf{fd}}
         , buf(rdbuf())
     { }

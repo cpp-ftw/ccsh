@@ -6,12 +6,12 @@
 
 namespace ccsh {
 
-template<const char* NAME>
-class base_t : public wrappers::options_paths<base_t<NAME>>
+template<typename DERIVED>
+class base_t : public wrappers::options_paths<base_t<DERIVED>>
 {
-    using base = wrappers::options_paths<base_t<NAME>>;
+    using base = wrappers::options_paths<base_t<DERIVED>>;
     friend base;
-    static constexpr const char * name() { return NAME; }
+    static constexpr const char * name() { return DERIVED::name(); }
 
 public:
 

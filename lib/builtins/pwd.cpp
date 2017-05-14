@@ -23,7 +23,7 @@ const std::string help_message = R"delim(pwd: pwd [-LP]
 
 namespace ccsh {
 
-int pwd_t::runx(int, int out_fd, int) const
+int pwd_t::runx(fd_t, fd_t out_fd, fd_t) const
 {
     ofdstream out{out_fd};
 

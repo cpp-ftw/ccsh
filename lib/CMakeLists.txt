@@ -14,6 +14,10 @@ file(GLOB sources *.cpp *.hpp builtins/*.cpp)
 file(GLOB headers ../include/ccsh/*.hpp ../include/ccsh/builtins/*.hpp)
 
 add_library(ccsh_lib SHARED ${sources} ${headers})
-target_link_libraries(ccsh_lib PUBLIC ${filesystem_lib} pthread)
+target_link_libraries(ccsh_lib PUBLIC ${filesystem_lib})
+if(NOT WIN32)
+    target_link_libraries(ccsh_lib PUBLIC pthread)
+endif()
+
 
 endif()

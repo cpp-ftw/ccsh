@@ -9,8 +9,7 @@ file(GLOB_RECURSE wrappers ../wrappers/*.hpp)
 file(GLOB_RECURSE tests test*.cpp)
 
 enable_testing()
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
 
+include_directories(${GTEST_INCLUDE_DIRS})
 add_executable(ccsh_test ${tests} ${wrappers})
 target_link_libraries( ccsh_test PUBLIC ccsh_lib ${filesystem_lib} ${GTEST_BOTH_LIBRARIES})

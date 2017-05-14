@@ -5,6 +5,11 @@
 #include <cstdlib>
 #include <cstring>
 
+#ifdef _WIN32
+#define strtok_r strtok_s
+#define chdir _wchdir
+#endif
+
 namespace {
 
 using ccsh::fs::path;
@@ -120,7 +125,7 @@ const std::string help_message = R"delim(cd: cd [-L|[-P [-e]]] [dir]
 
 namespace ccsh {
 
-int cd_t::runx(int, int out_fd, int err_fd) const
+int cd_t::runx(fd_t, fd_t out_fd, fd_t err_fd) const
 {
     ofdstream out{out_fd};
     ofdstream err{err_fd};
@@ -136,11 +141,12 @@ int cd_t::runx(int, int out_fd, int err_fd) const
     if (eflag && follow_symlinks)
         eflag = false;
 
-    const char* dirname = p.c_str();
+    std::string dir = p.string();
+    const char* dirname = dir.c_str();
 
     if (dirname == std::string("-"))
     {
-        dirname = env_var::get("OLDPWD");
+        dirname = env_var::try_get("OLDPWD");
         if (dirname == nullptr)
         {
             err << "OLDPWD not set" << std::endl;
@@ -187,7 +193,7 @@ int cd_t::runx(int, int out_fd, int err_fd) const
         return bindpwd(follow_symlinks, eflag);
     }
 
-    err << dirname << ": " << strerror(errno) << std::endl;
+    err << dirname << ": " << stdc_error::strerror(errno) << std::endl;
     return EXIT_FAILURE;
 }
 

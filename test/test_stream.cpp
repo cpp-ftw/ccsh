@@ -22,6 +22,6 @@ TEST(StreamTest, istream)
     std::istringstream iss{TEST_STRING};
     (cat() > output) << iss;
     EXPECT_EQ(output, TEST_STRING);
-    EXPECT_EQ(iss.tellg(), -1);
+    EXPECT_EQ(int(iss.tellg()), -1);
 }
 

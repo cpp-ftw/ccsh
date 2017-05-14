@@ -13,7 +13,7 @@ namespace internal {
 
 command_runnable operator<(command const& c, std::string& str)
 {
-    auto func = [&str](char* buf, std::size_t s) -> ssize_t
+    auto func = [&str](char* buf, std::size_t s) -> int64_t
     {
         std::size_t len = str.length();
         len = len < s ? len : s;
@@ -54,7 +54,7 @@ command_runnable operator>=(command const& c, std::string& str)
 
 command_runnable operator<(command const& c, std::vector<std::string>& vec)
 {
-    auto func = [&vec](char* buf, std::size_t s) -> ssize_t
+    auto func = [&vec](char* buf, std::size_t s) -> int64_t
     {
         if (s == 0 || vec.empty())
             return 0;
@@ -148,7 +148,7 @@ namespace {
 template<typename COMMAND>
 command_base * out_stream(command const& c, std::ostream& os)
 {
-    return new COMMAND(c, [&os](char* str, std::size_t n) -> ssize_t {
+    return new COMMAND(c, [&os](char* str, std::size_t n) -> int64_t {
         auto pos = os.tellp();
         if (os.write(str, n))
             return n;
@@ -163,7 +163,7 @@ command_base * out_stream(command const& c, std::ostream& os)
 template<typename COMMAND>
 command_base * in_stream(command const& c, std::istream& is)
 {
-    return new COMMAND(c, [&is](char* str, std::size_t n) -> ssize_t {
+    return new COMMAND(c, [&is](char* str, std::size_t n) -> int64_t {
         if (is.read(str, n))
             return n;
         else

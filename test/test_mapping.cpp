@@ -30,7 +30,7 @@ protected:
     std::vector<std::string> vec_in;
     command cat_err = command_make(std::bind(&MappingVectorTest::cat_err_func, this, _1, _2, _3));
 
-    int cat_err_func(int, int, int err)
+    int cat_err_func(fd_t, fd_t, fd_t err)
     {
         ofdstream output{err};
         for(int i = 0; i < no; ++i)

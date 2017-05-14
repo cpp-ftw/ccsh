@@ -7,12 +7,12 @@
 namespace ccsh {
 
 
-template<const char* NAME>
-class shasum_t : public wrappers::options_paths<shasum_t<NAME>>
+template<typename DERIVED>
+class shasum_t : public wrappers::options_paths<shasum_t<DERIVED>>
 {
-    using base = wrappers::options_paths<shasum_t<NAME>>;
+    using base = wrappers::options_paths<shasum_t<DERIVED>>;
     friend base;
-    static constexpr const char * name() { return NAME; }
+    static constexpr const char * name() { return DERIVED::name(); }
 
 public:
 
