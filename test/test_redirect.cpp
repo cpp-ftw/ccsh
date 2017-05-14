@@ -16,7 +16,7 @@ TEST(RedirectTest, append1)
     EXPECT_EQ(fs::exists(p1), false);
 
     (shell("wc", {"-l"}) < p2 > s1).run();
-    EXPECT_EQ(s1, "2\n");
+    EXPECT_EQ(s1, "2" + portable_eol);
 
     (shell("echo", {"test"}) > p1).run();
     EXPECT_EQ(fs::exists(p1), true);
@@ -42,9 +42,6 @@ TEST(RedirectTest, append2)
 
     (shell("echo", {"test"}) > p1).run();
     EXPECT_EQ(fs::exists(p1), true);
-
-    std::string s1;
-    shell("cat", {p1.string()}) > s1;
 
     (shell("echo", {"append"}) >> p1).run();
 

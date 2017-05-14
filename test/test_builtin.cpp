@@ -6,11 +6,17 @@ class BuiltinTest : public ::testing::Test
 {
 protected:
     fs::path wd;
-    void SetUp()
+
+#ifdef _WIN32
+    fs::path absolute_example = "C:\\"_p;
+#else
+    fs::path absolute_example = "/tmp"_p;
+#endif // _WIN32
+    void SetUp() override
     {
         wd = fs::current_path();
     }
-    void TearDown()
+    void TearDown() override
     {
         cd{wd};
     }
@@ -27,7 +33,9 @@ TEST_F(BuiltinTest, pwd_backtick)
 
     // they must be same as strings, not only refer to the same path!
     EXPECT_EQ(pwd_fs.string(), pwd_ccsh.string());
+#ifndef _WIN32
     EXPECT_EQ(pwd_fs.string(), pwd_native);
+#endif
     EXPECT_EQ(pwd_fs.string(), pwd_builtin);
 }
 
@@ -40,15 +48,15 @@ TEST_F(BuiltinTest, cd_relative)
 
 TEST_F(BuiltinTest, cd_absolute)
 {
-    cd("/tmp"_p);
+    cd{absolute_example};
     fs::path wd_after = fs::current_path();
-    EXPECT_EQ("/tmp"_p, wd_after);
+    EXPECT_EQ(absolute_example, wd_after);
 }
 
 TEST_F(BuiltinTest, fs_abbreviated)
 {
     fs::path home = get_home();
-    cd("/tmp"_p);
+    cd{absolute_example};
     fs::path wd = get_current_path_abbreviated();
     EXPECT_EQ(wd.string().find(home.string()), std::string::npos);
 }

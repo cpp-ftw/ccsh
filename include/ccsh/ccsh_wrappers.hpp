@@ -51,8 +51,8 @@
 
 
 #define CCSH_WRAPPER_COMMON_CLASS(basecmd, cmdname, cmdstr) \
-    namespace hidden { constexpr const char cmdname##_name[] = cmdstr; } \
-    using cmdname = basecmd<hidden::cmdname##_name>;
+    class cmdname : public basecmd<cmdname> { static constexpr const char * name() { return cmdstr; } };
+
 
 namespace ccsh {
 namespace wrappers {
@@ -63,9 +63,9 @@ class options_paths : public internal::command_native
 protected:
     std::vector<fs::path> paths;
 
-    std::vector<const char*> get_argv() const final
+    std::vector<const tchar_t*> get_argv() const final
     {
-        std::vector<const char*> argv = internal::command_native::get_argv();
+        std::vector<const tchar_t*> argv = internal::command_native::get_argv();
         argv.reserve(argv.size() + paths.size());
         argv.pop_back();
         for (const auto& p : paths)
@@ -78,13 +78,13 @@ protected:
     // -x or --xx
     command_holder <DERIVED>& add_larg(const char* arg)
     {
-        args_.emplace_back(arg);
+        add_arg(arg);
         return static_cast<command_holder<DERIVED>&>(*this);
     }
 
     command_holder <DERIVED>&& add_rarg(const char* arg)
     {
-        args_.emplace_back(arg);
+        add_arg(arg);
         return std::move(static_cast<command_holder<DERIVED>&>(*this));
     }
 
@@ -92,16 +92,16 @@ protected:
     template<typename ARG>
     command_holder <DERIVED>& add_larg_s(const char* name, ARG&& arg)
     {
-        args_.emplace_back(name);
-        args_.push_back(std::forward<ARG>(arg));
+        add_arg(name);
+        add_arg(std::forward<ARG>(arg));
         return static_cast<command_holder<DERIVED>&>(*this);
     }
 
     template<typename ARG>
     command_holder <DERIVED>&& add_rarg_s(const char* name, ARG&& arg)
     {
-        args_.emplace_back(name);
-        args_.push_back(std::forward<ARG>(arg));
+        add_arg(name);
+        add_arg(std::forward<ARG>(arg));
         return std::move(static_cast<command_holder<DERIVED>&>(*this));
     }
 
@@ -111,7 +111,7 @@ protected:
         std::string res = name;
         using swallow = int[];
         MAGIC(res += arg);
-        args_.push_back(std::move(res));
+        add_arg(std::move(res));
         return static_cast<command_holder<DERIVED>&>(*this);
     }
     template<typename... ARG>
@@ -120,7 +120,7 @@ protected:
         std::string res = name;
         using swallow = int[];
         MAGIC(res += arg);
-        args_.push_back(std::move(res));
+        add_arg(std::move(res));
         return std::move(static_cast<command_holder<DERIVED>&>(*this));
     }
 

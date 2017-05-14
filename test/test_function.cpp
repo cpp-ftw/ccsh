@@ -52,7 +52,7 @@ TEST(FunctionTest, line_functor_err)
     std::string str = "test";
     line_consumer consumer{str, repeat};
 
-    auto cat_err = [&](int, int, int err)
+    auto cat_err = [&](fd_t, fd_t, fd_t err)
     {
         ofdstream output{err};
         for(int i = 0; i < repeat; ++i)

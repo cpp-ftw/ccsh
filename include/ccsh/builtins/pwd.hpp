@@ -36,7 +36,7 @@ public:
         return static_cast<command_holder<pwd_t>&>(*this);
     }
 
-    int runx(int in, int out, int err) const final;
+    int runx(fd_t in, fd_t out, fd_t err) const final;
 };
 
 using pwd = command_holder<pwd_t>;

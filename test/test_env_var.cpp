@@ -24,6 +24,7 @@ TEST(EnvVarTest, dollar2)
     EXPECT_EQ(natstr, wrapstr);
 }
 
+#ifndef _WIN32
 TEST(EnvVarTest, source)
 {
     fs::path vars = fs::path{__FILE__}.parent_path() / "vars.sh"_p;
@@ -35,6 +36,7 @@ TEST(EnvVarTest, source)
     EXPECT_EQ(var1, "");
     EXPECT_EQ(var2, "value2");
 }
+#endif
 
 TEST(EnvVarTest, set)
 {
