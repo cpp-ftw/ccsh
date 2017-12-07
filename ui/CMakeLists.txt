@@ -5,6 +5,7 @@ add_subdirectory(./../lib ccsh_lib)
 include_directories(${SHARED_LIB_INCLUDE_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ..)
 
+include_directories(BEFORE /opt/legacy/clang-3.9/usr/include)
 include_directories(AFTER /opt/cling/include /opt/cling/include/cling/UserInterface)
 link_directories(/opt/cling/lib)
 

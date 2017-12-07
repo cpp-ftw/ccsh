@@ -74,21 +74,6 @@ std::vector<std::string>::const_iterator find_file(std::vector<std::string> cons
     return options.end();
 }
 
-std::string generate_filename()
-{
-    const std::string VALID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    constexpr int RANDOM_SIZE = 36;
-
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0, int(VALID_CHARS.size() - 1));
-    std::string your_random_string;
-    std::generate_n(std::back_inserter(your_random_string), RANDOM_SIZE, [&]() -> char
-    {
-        return VALID_CHARS[distribution(generator)];
-    });
-    return your_random_string;
-}
-
 void print_usage()
 {
     std::cout << "Usage: ccshc [gcc-options] file [file-options]" << std::endl;

@@ -5,7 +5,7 @@ HeaderFilterRegex: '.*/ccsh/.*\.hpp'
 AnalyzeTemporaryDtors: false
 User:            dandrid
 CheckOptions:    
-  - key:             google-build-namespaces.HeaderFileExtensions
+  - key:             google-build_rules-namespaces.HeaderFileExtensions
     value:           h,hh,hpp,hxx
   - key:             google-global-names-in-headers.HeaderFileExtensions
     value:           h

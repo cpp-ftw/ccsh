@@ -332,7 +332,7 @@ void command_source::start_run(int in, int out, int err, std::vector<int> unused
     open_wrapper temp1{pipefd[1]};
 
     unused_fds.push_back(pipefd[0]);
-    cmd.args[1] = cmdstr + std::to_string(pipefd[1]);
+    cmd.args_[1] = cmdstr + std::to_string(pipefd[1]);
     cmd.start_run(in, out, err, std::move(unused_fds));
 
     result = std::async(std::launch::async, env_applier, std::move(temp0));
