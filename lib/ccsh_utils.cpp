@@ -9,6 +9,8 @@
 #include <unistd.h>
 
 #include <memory>
+#include <random>
+#include <algorithm>
 
 namespace ccsh {
 
@@ -127,6 +129,21 @@ bool is_user_possibly_elevated()
     uid_t euid = geteuid();
 
     return uid <= 0 || uid != euid;
+}
+
+fs::path generate_filename()
+{
+    const std::string VALID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    constexpr int RANDOM_SIZE = 36;
+
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> distribution(0, int(VALID_CHARS.size() - 1));
+    std::string your_random_string;
+    std::generate_n(std::back_inserter(your_random_string), RANDOM_SIZE, [&]() -> char
+    {
+        return VALID_CHARS[distribution(generator)];
+    });
+    return fs::path{your_random_string};
 }
 
 const char* env_var::get(std::string const& name)

@@ -53,7 +53,7 @@ int main(int argc, const char** argv)
 {
 
 #if defined(_WIN32) && defined(_MSC_VER)
-    // Suppress error dialogs to avoid hangs on build nodes.
+    // Suppress error dialogs to avoid hangs on build_rules nodes.
     // One can use an environment variable (Cling_GuiOnAssert) to enable
     // the error dialogs.
     const char *EnablePopups = getenv("Cling_GuiOnAssert");

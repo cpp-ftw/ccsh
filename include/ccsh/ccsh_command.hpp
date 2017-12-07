@@ -76,17 +76,17 @@ class command_native : public command_base, private command_async
 protected:
 
     fs::path p;
-    std::vector<std::string> args;
+    std::vector<std::string> args_;
 
     friend class command_source;
 
     virtual std::vector<const char*> get_argv() const
     {
         std::vector<const char*> argv;
-        argv.reserve(args.size() + 2);
+        argv.reserve(args_.size() + 2);
 
         argv.push_back(p.c_str());
-        for (const auto& s : this->args)
+        for (const auto& s : this->args_)
             argv.push_back(s.c_str());
 
         argv.push_back(nullptr);
@@ -95,9 +95,15 @@ protected:
 
 public:
 
+    std::vector<std::string>& args() { return args_; }
+    std::vector<std::string> const& args() const { return args_; }
+
+    fs::path& binary() { return p; }
+    fs::path const& binary() const { return p; }
+
     explicit command_native(fs::path p, std::vector<std::string> args = {})
         : p(std::move(p))
-        , args(std::move(args))
+        , args_(std::move(args))
     { }
 
     void append_dir(fs::path const& dir)

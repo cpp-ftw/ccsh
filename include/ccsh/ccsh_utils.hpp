@@ -5,6 +5,7 @@
 #include <exception>
 #include <stdexcept>
 #include <string>
+#include <cstring>
 
 #include "ccsh_filesystem.hpp"
 
@@ -31,6 +32,8 @@ std::string get_short_hostname();
 std::string get_shell_name();
 
 std::string get_ttyname();
+
+fs::path generate_filename();
 
 bool is_user_possibly_elevated();
 
@@ -94,7 +97,60 @@ enum class stdfd : uint8_t
     count
 };
 
+template<typename FUNC>
+class line_splitter
+{
+    std::string temp;
+    FUNC func;
+    char delim;
+public:
+    explicit line_splitter(FUNC func, char delim = '\n')
+        : func(std::move(func))
+        , delim(delim)
+    { }
+
+    ssize_t operator()(char* buf, std::size_t s)
+    {
+        char* newline;
+        std::size_t si = s;
+        while (si > 0 && (newline = static_cast<char*>(memchr(buf, delim, si))) != nullptr)
+        {
+            std::size_t diff = newline - buf;
+            temp.append(buf, diff);
+            // if you want efficient processing, func can take std::string&& argument
+            func(std::move(temp));
+            temp.clear();
+            buf += diff + 1;
+            si -= diff + 1;
+        }
+        temp.append(buf, si);
+        return s;
+    }
+};
+
+template<typename FUNC>
+line_splitter<typename std::remove_reference<FUNC>::type> line_splitter_make(FUNC&& func, char delim = '\n')
+{   // Comes handy when you have a lambda.
+    return line_splitter<typename std::remove_reference<FUNC>::type>(std::forward<FUNC>(func), delim);
+}
+
 } // namespace internal
+
+template<typename ENUM, std::size_t N>
+static const char* enum_to_string(ENUM val, const char* const (& mapping)[N])
+{
+    if (val < 0 || val >= N)
+        return "";
+    return mapping[val];
+}
+
+template<typename ENUM, std::size_t N>
+static const char* enum_to_string(ENUM val, std::array<const char*, N> const& mapping)
+{
+    if (val < 0 || val >= N)
+        return "";
+    return mapping[val];
+}
 
 } // namespace ccsh
 

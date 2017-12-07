@@ -45,6 +45,10 @@
     command_holder <comm>&  method(ty1 arg1, ty2 arg2) &  { return this->add_larg_cat(argstr, (userarg1), ":", (userarg2)); } \
     command_holder <comm>&& method(ty1 arg1, ty2 arg2) && { return this->add_rarg_cat(argstr, (userarg1), ":", (userarg2)); }
 
+#define CCSH_WRAPPER_ARG2_NE(comm, method, argstr, ty1, userarg1, ty2, userarg2) \
+    command_holder <comm>&  method(ty1 arg1, ty2 arg2) &  { return this->add_larg_cat(argstr, (userarg1), "=", (userarg2)); } \
+    command_holder <comm>&& method(ty1 arg1, ty2 arg2) && { return this->add_rarg_cat(argstr, (userarg1), "=", (userarg2)); }
+
 
 #define CCSH_WRAPPER_COMMON_CLASS(basecmd, cmdname, cmdstr) \
     namespace hidden { constexpr const char cmdname##_name[] = cmdstr; } \
@@ -71,32 +75,16 @@ protected:
         return argv;
     }
 
-    template<typename ENUM, std::size_t N>
-    static const char* enum_to_string(ENUM val, const char* const (& mapping)[N])
-    {
-        if (val < 0 || val >= N)
-            return "";
-        return mapping[val];
-    }
-
-    template<typename ENUM, std::size_t N>
-    static const char* enum_to_string(ENUM val, std::array<const char*, N> const& mapping)
-    {
-        if (val < 0 || val >= N)
-            return "";
-        return mapping[val];
-    }
-
     // -x or --xx
     command_holder <DERIVED>& add_larg(const char* arg)
     {
-        args.emplace_back(arg);
+        args_.emplace_back(arg);
         return static_cast<command_holder<DERIVED>&>(*this);
     }
 
     command_holder <DERIVED>&& add_rarg(const char* arg)
     {
-        args.emplace_back(arg);
+        args_.emplace_back(arg);
         return std::move(static_cast<command_holder<DERIVED>&>(*this));
     }
 
@@ -104,16 +92,16 @@ protected:
     template<typename ARG>
     command_holder <DERIVED>& add_larg_s(const char* name, ARG&& arg)
     {
-        args.emplace_back(name);
-        args.push_back(std::forward<ARG>(arg));
+        args_.emplace_back(name);
+        args_.push_back(std::forward<ARG>(arg));
         return static_cast<command_holder<DERIVED>&>(*this);
     }
 
     template<typename ARG>
     command_holder <DERIVED>&& add_rarg_s(const char* name, ARG&& arg)
     {
-        args.emplace_back(name);
-        args.push_back(std::forward<ARG>(arg));
+        args_.emplace_back(name);
+        args_.push_back(std::forward<ARG>(arg));
         return std::move(static_cast<command_holder<DERIVED>&>(*this));
     }
 
@@ -123,7 +111,7 @@ protected:
         std::string res = name;
         using swallow = int[];
         MAGIC(res += arg);
-        args.push_back(std::move(res));
+        args_.push_back(std::move(res));
         return static_cast<command_holder<DERIVED>&>(*this);
     }
     template<typename... ARG>
@@ -132,7 +120,7 @@ protected:
         std::string res = name;
         using swallow = int[];
         MAGIC(res += arg);
-        args.push_back(std::move(res));
+        args_.push_back(std::move(res));
         return std::move(static_cast<command_holder<DERIVED>&>(*this));
     }
 
