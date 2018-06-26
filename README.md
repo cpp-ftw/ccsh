@@ -15,7 +15,7 @@
 
 - Add `command operator<(command, command_line_functor);`
 - Add command to fd conversion, for using commands as files, see https://www.gnu.org/software/coreutils/manual/coreutils.html#tee-invocation
-- Add `command operator<(command, int fd); and same for <, >>, >=, >>=`
+- Add `command operator>>(command, std::ostream&);` and `command operator<<(command, std::istream&);` or possibly in reverse order.
 
 
 ### DONE
