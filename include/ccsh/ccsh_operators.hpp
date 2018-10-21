@@ -110,6 +110,19 @@ command_runnable operator>=(command const& c, command_functor_raw func);
 
 /* ******************* raw functor redirection operators ******************* */
 
+/* ******************* stream redirection operators ******************* */
+
+command_runnable operator>>(command const& c, std::ostream& os);
+command_runnable operator<<(std::ostream& os, command const& c);
+
+command_runnable operator>>=(command const& c, std::ostream& os);
+command_runnable operator<<=(std::ostream& os, command const& c);
+
+command_runnable operator<<(command const& c, std::istream& is);
+command_runnable operator>>(std::istream& is, command const& c);
+
+/* ******************* stream redirection operators ******************* */
+
 /* ******************* command functor redirection operators ******************* */
 
 // command_runnable operator<(command const& c, command_functor func);

@@ -141,5 +141,70 @@ command_runnable operator>=(command const& c, command_functor_raw func)
 
 /* ******************* raw functor redirection operators ******************* */
 
+/* ******************* stream redirection operators ******************* */
+
+namespace {
+
+template<typename COMMAND>
+command_base * out_stream(command const& c, std::ostream& os)
+{
+    return new COMMAND(c, [&os](char* str, std::size_t n) -> ssize_t {
+        auto pos = os.tellp();
+        if (os.write(str, n))
+            return n;
+        else
+        {
+            auto count = os.tellp() - pos;
+            return count > 0 ? count : -1;
+        }
+    });
+}
+
+template<typename COMMAND>
+command_base * in_stream(command const& c, std::istream& is)
+{
+    return new COMMAND(c, [&is](char* str, std::size_t n) -> ssize_t {
+        if (is.read(str, n))
+            return n;
+        else
+        {
+            auto count = is.gcount();
+            return count > 0 ? count : -1;
+        }
+    });
+}
+
+}
+
+command_runnable operator>>(command const& c, std::ostream& os)
+{
+    return {out_stream<command_out_mapping>(c, os)};
+}
+command_runnable operator<<(std::ostream& os, command const& c)
+{
+    return {out_stream<command_out_mapping>(c, os)};
+}
+
+command_runnable operator>>=(command const& c, std::ostream& os)
+{
+    return {out_stream<command_err_mapping>(c, os)};
+}
+command_runnable operator<<=(std::ostream& os, command const& c)
+{
+    return {out_stream<command_err_mapping>(c, os)};
+}
+
+command_runnable operator<<(command const& c, std::istream& is)
+{
+    return {in_stream<command_in_mapping>(c, is)};
+}
+command_runnable operator>>(std::istream& is, command const& c)
+{
+    return {in_stream<command_in_mapping>(c, is)};
+}
+
+
+/* ******************* stream redirection operators ******************* */
+
 } // namespace internal
 } // namespace ccsh
