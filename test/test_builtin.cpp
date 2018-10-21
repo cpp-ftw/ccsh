@@ -12,7 +12,7 @@ protected:
     }
     void TearDown()
     {
-        cd(wd);
+        cd{wd};
     }
 };
 
@@ -59,7 +59,7 @@ TEST_F(BuiltinTest, home_test)
     fs::path wd = get_current_path_abbreviated();
     EXPECT_EQ(wd.string().find(home.string()), std::string::npos);
 
-    cd(get_home());
+    cd{get_home()};
     fs::path home_abbr = get_current_path_abbreviated();
     EXPECT_EQ(home_abbr.string(), "~");
 }
