@@ -63,6 +63,7 @@ compile_commands.json
 *.dir
 Bin/*
 Win32/*
+x64/
 packages/*
 packages.config
 _ReSharper.Caches/

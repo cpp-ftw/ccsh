@@ -117,6 +117,12 @@ public:
     {
         return result.get();
     }
+
+#ifdef _WIN32
+private:
+    void start_run_internal(fd_t in, fd_t out, fd_t err, std::vector<fd_t> unused_fds, tstring_t cmdline) const;
+    friend class command_source;
+#endif
 };
 
 class command_runnable : protected std::shared_ptr<command_base>
@@ -428,14 +434,13 @@ public:
     }
 };
 
-#ifndef _WIN32
 class command_source final : public command_base, protected command_async
 {
     mutable command_native cmd;
-    std::string cmdstr;
+    tstring_t cmdstr;
 
 public:
-    explicit command_source(fs::path const& p, std::vector<std::string> const& args = {});
+    explicit command_source(fs::path const& p, std::vector<std::string> const& args = {}, fs::path const& shell = "/bin/sh");
 
     void start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t>) const override;
 
@@ -445,7 +450,6 @@ public:
         return cmd.finish_run();
     }
 };
-#endif
 
 class command_builtin : public command_base
 {
