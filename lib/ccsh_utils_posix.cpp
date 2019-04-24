@@ -107,7 +107,7 @@ pipe_t pipe_compat()
 {
     int pipefd[2];
     stdc_thrower(pipe(pipefd));
-    return {open_wrapper{pipefd[0]}, open_wrapper{pipefd[1]}};
+    return {{open_wrapper{pipefd[0]}, open_wrapper{pipefd[1]}}};
 }
 
 std::size_t read_compat(fd_t file, void* data, std::size_t size)

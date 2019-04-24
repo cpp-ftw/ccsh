@@ -1,5 +1,6 @@
 #include "ccsh_internals.hpp"
 #include <ccsh/ccsh_command.hpp>
+#include <iostream>
 
 #ifdef _WIN32
 
@@ -38,36 +39,48 @@ void command_native::add_arg(std::string&& str)
 
 namespace {
 
+template<typename T, typename Iter>
+void append(Iter& iter, T const& t, size_t n = 1)
+{
+    for (int i = 0; i < n; ++i)
+        *iter++ = t;
+}
+
+
+template<typename InserterIter>
+void convert_arg(const tchar_t* arg, InserterIter&& iter)
+{
+    append(iter, L'"');
+    int backslash_count = 0;
+    for (int i = 0; arg[i] != '\0'; ++i)
+    {
+        switch (arg[i])
+        {
+        case L'\\':
+            backslash_count++;
+            break;
+        case L'"':
+            append(iter, L'\\', backslash_count * 2 + 1);
+            append(iter, L'"');
+            backslash_count = 0;
+            break;
+        default:
+            append(iter, L'\\', backslash_count);
+            backslash_count = 0;
+            append(iter, arg[i]);
+        }
+    }
+    append(iter, L'\\', backslash_count * 2);
+    append(iter, L'"');
+}
+
 tstring_t convert_argv(std::vector<const tchar_t*> const& argv)
 {
     tstring_t result;
 
     for (auto it = argv.begin(); *it != nullptr; ++it)
     {
-        auto arg = *it;
-
-        result += L'"';
-        int backslash_count = 0;
-        for (int i = 0; arg[i] != '\0'; ++i)
-        {
-            switch (arg[i])
-            {
-            case L'\\':
-                backslash_count++;
-                break;
-            case L'"':
-                result.append(backslash_count * 2 + 1, L'\\');
-                result += L'"';
-                backslash_count = 0;
-                break;
-            default:
-                result.append(backslash_count, L'\\');
-                backslash_count = 0;
-                result += arg[i];
-            }
-        }
-        result.append(backslash_count * 2, L'\\');
-        result += L'"';
+        convert_arg(*it, std::back_inserter(result));
         result += L' ';
     }
 
@@ -166,6 +179,7 @@ public:
 struct wait_helper // working around missing [=, a = b] feature in C++11
 {
     open_wrapper process_handle;
+    // ReSharper disable once CppDeclaratorNeverUsed
     open_wrapper thread_handle;
 
     int operator()() const
@@ -179,7 +193,7 @@ struct wait_helper // working around missing [=, a = b] feature in C++11
 
 } // namespace
 
-void command_native::start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t>) const
+void command_native::start_run_internal(fd_t in, fd_t out, fd_t err, std::vector<fd_t>, tstring_t cmdline) const
 {
     STARTUPINFOW startupinfo = {0};
     startupinfo.cb = sizeof(startupinfo);
@@ -190,19 +204,17 @@ void command_native::start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t>) c
 
     PROCESS_INFORMATION processinfo = {nullptr};
 
-    tstring_t cmdargs = convert_argv(get_argv());
-
     if(inherit_by_default())
     {
         fd_t inherited[] = {in, out, err};
-        winapi_thrower(CreateProcessWithExplicitHandlesW(nullptr, &cmdargs[0], nullptr, nullptr, true, 0, nullptr, nullptr, &startupinfo, &processinfo, 3, inherited), p.string());
+        winapi_thrower(CreateProcessWithExplicitHandlesW(nullptr, &cmdline[0], nullptr, nullptr, true, 0, nullptr, nullptr, &startupinfo, &processinfo, 3, inherited), p.string());
     }
     else
     {
         inherit_helper temp1{in};
         inherit_helper temp2{out};
         inherit_helper temp3{err};
-        winapi_thrower(CreateProcessW(nullptr, &cmdargs[0], nullptr, nullptr, true, 0, nullptr, nullptr, &startupinfo, &processinfo), p.string());
+        winapi_thrower(CreateProcessW(nullptr, &cmdline[0], nullptr, nullptr, true, 0, nullptr, nullptr, &startupinfo, &processinfo), p.string());
     }
 
     open_wrapper proc{processinfo.hProcess};
@@ -210,6 +222,12 @@ void command_native::start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t>) c
 
     wait_helper helper{std::move(proc), std::move(thr)};
     result = std::async(std::launch::async, std::move(helper));
+}
+
+
+void command_native::start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t> unused_fds) const
+{
+    start_run_internal(in, out, err, std::move(unused_fds), convert_argv(get_argv()));
 }
 
 template<stdfd DESC>
@@ -245,6 +263,87 @@ class command_redirect<stdfd::out>;
 
 template
 class command_redirect<stdfd::err>;
+
+namespace {
+
+tstring_t make_source_command(fs::path const& p, std::vector<std::string> const& args)
+{
+    tstring_t cmdstr;
+    convert_arg(p.wstring().c_str(), std::back_inserter(cmdstr));
+
+    for (std::string const& str : args)
+    {
+        cmdstr += L' ';
+        convert_arg(from_utf8(str).c_str(), std::back_inserter(cmdstr));
+    }
+
+    cmdstr += L" && SET >";
+    return cmdstr;
+}
+
+void env_putter(std::string str)
+{
+    auto eq_sign = str.find('=');
+    if (eq_sign == std::string::npos) // should never happen
+        throw stdc_error(errno, "Bad format from SET");
+
+    str[eq_sign] = '\0';
+    if (str.back() == '\r')
+        str.pop_back();
+    env_var::try_set(&str[0], &str[eq_sign + 1], true);
+}
+
+auto env_applier = [](fd_t fd) -> int
+{
+    if (ConnectNamedPipe(fd, nullptr) == 0)
+        throw winapi_error();
+
+    auto env_splitter = line_splitter_make(&env_putter, '\n');
+
+    try
+    {
+        char buf[BUFSIZ];
+        int64_t count;
+        while ((count = read_compat(fd, buf, BUFSIZ)) > 0)
+            env_splitter(buf, std::size_t(count));
+    }
+    catch (...)
+    {
+        DisconnectNamedPipe(fd);
+        throw;
+    }
+    DisconnectNamedPipe(fd);
+    return 0;
+};
+
+}  // namespace
+
+command_source::command_source(fs::path const& p, std::vector<std::string> const& args, fs::path const&)
+    : cmd(p, args)
+    , cmdstr(make_source_command(p, args))
+{
+}
+
+void command_source::start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t> unused_fds) const
+{
+    char ptrbuf[2*sizeof(void*) + 3];
+    snprintf(ptrbuf, sizeof(ptrbuf), "0x%p", this);
+
+    tstring_t pipename = L"\\\\.\\pipe\\" + std::to_wstring(GetProcessId(GetCurrentProcess())) + L"-" + from_utf8(ptrbuf);
+    fd_t pipe = CreateNamedPipeW(pipename.c_str(),
+                PIPE_ACCESS_INBOUND,
+                PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
+                PIPE_UNLIMITED_INSTANCES,
+                1024 * 16,
+                1024 * 16,
+                NMPWAIT_USE_DEFAULT_WAIT,
+                nullptr);
+
+    tstring_t cmdline = cmdstr + pipename;
+    cmd.start_run_internal(in, out, err, std::move(unused_fds), cmdline);
+    result = std::async(std::launch::async, env_applier, pipe);
+}
+
 
 } // namespace internal
 } // namespace ccsh

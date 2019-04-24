@@ -24,19 +24,28 @@ TEST(EnvVarTest, dollar2)
     EXPECT_EQ(natstr, wrapstr);
 }
 
-#ifndef _WIN32
 TEST(EnvVarTest, source)
 {
-    fs::path vars = fs::path{__FILE__}.parent_path() / "vars.sh"_p;
+#ifdef _WIN32
+    fs::path script = "var test.bat"_p;
+#else
+    fs::path script = "vars.sh"_p;
+#endif
+
+    fs::path vars = fs::path{__FILE__}.parent_path() / script;
     ASSERT_EQ(fs::exists(vars), true);
-    source(vars);
+
+    std::string output;
+    source(vars, {"value x"}, "/bin/bash") > output;
+    rtrim(output);
+    EXPECT_EQ(output, "\"value x\"");
+
     std::string var1, var2;
     var1 = $("EXAMPLE_ENV_VAR1");
     var2 = $("EXAMPLE_ENV_VAR2");
     EXPECT_EQ(var1, "");
     EXPECT_EQ(var2, "value2");
 }
-#endif
 
 TEST(EnvVarTest, set)
 {

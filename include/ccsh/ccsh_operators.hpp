@@ -15,12 +15,10 @@ inline internal::command_runnable shell(fs::path const& p, std::vector<std::stri
     return {new internal::command_native(p, args)};
 }
 
-#ifndef _WIN32
-inline internal::command_runnable source(fs::path const& p, std::vector<std::string> const& args = {})
+inline internal::command_runnable source(fs::path const& p, std::vector<std::string> const& args = {}, fs::path const& shell = "/bin/sh")
 {
-    return {new internal::command_source(p, args)};
+    return {new internal::command_source(p, args, shell)};
 }
-#endif
 
 namespace internal {
 

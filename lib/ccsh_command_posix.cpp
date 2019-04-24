@@ -157,7 +157,10 @@ std::string make_source_command(fs::path const& p, std::vector<std::string> cons
 {
     std::string cmdstr = ". " + sh_escape(p.string());
     for (std::string const& str : args)
+    {
+        cmdstr += ' ';
         cmdstr += sh_escape(str);
+    }
 
     cmdstr += " && (printenv -0) >&";
     return cmdstr;
@@ -187,8 +190,8 @@ auto env_applier = [](open_wrapper fd) -> int
 
 }  // namespace
 
-command_source::command_source(fs::path const& p, std::vector<std::string> const& args)
-    : cmd("/bin/sh", {"-c", ""})
+command_source::command_source(fs::path const& p, std::vector<std::string> const& args, fs::path const& shell)
+    : cmd(shell, {"-c", ""})
     , cmdstr(make_source_command(p, args))
 { }
 
