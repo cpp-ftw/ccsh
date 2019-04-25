@@ -37,6 +37,21 @@ void command_native::add_arg(std::string&& str)
     args_.push_back(from_utf8(str));
 }
 
+void command_native::add_arg(const tchar_t* str)
+{
+    args_.push_back(str);
+}
+
+void command_native::add_arg(tstring_t const& str)
+{
+    args_.push_back(str);
+}
+
+void command_native::add_arg(tstring_t&& str)
+{
+    args_.push_back(std::move(str));
+}
+
 namespace {
 
 template<typename T, typename Iter>

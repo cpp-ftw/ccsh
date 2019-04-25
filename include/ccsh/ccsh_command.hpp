@@ -93,11 +93,16 @@ protected:
         return argv;
     }
 
+public:
     void add_arg(const char* str);
     void add_arg(std::string const& str);
     void add_arg(std::string&& str);
 
-public:
+#ifdef _WIN32
+    void add_arg(const tchar_t* str);
+    void add_arg(tstring_t const& str);
+    void add_arg(tstring_t&& str);
+#endif
 
     std::vector<tstring_t>& args() { return args_; }
     std::vector<tstring_t> const& args() const { return args_; }
