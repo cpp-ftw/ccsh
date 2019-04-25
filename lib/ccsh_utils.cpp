@@ -8,7 +8,7 @@
 #include <random>
 #include <algorithm>
 
-#include <ccsh/simpleopt/SimpleGlob.h>
+#include "cygwin/glob.h"
 
 namespace ccsh {
 
@@ -16,13 +16,17 @@ namespace fs {
 
 namespace {
 
-void expand_helper(fs::path const& p, std::vector<fs::path>& result)
+void expand_helper(path const& p, std::vector<path>& result)
 {
-    CSimpleGlob glob{SG_GLOB_NOCHECK | SG_GLOB_TILDE};
-    glob.Add(p.c_str());
-    for (int i = 0; i < glob.FileCount(); ++i)
-        result.emplace_back(glob.File(i));
+    glob_t globbuf;
+    glob(p.string().c_str(), GLOB_NOCHECK | GLOB_TILDE, NULL, &globbuf);
+
+    for(std::size_t i = 0; i < globbuf.gl_pathc; ++i)
+        result.push_back(globbuf.gl_pathv[i]);
+
+    globfree(&globbuf);
 }
+
 
 } // namespace
 

@@ -10,7 +10,7 @@ if(NOT TARGET ccsh_lib) # "include guard"
 
 include_directories(${SHARED_LIB_INCLUDE_DIR})
 
-file(GLOB sources *.cpp *.hpp builtins/*.cpp)
+file(GLOB sources *.cpp *.hpp builtins/*.cpp cygwin/*.cpp)
 file(GLOB headers ../include/ccsh/*.hpp ../include/ccsh/builtins/*.hpp)
 
 add_library(ccsh_lib SHARED ${sources} ${headers})
