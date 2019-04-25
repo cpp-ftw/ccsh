@@ -333,7 +333,7 @@ void command_source::start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t> un
     fd_t pipe = CreateNamedPipeW(pipename.c_str(),
                 PIPE_ACCESS_INBOUND,
                 PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
-                PIPE_UNLIMITED_INSTANCES,
+                1,
                 1024 * 16,
                 1024 * 16,
                 NMPWAIT_USE_DEFAULT_WAIT,
