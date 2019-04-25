@@ -181,6 +181,19 @@ static const char* enum_to_string(ENUM val, std::array<const char*, N> const& ma
     return mapping[val];
 }
 
+
+#ifdef _WIN32
+std::string to_utf8(tstring_t const& str);
+tstring_t from_utf8(std::string const& str);
+#else
+std::string const& to_utf8(tstring_t const& str) { return str; }
+std::string& to_utf8(tstring_t& str) { return str; }
+std::string&& to_utf8(tstring_t&& str) { return std::move(str); }
+std::wstring const& from_utf8(tstring_t const& str) { return str; }
+std::wstring& from_utf8(tstring_t& str) { return str; }
+std::wstring&& from_utf8(tstring_t&& str) { return std::move(str); }
+#endif
+
 } // namespace ccsh
 
 #endif // CCSH_CCSH_UTILS_HPP

@@ -10,10 +10,6 @@
 #include <Shlobj.h>
 #include <VersionHelpers.h>
 
-#ifndef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#endif
-#include <codecvt>
 
 namespace ccsh {
 
@@ -60,32 +56,6 @@ inline void winapi_hresult_thrower(HRESULT result) // DWORD
 {
     if (FAILED(result))
         throw winapi_error(from_hresult(result));
-}
-
-template<std::size_t N>
-std::string to_utf8(const wchar_t(&str)[N])
-{
-    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-    return converter.to_bytes(std::begin(str), std::end(str));
-}
-
-inline std::string to_utf8(std::wstring const& str)
-{
-    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-    return converter.to_bytes(str);
-}
-
-template<std::size_t N>
-std::wstring from_utf8(const char (&str)[N])
-{
-    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-    return converter.from_bytes(std::begin(str), std::end(str) - 1);
-}
-
-inline std::wstring from_utf8(std::string const& str)
-{
-    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-    return converter.from_bytes(str);
 }
 
 inline bool inherit_by_default()

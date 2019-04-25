@@ -17,7 +17,7 @@ bool ofdstreambuf::do_flush()
     pbump(int(-n));
 
 #ifdef _WIN32
-    return WriteFile(fd, pbase(), n, nullptr, nullptr);
+    return WriteFile(fd, pbase(), unsigned(n), nullptr, nullptr);
 #else
     return CCSH_RETRY_HANDLER(::write(fd, pbase(), size_t(n))) != -1;
 #endif 

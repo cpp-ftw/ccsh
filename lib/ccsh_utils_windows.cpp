@@ -3,6 +3,11 @@
 
 #ifdef _WIN32
 
+#ifndef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#endif
+#include <codecvt>
+
 #include <mutex>
 
 namespace ccsh {
@@ -191,14 +196,14 @@ pipe_t pipe_compat()
 std::size_t read_compat(fd_t file, void* data, std::size_t size)
 {
     DWORD result;
-    winapi_thrower(ReadFile(file, data, size, &result, nullptr));
+    winapi_thrower(ReadFile(file, data, unsigned(size), &result, nullptr));
     return std::size_t(result);
 }
 
 std::size_t write_compat(fd_t file, void* data, std::size_t size)
 {
     DWORD result;
-    winapi_thrower(WriteFile(file, data, size, &result, nullptr));
+    winapi_thrower(WriteFile(file, data, unsigned(size), &result, nullptr));
     return std::size_t(result);
 }
 
@@ -216,6 +221,18 @@ void close_compat(fd_t fd)
 
 
 } // namespace internal
+
+std::string to_utf8(tstring_t const& str)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+    return converter.to_bytes(str);
+}
+
+tstring_t from_utf8(std::string const& str)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+    return converter.from_bytes(str);
+}
 
 }
 
