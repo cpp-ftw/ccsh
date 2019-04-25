@@ -6,6 +6,11 @@
  * under the MIT license.  For all details and documentation, see
  * https://github.com/tronkko/dirent
  */
+
+#ifndef _WIN32
+#include <dirent.h>
+#else
+
 #ifndef DIRENT_H
 #define DIRENT_H
 
@@ -24,6 +29,9 @@
  */
 #ifndef WIN32_LEAN_AND_MEAN
 #   define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#   define NOMINMAX
 #endif
 #include <windows.h>
 
@@ -1158,3 +1166,5 @@ dirent_set_errno(
 }
 #endif
 #endif /*DIRENT_H*/
+
+#endif // _WIN32

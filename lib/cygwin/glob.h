@@ -37,10 +37,13 @@
  * $FreeBSD: /repoman/r/ncvs/src/include/glob.h,v 1.10 2006/05/22 05:57:39 ache Exp $
  */
 
+#ifndef _WIN32
+#include <glob.h>
+#else
+
 #ifndef _GLOB_H_
 #define	_GLOB_H_
 
-#include <sys/cdefs.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -51,7 +54,7 @@ typedef struct {
 	int gl_flags;		/* Copy of flags parameter to glob. */
 	char **gl_pathv;	/* List of paths matching pattern. */
 				/* Copy of errfunc parameter to glob. */
-	int (*gl_errfunc) __P((const char *, int));
+	int (*gl_errfunc) (const char *, int);
 
 	/*
 	 * Alternate filesystem access methods for glob; replacement
@@ -61,8 +64,8 @@ typedef struct {
 	void (*gl_closedir)(void *);
 	struct dirent *(*gl_readdir)(void *);
 	void *(*gl_opendir)(const char *);
-	int (*gl_lstat) __P((const char *, struct stat *));
-	int (*gl_stat) __P((const char *, struct stat *));
+	int (*gl_lstat) (const char *, struct stat *);
+	int (*gl_stat) (const char *, struct stat *);
 } glob_t;
 
 /* Believed to have been introduced in 1003.2-1992 */
@@ -80,7 +83,6 @@ typedef struct {
 #define	GLOB_NOMATCH	(-3)	/* No match and GLOB_NOCHECK was not set. */
 #define	GLOB_NOSYS	(-4)	/* Obsolete: source comptability only. */
 
-#if __GNU_VISIBLE
 #define	GLOB_ALTDIRFUNC	0x0040	/* Use alternately specified directory funcs. */
 #define	GLOB_BRACE	0x0080	/* Expand braces ala csh. */
 #define	GLOB_MAGCHAR	0x0100	/* Pattern had globbing characters. */
@@ -89,23 +91,18 @@ typedef struct {
 #define	GLOB_TILDE	0x0800	/* Expand tilde names from the passwd file. */
 #define	GLOB_LIMIT	0x1000	/* limit number of returned paths */
 
-/* source compatibility, these are the old names */
-#define GLOB_MAXPATH	GLOB_LIMIT
-#define	GLOB_ABEND	GLOB_ABORTED
-#endif /* __GNU_VISIBLE */
-
-__BEGIN_DECLS
-
-#undef DLLEXPORT
-#ifdef __INSIDE_CYGWIN__
-# define DLLEXPORT
-#else
-# define DLLEXPORT __declspec(dllimport)
+#ifdef __cplusuplus
+extern "C" {
 #endif
 
-int	DLLEXPORT glob (const char *__restrict , int, int (*)(const char *, int), glob_t *__restrict);
-void	DLLEXPORT globfree (glob_t *);
-int	DLLEXPORT glob_pattern_p (const char *, int);
-__END_DECLS
+int	glob (const char *, int, int (*)(const char *, int), glob_t *);
+void globfree (glob_t *);
+int	 glob_pattern_p (const char *, int);
+
+#ifdef __cplusuplus
+}
+#endif
 
 #endif /* !_GLOB_H_ */
+
+#endif // _WIN32

@@ -30,15 +30,6 @@
  * SUCH DAMAGE.
  */
 
-#ifdef __CYGWIN__
-#include "winsup.h"
-#endif
-
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)glob.c	8.3 (Berkeley) 10/13/93";
-#endif /* LIBC_SCCS and not lint */
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD: src/lib/libc/gen/glob.c,v 1.28 2010/05/12 17:44:00 gordon Exp $");
 
 /*
  * glob(3) -- a superset of the one defined in POSIX 1003.2.
@@ -75,38 +66,34 @@ __FBSDID("$FreeBSD: src/lib/libc/gen/glob.c,v 1.28 2010/05/12 17:44:00 gordon Ex
  * 3. State-dependent encodings are not currently supported.
  */
 
-#include <sys/param.h>
+namespace {}
+
+#ifdef _WIN32
+
+#ifndef ARG_MAX
+#define ARG_MAX 65536
+#endif
+
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
+#include "glob.h"
+#include "dirent.h"
+#include <shlobj_core.h>
+
+
 #include <sys/stat.h>
 
 #include <ctype.h>
-#include <dirent.h>
 #include <errno.h>
-#include <glob.h>
 #include <limits.h>
-#include <pwd.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <wchar.h>
 
-#include "collate.h"
-
-#ifdef __CYGWIN__
-#include <wctype.h>
-#include "path.h"
-#include "fhandler.h"
-#include "dtable.h"
-#include "cygheap.h"
-#include "cygwin/version.h"
-
-#define getpwuid(uid)	getpwuid32 (uid)
-#define getuid()	getuid32 ()
-
-#define CCHAR(c)	(ignore_case_with_glob ? towlower (CHAR (c)) : CHAR (c))
-#define Cchar(c)	(ignore_case_with_glob ? towlower (c) : (c))
-#endif
 
 #undef MAXPATHLEN
 #define MAXPATHLEN 8192
@@ -388,7 +375,7 @@ globexp2(const Char *ptr, const Char *pattern, glob_t *pglob, int *rv, size_t *l
 static const Char *
 globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 {
-	struct passwd *pwd;
+ 	char pw_dir[MAX_PATH];
 	char *h;
 	const Char *p;
 	Char *b, *eb;
@@ -401,7 +388,7 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 	 */
 	eb = &patbuf[patbuf_len - 1];
 	for (p = pattern + 1, h = (char *) patbuf;
-	    h < (char *)eb && *p && *p != SLASH; *h++ = *p++)
+	    h < (char *)eb && *p && *p != SLASH; *h++ = char(*p++))
 		continue;
 
 	*h = EOS;
@@ -412,12 +399,9 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 		 * we're not running setuid or setgid) and then trying
 		 * the password file
 		 */
-		if (issetugid() != 0 ||
-		    (h = getenv("HOME")) == NULL) {
-			if (((h = getlogin()) != NULL &&
-			     (pwd = getpwnam(h)) != NULL) ||
-			    (pwd = getpwuid(getuid())) != NULL)
-				h = pwd->pw_dir;
+		if ((h = getenv("HOME")) == NULL) {
+			if (SHGetFolderPathA(nullptr, CSIDL_PROFILE, nullptr, 0, pw_dir) == S_OK)
+				h = pw_dir;
 			else
 				return pattern;
 		}
@@ -426,10 +410,10 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 		/*
 		 * Expand a ~user
 		 */
-		if ((pwd = getpwnam((char*) patbuf)) == NULL)
+		if (SHGetFolderPathA(nullptr, CSIDL_PROFILE, nullptr, 0, pw_dir) != S_OK)
 			return pattern;
 		else
-			h = pwd->pw_dir;
+			h = pw_dir;
 	}
 
 	/* Copy the home directory */
@@ -799,10 +783,7 @@ match(Char *name, Char *pat, Char *patend)
 				++pat;
 			while (((c = *pat++) & M_MASK) != M_END)
 				if ((*pat & M_MASK) == M_RNG) {
-					if (__collate_load_error ?
-					    CCHAR(c) <= CCHAR(k) && CCHAR(k) <= CCHAR(pat[1]) :
-					       __collate_range_cmp(CCHAR(c), CCHAR(k)) <= 0
-					    && __collate_range_cmp(CCHAR(k), CCHAR(pat[1])) <= 0
+					if (CCHAR(c) <= CCHAR(k) && CCHAR(k) <= CCHAR(pat[1])
 					   )
 						ok = 1;
 					pat += 2;
@@ -812,7 +793,7 @@ match(Char *name, Char *pat, Char *patend)
 				return(0);
 			break;
 		default:
-			if (Cchar(*name++) != Cchar(c))
+			if (char(*name++) != char(c))
 				return(0);
 			break;
 		}
@@ -855,7 +836,7 @@ g_opendir(Char *str, glob_t *pglob)
 	return(opendir(buf));
 }
 
-#ifdef __x86_64__
+#if 1
 #define CYGWIN_gl_stat(sfptr) ((*pglob->sfptr) (buf, sb))
 #else
 static void
@@ -899,7 +880,7 @@ g_lstat(Char *fn, struct stat *sb, glob_t *pglob)
 	}
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		return CYGWIN_gl_stat (gl_lstat);
-	return(lstat64(buf, sb));
+	return(stat(buf, sb));
 }
 
 static int
@@ -913,7 +894,7 @@ g_stat(Char *fn, struct stat *sb, glob_t *pglob)
 	}
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
 		return CYGWIN_gl_stat (gl_stat);
-	return(stat64(buf, sb));
+	return(stat(buf, sb));
 }
 
 static const Char *
@@ -935,7 +916,7 @@ g_Ctoc(const Char *str, char *buf, size_t len)
 
 	memset(&mbs, 0, sizeof(mbs));
 	while (len >= (size_t) MB_CUR_MAX) {
-		clen = wcrtomb(buf, *str, &mbs);
+		clen = wcrtomb(buf, wchar_t(*str), &mbs);
 		if (clen == (size_t)-1)
 			return (1);
 		if (*str == L'\0')
@@ -965,3 +946,5 @@ qprintf(const char *str, Char *s)
 	(void)printf("\n");
 }
 #endif
+
+#endif // _WIN32
