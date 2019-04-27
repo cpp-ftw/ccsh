@@ -57,7 +57,7 @@ namespace {
 template<typename T, typename Iter>
 void append(Iter& iter, T const& t, size_t n = 1)
 {
-    for (int i = 0; i < n; ++i)
+    for (size_t i = 0; i < n; ++i)
         *iter++ = t;
 }
 

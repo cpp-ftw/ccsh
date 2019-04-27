@@ -186,12 +186,12 @@ static const char* enum_to_string(ENUM val, std::array<const char*, N> const& ma
 std::string to_utf8(tstring_t const& str);
 tstring_t from_utf8(std::string const& str);
 #else
-std::string const& to_utf8(tstring_t const& str) { return str; }
-std::string& to_utf8(tstring_t& str) { return str; }
-std::string&& to_utf8(tstring_t&& str) { return std::move(str); }
-std::wstring const& from_utf8(tstring_t const& str) { return str; }
-std::wstring& from_utf8(tstring_t& str) { return str; }
-std::wstring&& from_utf8(tstring_t&& str) { return std::move(str); }
+inline std::string const& to_utf8(tstring_t const& str) { return str; }
+inline std::string& to_utf8(tstring_t& str) { return str; }
+inline std::string&& to_utf8(tstring_t&& str) { return std::move(str); }
+inline tstring_t const& from_utf8(std::string const& str) { return str; }
+inline tstring_t& from_utf8(std::string& str) { return str; }
+inline tstring_t&& from_utf8(std::string&& str) { return std::move(str); }
 #endif
 
 } // namespace ccsh
