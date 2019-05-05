@@ -20,6 +20,13 @@ inline internal::command_runnable source(fs::path const& p, std::vector<std::str
     return {new internal::command_source(p, args, shell)};
 }
 
+#ifdef _WIN32
+inline internal::command_runnable cmd(fs::path const& p, std::vector<std::string> const& args = {})
+{
+    return {new internal::command_shell(p, args)};
+}
+#endif
+
 namespace internal {
 
 inline command_runnable operator|(command const& a, command const& b)

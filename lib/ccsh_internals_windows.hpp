@@ -5,11 +5,14 @@
 
 #include <ccsh/ccsh_utils.hpp>
 
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <Windows.h>
 #include <Shlobj.h>
-#include <VersionHelpers.h>
-
 
 namespace ccsh {
 
@@ -43,7 +46,7 @@ void winapi_thrower(ErrorType result, std::string const& msg)
 
 inline error_t from_hresult(HRESULT hr)
 {
-    if ((hr & 0xFFFF0000) == MAKE_HRESULT(SEVERITY_ERROR, FACILITY_WIN32, 0))
+    if (HRESULT(hr & 0xFFFF0000) == MAKE_HRESULT(SEVERITY_ERROR, FACILITY_WIN32, 0))
         return HRESULT_CODE(hr);
 
     if (hr == S_OK)

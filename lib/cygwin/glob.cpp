@@ -80,7 +80,7 @@ namespace {}
 
 #include "glob.h"
 #include "dirent.h"
-#include <shlobj_core.h>
+#include <Shlobj.h>
 
 
 #include <sys/stat.h>

@@ -136,6 +136,11 @@ fd_t duplicate_compat(fd_t file)
     return result;
 }
 
+char* strtok_compat(char* str, char const* delim, char** context)
+{
+    return strtok_r(str, delim, context);
+}
+
 static_assert(int(stdfd::in) == STDIN_FILENO, "Error in stdfd enum.");
 static_assert(int(stdfd::out) == STDOUT_FILENO, "Error in stdfd enum.");
 static_assert(int(stdfd::err) == STDERR_FILENO, "Error in stdfd enum.");

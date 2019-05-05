@@ -23,3 +23,14 @@ TEST(NativeTest, CopyRemoveFile)
     EXPECT_EQ(fs::exists(example_path2), false);
 }
 
+#ifdef _WIN32
+TEST(NativeTest, ShellExecute)
+{
+    fs::path example_path1{__FILE__};
+    fs::path example_path2 = example_path1.parent_path() / "var test.bat"_p;
+
+    std::string output;
+    cmd("dir", {"/B", example_path2.string()}) > output;
+    ASSERT_EQ(output, "var test.bat" + portable_eol);
+}
+#endif

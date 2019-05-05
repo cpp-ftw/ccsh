@@ -137,6 +137,8 @@ public:
         {
             std::size_t diff = newline - buf;
             temp.append(buf, diff);
+            if (delim == '\n' && !temp.empty() && temp.back() == '\r')
+                temp.pop_back();
             // if you want efficient processing, func can take std::string&& argument
             func(std::move(temp));
             temp.clear();
@@ -161,7 +163,21 @@ std::size_t read_compat(fd_t file, void* data, std::size_t size);
 std::size_t write_compat(fd_t file, void* data, std::size_t size);
 fd_t duplicate_compat(fd_t file);
 void close_compat(fd_t fd);
+char* strtok_compat(char* str, char const* delim, char** context);
 
+template<typename FUNC>
+void tokenize_string(std::string const& str, std::string const& delimiters, FUNC&& func)
+{
+    std::string line = str;
+    char* saveptr = nullptr;
+    char* token = strtok_compat(&line[0], delimiters.c_str(), &saveptr);
+
+    while (token != nullptr)
+    {
+        func(token);
+        token = strtok_compat(nullptr, delimiters.c_str(), &saveptr);
+    }
+}
 
 } // namespace internal
 

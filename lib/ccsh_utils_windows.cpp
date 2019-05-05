@@ -156,7 +156,7 @@ int env_var::try_set(std::string const& name, std::string const& value, bool ove
         errcode = getenv_s(&envsize, nullptr, 0, name.c_str());
         if (errcode || envsize) return errcode;
     }
-    errno_t err = _putenv_s(name.c_str(), value.c_str());
+    auto err = _putenv_s(name.c_str(), value.c_str());
     if (err)
     {
         errno = err;
@@ -219,6 +219,10 @@ void close_compat(fd_t fd)
     CloseHandle(fd);
 }
 
+char* strtok_compat(char* str, char const* delim, char** context)
+{
+    return strtok_s(str, delim, context);
+}
 
 } // namespace internal
 

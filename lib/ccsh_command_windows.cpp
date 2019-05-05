@@ -106,19 +106,19 @@ tstring_t convert_argv(std::vector<const tchar_t*> const& argv)
 
 // source: https://blogs.msdn.microsoft.com/oldnewthing/20111216-00/?p=8873/
 BOOL CreateProcessWithExplicitHandlesW(
-    __in_opt     LPCWSTR lpApplicationName,
-    __inout_opt  LPWSTR lpCommandLine,
-    __in_opt     LPSECURITY_ATTRIBUTES lpProcessAttributes,
-    __in_opt     LPSECURITY_ATTRIBUTES lpThreadAttributes,
-    __in         BOOL bInheritHandles,
-    __in         DWORD dwCreationFlags,
-    __in_opt     LPVOID lpEnvironment,
-    __in_opt     LPCWSTR lpCurrentDirectory,
-    __in         LPSTARTUPINFOW lpStartupInfo,
-    __out        LPPROCESS_INFORMATION lpProcessInformation,
+    LPCWSTR lpApplicationName,
+    LPWSTR lpCommandLine,
+    LPSECURITY_ATTRIBUTES lpProcessAttributes,
+    LPSECURITY_ATTRIBUTES lpThreadAttributes,
+    BOOL bInheritHandles,
+    DWORD dwCreationFlags,
+    LPVOID lpEnvironment,
+    LPCWSTR lpCurrentDirectory,
+    LPSTARTUPINFOW lpStartupInfo,
+    LPPROCESS_INFORMATION lpProcessInformation,
     // here is the new stuff
-    __in         DWORD cHandlesToInherit,
-    __in_ecount(cHandlesToInherit) HANDLE *rgHandlesToInherit)
+    DWORD cHandlesToInherit,
+    HANDLE *rgHandlesToInherit)
 {
     BOOL fInitialized = FALSE;
     SIZE_T size = 0;
@@ -208,7 +208,7 @@ struct wait_helper // working around missing [=, a = b] feature in C++11
 
 } // namespace
 
-void command_native::start_run_internal(fd_t in, fd_t out, fd_t err, std::vector<fd_t>, tstring_t cmdline) const
+void command_native::start_run_internal(fd_t in, fd_t out, fd_t err, std::vector<fd_t>, const tchar_t* appname, tstring_t cmdline) const
 {
     STARTUPINFOW startupinfo = {0};
     startupinfo.cb = sizeof(startupinfo);
@@ -222,14 +222,14 @@ void command_native::start_run_internal(fd_t in, fd_t out, fd_t err, std::vector
     if(inherit_by_default())
     {
         fd_t inherited[] = {in, out, err};
-        winapi_thrower(CreateProcessWithExplicitHandlesW(nullptr, &cmdline[0], nullptr, nullptr, true, 0, nullptr, nullptr, &startupinfo, &processinfo, 3, inherited), p.string());
+        winapi_thrower(CreateProcessWithExplicitHandlesW(appname, &cmdline[0], nullptr, nullptr, true, 0, nullptr, nullptr, &startupinfo, &processinfo, 3, inherited), p.string());
     }
     else
     {
         inherit_helper temp1{in};
         inherit_helper temp2{out};
         inherit_helper temp3{err};
-        winapi_thrower(CreateProcessW(nullptr, &cmdline[0], nullptr, nullptr, true, 0, nullptr, nullptr, &startupinfo, &processinfo), p.string());
+        winapi_thrower(CreateProcessW(appname, &cmdline[0], nullptr, nullptr, true, 0, nullptr, nullptr, &startupinfo, &processinfo), p.string());
     }
 
     open_wrapper proc{processinfo.hProcess};
@@ -242,7 +242,7 @@ void command_native::start_run_internal(fd_t in, fd_t out, fd_t err, std::vector
 
 void command_native::start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t> unused_fds) const
 {
-    start_run_internal(in, out, err, std::move(unused_fds), convert_argv(get_argv()));
+    start_run_internal(in, out, err, std::move(unused_fds), nullptr, convert_argv(get_argv()));
 }
 
 template<stdfd DESC>
@@ -355,10 +355,31 @@ void command_source::start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t> un
                 nullptr);
 
     tstring_t cmdline = cmdstr + pipename;
-    cmd.start_run_internal(in, out, err, std::move(unused_fds), cmdline);
+    cmd.start_run_internal(in, out, err, std::move(unused_fds), nullptr, cmdline);
     result = std::async(std::launch::async, env_applier, pipe);
 }
 
+void command_shell::start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t> unused_fds) const
+{
+    const tchar_t* applicationName = LR"(C:\Windows\System32\cmd.exe)";
+    tstring_t cmdline = L" /C ";
+    cmdline += L'"';
+    const tstring_t& exe = p.native();
+    if (exe.find(' ') != tstring_t::npos)  // built-in cmd commands, like DIR, should not be enclosed by quoted
+        convert_arg(p.c_str(), std::back_inserter(cmdline));
+    else
+        cmdline += p.native();
+    for (const tstring_t& arg : args())
+    {
+        cmdline += L" ";
+        if (arg.find(' ') != tstring_t::npos)  // built-in cmd commands, like DIR, cannot parse quotes around switches
+            convert_arg(arg.c_str(), std::back_inserter(cmdline));
+        else
+            cmdline += arg;
+    }
+    cmdline += L'"';
+    return start_run_internal(in, out, err, std::move(unused_fds), applicationName, std::move(cmdline));
+}
 
 } // namespace internal
 } // namespace ccsh

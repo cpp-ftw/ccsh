@@ -11,6 +11,7 @@
 #include <cstring>
 #include <cstddef>
 #include <cstdint>
+#include <string.h>
 
 namespace ccsh {
 namespace internal {
@@ -31,21 +32,6 @@ inline int64_t mapping_appender(std::string& str, char* buf, std::size_t s)
 {
     str.append(buf, s);
     return s;
-}
-
-
-template<typename FUNC>
-void tokenize_string(std::string const& str, std::string const& delimiters, FUNC&& func)
-{
-    std::string line = str;
-    char* saveptr = nullptr;
-    char* token = strtok_r(&line[0], delimiters.c_str(), &saveptr);
-
-    while (token != nullptr)
-    {
-        func(token);
-        token = strtok_r(nullptr, delimiters.c_str(), &saveptr);
-    }
 }
 
 } // namespace internal

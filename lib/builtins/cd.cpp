@@ -6,7 +6,6 @@
 #include <cstring>
 
 #ifdef _WIN32
-#define strtok_r strtok_s
 #define chdir _wchdir
 #endif
 
@@ -159,7 +158,7 @@ int cd_t::runx(fd_t, fd_t out_fd, fd_t err_fd) const
         std::string cdpath = dollar("CDPATH");
 
         char* saveptr = nullptr;
-        char* token = strtok_r(&cdpath[0], ":", &saveptr);
+        char* token = internal::strtok_compat(&cdpath[0], ":", &saveptr);
 
         while (token != nullptr)
         {
@@ -179,7 +178,7 @@ int cd_t::runx(fd_t, fd_t out_fd, fd_t err_fd) const
                 }
                 return bindpwd(follow_symlinks, eflag);
             }
-            token = strtok_r(nullptr, ":", &saveptr);
+            token = internal::strtok_compat(nullptr, ":", &saveptr);
         }
     }
 

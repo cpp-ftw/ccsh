@@ -117,16 +117,17 @@ public:
         p = dir / p;
     }
 
-    void start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t> unused_fds) const final;
-    int finish_run() const final
+    void start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t> unused_fds) const override;
+    int finish_run() const override
     {
         return result.get();
     }
 
 #ifdef _WIN32
 private:
-    void start_run_internal(fd_t in, fd_t out, fd_t err, std::vector<fd_t> unused_fds, tstring_t cmdline) const;
+    void start_run_internal(fd_t in, fd_t out, fd_t err, std::vector<fd_t> unused_fds, const tchar_t* appname, tstring_t cmdline) const;
     friend class command_source;
+    friend class command_shell;
 #endif
 };
 
@@ -455,6 +456,17 @@ public:
         return cmd.finish_run();
     }
 };
+
+#ifdef _WIN32
+
+class command_shell : public command_native
+{
+public:
+    using command_native::command_native;
+    void start_run(fd_t in, fd_t out, fd_t err, std::vector<fd_t> unused_fds) const override;
+};
+
+#endif // _WIN32
 
 class command_builtin : public command_base
 {
