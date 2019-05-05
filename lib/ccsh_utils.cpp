@@ -19,7 +19,7 @@ namespace {
 void expand_helper(path const& p, std::vector<path>& result)
 {
     glob_t globbuf;
-    glob(p.string().c_str(), GLOB_NOCHECK | GLOB_TILDE, NULL, &globbuf);
+    glob(p.generic_string().c_str(), GLOB_NOCHECK | GLOB_TILDE, NULL, &globbuf);
 
     for(std::size_t i = 0; i < globbuf.gl_pathc; ++i)
         result.push_back(globbuf.gl_pathv[i]);
