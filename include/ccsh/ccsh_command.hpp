@@ -133,8 +133,6 @@ private:
 
 class command_runnable : protected std::shared_ptr<command_base>
 {
-    using base = std::shared_ptr<command_base>;
-
     friend class command;
 
     command_runnable(command_runnable const&) = default;
@@ -145,7 +143,7 @@ class command_runnable : protected std::shared_ptr<command_base>
 public:
 
     command_runnable(command_base* other)
-        : base(other)
+        : std::shared_ptr<command_base>(other)
     { }
 
     int run() const
@@ -168,6 +166,9 @@ public:
     {
         return (*this)->finish_run();
     }
+
+    command_base* base() { return get(); }
+    command_base const* base() const { return get(); }
 
     ~command_runnable()
     {
@@ -228,6 +229,7 @@ public:
     using command_runnable::run;
     using command_runnable::start_run;
     using command_runnable::finish_run;
+    using command_runnable::base;
 };
 
 template<typename T>

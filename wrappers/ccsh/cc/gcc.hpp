@@ -15,7 +15,10 @@ class gcc_t : public wrappers::options_paths<gcc_t>
 public:
     using base::base;
 
+    CCSH_WRAPPER_ARG1_N(gcc_t, input, "", fs::path const&, arg.string())
+
     CCSH_WRAPPER_ARG1_S(gcc_t, o, "-o", fs::path const&, arg.string())
+    CCSH_WRAPPER_ARG1_S(gcc_t, output, "-o", fs::path const&, arg.string())
     CCSH_WRAPPER_ARG0(gcc_t, c, "-c")
 
     CCSH_WRAPPER_ARG1_N(gcc_t, D, "-D", std::string, std::move(arg))
