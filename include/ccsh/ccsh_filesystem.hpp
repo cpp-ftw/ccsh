@@ -63,6 +63,7 @@ path self_lexically_normal(path const& self);
 
 #if !defined(CCSH_FILESYSTEM_BOOST) || BOOST_VERSION < 106000
 path relative(path const& p, path const& base, fs::error_code& ec);
+path safe_relative(path const& p, path const& base);
 #endif
 
 struct path_equivalent

@@ -13,6 +13,7 @@
 #endif
 #include <Windows.h>
 #include <Shlobj.h>
+#include <VersionHelpers.h>
 
 namespace ccsh {
 

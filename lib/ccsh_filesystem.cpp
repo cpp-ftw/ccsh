@@ -155,6 +155,15 @@ fs::path relative(fs::path const& p, fs::path const& base, fs::error_code& ec)
     return self_lexically_relative(wc_p, wc_base);
 }
 
+fs::path safe_relative(fs::path const& p, fs::path const& base)
+{
+    fs::error_code ec;
+    fs::path result = relative(p, base, ec);
+    if (ec)
+        return p;
+    return result;
+}
+
 path self_lexically_normal(path const& self)
 {
     if (self.empty())
